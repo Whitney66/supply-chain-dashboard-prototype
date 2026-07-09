@@ -313,7 +313,7 @@ export function MetricsOverview() {
                     </div>
                   </div>
                 </td>
-                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-pink-50 text-pink-700 rounded text-xs">香化</span></td>
+                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-gray-50 text-gray-900 border border-gray-200 rounded text-xs">香化</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">10.0D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">12.3D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">77.2%</span></td>
@@ -323,7 +323,7 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-9.8%</span></td>
               </tr>
               <tr className="hover:bg-gray-50">
-                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded text-xs">酒水</span></td>
+                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-gray-50 text-gray-900 border border-gray-200 rounded text-xs">酒水</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">11.0D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">13.1D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">74.5%</span></td>
@@ -346,7 +346,7 @@ export function MetricsOverview() {
                     </div>
                   </div>
                 </td>
-                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-pink-50 text-pink-700 rounded text-xs">香化</span></td>
+                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-gray-50 text-gray-900 border border-gray-200 rounded text-xs">香化</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.0D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.4D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">80.1%</span></td>
@@ -356,7 +356,7 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-14.3%</span></td>
               </tr>
               <tr className="hover:bg-gray-50">
-                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded text-xs">酒水</span></td>
+                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-gray-50 text-gray-900 border border-gray-200 rounded text-xs">酒水</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.5D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.9D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">76.3%</span></td>
@@ -379,7 +379,7 @@ export function MetricsOverview() {
                     </div>
                   </div>
                 </td>
-                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-pink-50 text-pink-700 rounded text-xs">香化</span></td>
+                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-gray-50 text-gray-900 border border-gray-200 rounded text-xs">香化</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">1.5D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">1.8D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">83.5%</span></td>
@@ -389,7 +389,7 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-14.3%</span></td>
               </tr>
               <tr className="hover:bg-gray-50">
-                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded text-xs">酒水</span></td>
+                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-gray-50 text-gray-900 border border-gray-200 rounded text-xs">酒水</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.0D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.3D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">79.2%</span></td>
@@ -412,7 +412,7 @@ export function MetricsOverview() {
                     </div>
                   </div>
                 </td>
-                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-pink-50 text-pink-700 rounded text-xs">香化</span></td>
+                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-gray-50 text-gray-900 border border-gray-200 rounded text-xs">香化</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">1.0D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">1.2D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">86.4%</span></td>
@@ -422,7 +422,7 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-20.0%</span></td>
               </tr>
               <tr className="hover:bg-gray-50">
-                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded text-xs">酒水</span></td>
+                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-gray-50 text-gray-900 border border-gray-200 rounded text-xs">酒水</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">1.5D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">1.7D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">82.1%</span></td>
@@ -468,7 +468,7 @@ export function MetricsOverview() {
                     </div>
                   </div>
                 </td>
-                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-pink-50 text-pink-700 rounded text-xs">香化</span></td>
+                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-gray-50 text-gray-900 border border-gray-200 rounded text-xs">香化</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">12.0D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">15.2D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">62.3%</span></td>
@@ -478,7 +478,7 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-2.0%</span></td>
               </tr>
               <tr className="hover:bg-gray-50">
-                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded text-xs">酒水</span></td>
+                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-gray-50 text-gray-900 border border-gray-200 rounded text-xs">酒水</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">13.0D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">16.4D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">59.7%</span></td>
@@ -501,7 +501,7 @@ export function MetricsOverview() {
                     </div>
                   </div>
                 </td>
-                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-pink-50 text-pink-700 rounded text-xs">香化</span></td>
+                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-gray-50 text-gray-900 border border-gray-200 rounded text-xs">香化</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">0.5D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">0.7D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">88.2%</span></td>
@@ -511,7 +511,7 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-22.2%</span></td>
               </tr>
               <tr className="hover:bg-gray-50">
-                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded text-xs">酒水</span></td>
+                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-gray-50 text-gray-900 border border-gray-200 rounded text-xs">酒水</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">0.5D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">0.8D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">85.6%</span></td>
@@ -534,7 +534,7 @@ export function MetricsOverview() {
                     </div>
                   </div>
                 </td>
-                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-pink-50 text-pink-700 rounded text-xs">香化</span></td>
+                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-gray-50 text-gray-900 border border-gray-200 rounded text-xs">香化</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">1.5D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">1.7D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">84.7%</span></td>
@@ -544,7 +544,7 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-15.0%</span></td>
               </tr>
               <tr className="hover:bg-gray-50">
-                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded text-xs">酒水</span></td>
+                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-gray-50 text-gray-900 border border-gray-200 rounded text-xs">酒水</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.0D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.2D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">81.3%</span></td>
@@ -567,7 +567,7 @@ export function MetricsOverview() {
                     </div>
                   </div>
                 </td>
-                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-pink-50 text-pink-700 rounded text-xs">香化</span></td>
+                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-gray-50 text-gray-900 border border-gray-200 rounded text-xs">香化</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">1.5D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.1D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">85.7%</span></td>
@@ -577,7 +577,7 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-23.8%</span></td>
               </tr>
               <tr className="hover:bg-gray-50">
-                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded text-xs">酒水</span></td>
+                <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-gray-50 text-gray-900 border border-gray-200 rounded text-xs">酒水</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.0D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.6D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">82.4%</span></td>

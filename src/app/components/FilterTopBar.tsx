@@ -18,15 +18,15 @@ const ROLE_OPTIONS: { value: RoleType; label: string }[] = [
 
 function RoleToggle({ value, onChange }: { value: RoleType; onChange: (v: RoleType) => void }) {
   return (
-    <div className="flex items-center bg-gray-100 rounded-md p-0.5 gap-0.5">
+    <div className="flex h-8 items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
       {ROLE_OPTIONS.map((opt) => (
         <button
           key={opt.value}
           onClick={() => onChange(opt.value)}
-          className={`px-2.5 py-1 text-sm rounded transition-all whitespace-nowrap ${
+          className={`px-2.5 py-1 text-sm rounded-md transition-all whitespace-nowrap ${
             value === opt.value
               ? 'bg-white text-blue-600 shadow-sm font-semibold'
-              : 'text-gray-500 hover:text-gray-700'
+              : 'text-gray-500 hover:bg-white/60 hover:text-gray-700'
           }`}
         >
           {opt.label}
@@ -95,7 +95,7 @@ function DimensionDropdown({
       <div ref={ref} className="relative">
         <button
           onClick={() => setOpen(!open)}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:border-blue-400 transition-colors min-w-[100px] whitespace-nowrap"
+          className="flex h-8 items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-700 transition-colors hover:border-blue-400 min-w-[100px] whitespace-nowrap"
         >
           <span className="flex-1 text-left">{displayText}</span>
           <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`} />
@@ -179,7 +179,7 @@ function CategoryDropdown({
       <div ref={ref} className="relative">
         <button
           onClick={() => setOpen(!open)}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:border-blue-400 transition-colors min-w-[90px]"
+          className="flex h-8 items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-700 transition-colors hover:border-blue-400 min-w-[90px]"
         >
           <span className="flex-1 text-left">{displayText}</span>
           <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`} />
@@ -279,10 +279,10 @@ export function FilterTopBar({ filters, onFiltersChange }: FilterTopBarProps) {
   };
 
   return (
-    <div className="mb-0 rounded-xl border border-gray-200 bg-white px-6 py-5 shadow-sm">
-      <div className="flex flex-col gap-5">
-        <div className="flex flex-wrap items-end gap-x-7 gap-y-4">
-          <div className="flex flex-col gap-3">
+    <div className="mb-0 rounded-xl border border-gray-200 bg-white px-6 py-4 shadow-sm">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-end gap-x-7 gap-y-3">
+          <div className="flex flex-col gap-2">
             <span className="text-sm font-semibold text-gray-700">时间段</span>
             <DateRangePicker
               startDate={local.startDate}
@@ -294,14 +294,14 @@ export function FilterTopBar({ filters, onFiltersChange }: FilterTopBarProps) {
             />
           </div>
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             <span className="text-sm font-semibold text-gray-700">快速选择:</span>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-4 gap-2.5">
               {QUICK_RANGES.map((btn) => (
                 <button
                   key={btn.key}
                   onClick={() => applyQuickRange(btn.key)}
-                  className={`h-[52px] min-w-[116px] rounded-lg border px-5 text-xl font-medium transition-colors whitespace-nowrap ${
+                  className={`h-12 min-w-[116px] rounded-lg border px-5 text-lg font-medium transition-colors whitespace-nowrap ${
                     quickRange === btn.key
                       ? 'border-blue-600 bg-blue-600 text-white shadow-sm'
                       : 'border-gray-200 bg-gray-50 text-slate-800 hover:border-gray-300 hover:bg-white'
@@ -314,14 +314,14 @@ export function FilterTopBar({ filters, onFiltersChange }: FilterTopBarProps) {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-gray-100 pt-4">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-gray-100 pt-3">
           {/* 供应链关系标签 */}
           <span className="text-sm font-semibold text-gray-500 whitespace-nowrap">供应链关系</span>
 
           {/* 门店: 角色 → 筛选 */}
           <DimensionDropdown
             label="门店"
-          items={local.selectedWarehouses.length > 0 ? filteredStores : stores}
+            items={local.selectedWarehouses.length > 0 ? filteredStores : stores}
           selected={local.selectedStores}
           onSelectionChange={(ids) =>
             setLocal((prev) => ({ ...prev, selectedStores: ids, showStoreFilter: ids.length > 0 }))

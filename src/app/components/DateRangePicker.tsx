@@ -134,25 +134,25 @@ export function DateRangePicker({ startDate: controlledStartDate, endDate: contr
     <div className="relative" ref={containerRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-4 px-0 py-0 bg-white border-none w-full flex-nowrap"
+        className="flex items-center gap-3 px-0 py-0 bg-white border-none w-full flex-nowrap"
       >
-        <div className="flex h-16 min-w-[220px] items-center justify-between gap-3 rounded-2xl border border-gray-300 bg-white px-5 text-left shadow-sm transition-colors hover:border-gray-400 hover:bg-gray-50">
-          <span className="text-2xl font-medium leading-none text-slate-800">
+        <div className="flex h-12 min-w-[190px] items-center justify-between gap-3 rounded-xl border border-gray-300 bg-white px-4 text-left shadow-sm transition-colors hover:border-gray-400 hover:bg-gray-50">
+          <span className="text-xl font-medium leading-none text-slate-800">
             {startDate ? formatDate(startDate) : (() => {
               const today = new Date();
               const oneYearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
               return formatDate(oneYearAgo);
             })()}
           </span>
-          <Calendar className="h-7 w-7 shrink-0 text-slate-500" />
+          <Calendar className="h-5 w-5 shrink-0 text-slate-500" />
         </div>
-        <span className="text-2xl font-semibold text-slate-400">-</span>
-        <RotateCcw className="h-7 w-7 shrink-0 text-slate-400 transition-colors hover:text-slate-600" />
-        <div className="flex h-16 min-w-[220px] items-center justify-between gap-3 rounded-2xl border border-gray-300 bg-white px-5 text-left shadow-sm transition-colors hover:border-gray-400 hover:bg-gray-50">
-          <span className="text-2xl font-medium leading-none text-slate-800">
+        <span className="text-xl font-semibold text-slate-400">-</span>
+        <RotateCcw className="h-5 w-5 shrink-0 text-slate-400 transition-colors hover:text-slate-600" />
+        <div className="flex h-12 min-w-[190px] items-center justify-between gap-3 rounded-xl border border-gray-300 bg-white px-4 text-left shadow-sm transition-colors hover:border-gray-400 hover:bg-gray-50">
+          <span className="text-xl font-medium leading-none text-slate-800">
             {endDate ? formatDate(endDate) : formatDate(new Date())}
           </span>
-          <Calendar className="h-7 w-7 shrink-0 text-slate-500" />
+          <Calendar className="h-5 w-5 shrink-0 text-slate-500" />
         </div>
       </button>
 
