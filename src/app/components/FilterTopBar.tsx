@@ -1,0 +1,380 @@
+import { useState, useEffect, useRef } from 'react';
+import { ChevronDown, Search, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { format, subDays, subYears } from 'date-fns';
+import { getFilteredWarehouses, getFilteredStores, warehouses, stores } from '@/app/data/storeWarehouseMapping';
+import type { FilterState, RoleType } from '../types';
+
+interface FilterTopBarProps {
+  filters: FilterState;
+  onFiltersChange: (filters: FilterState) => void;
+}
+
+const ROLE_OPTIONS: { value: RoleType; label: string }[] = [
+  { value: 'all', label: '全部' },
+  { value: 'shipping', label: '仅发货' },
+  { value: 'receiving', label: '仅收货' },
+];
+
+function RoleToggle({ value, onChange }: { value: RoleType; onChange: (v: RoleType) => void }) {
+  return (
+    <div className="flex items-center bg-gray-100 rounded-md p-0.5 gap-0.5">
+      {ROLE_OPTIONS.map((opt) => (
+        <button
+          key={opt.value}
+          onClick={() => onChange(opt.value)}
+          className={`px-2.5 py-1 text-sm rounded transition-all whitespace-nowrap ${
+            value === opt.value
+              ? 'bg-white text-blue-600 shadow-sm font-semibold'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function DimensionDropdown({
+  label,
+  items,
+  selected,
+  onSelectionChange,
+  role,
+  onRoleChange,
+}: {
+  label: string;
+  items: { id: string; name: string }[];
+  selected: string[];
+  onSelectionChange: (ids: string[]) => void;
+  role: RoleType;
+  onRoleChange: (r: RoleType) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const filtered = items.filter((i) => i.name.toLowerCase().includes(query.toLowerCase()));
+  const allSelected = filtered.length > 0 && filtered.every((i) => selected.includes(i.id));
+
+  const toggleAll = () => {
+    if (allSelected) {
+      onSelectionChange(selected.filter((id) => !filtered.map((i) => i.id).includes(id)));
+    } else {
+      onSelectionChange(Array.from(new Set([...selected, ...filtered.map((i) => i.id)])));
+    }
+  };
+
+  const toggleItem = (id: string) => {
+    onSelectionChange(
+      selected.includes(id) ? selected.filter((s) => s !== id) : [...selected, id],
+    );
+  };
+
+  const displayText =
+    selected.length === 0 || selected.length === items.length
+      ? `全部${label}`
+      : `已选${selected.length}个`;
+
+  return (
+    <div className="flex items-center gap-2">
+      {/* Label */}
+      <span className="text-sm font-semibold text-gray-700 whitespace-nowrap">{label}</span>
+      {/* Role selector first */}
+      <RoleToggle value={role} onChange={onRoleChange} />
+      {/* Dropdown */}
+      <div ref={ref} className="relative">
+        <button
+          onClick={() => setOpen(!open)}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:border-blue-400 transition-colors min-w-[100px] whitespace-nowrap"
+        >
+          <span className="flex-1 text-left">{displayText}</span>
+          <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`} />
+        </button>
+
+        {open && (
+          <div className="absolute left-0 top-full mt-1 w-60 bg-white border border-gray-200 rounded-lg shadow-xl z-50">
+            <div className="p-2 border-b border-gray-100">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={`搜索${label}...`}
+                className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:border-blue-400"
+              />
+            </div>
+            <div className="max-h-56 overflow-y-auto p-1.5">
+              <label className="flex items-center gap-2.5 px-2 py-2 rounded cursor-pointer hover:bg-gray-50 border-b border-gray-100 mb-1">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={toggleAll}
+                  className="w-4 h-4 text-blue-600 accent-blue-600 rounded"
+                />
+                <span className="text-sm font-semibold text-gray-700">全选</span>
+              </label>
+              {filtered.map((item) => (
+                <label
+                  key={item.id}
+                  className={`flex items-center gap-2.5 px-2 py-2 rounded cursor-pointer hover:bg-gray-50 ${
+                    selected.includes(item.id) ? 'bg-blue-50' : ''
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(item.id)}
+                    onChange={() => toggleItem(item.id)}
+                    className="w-4 h-4 text-blue-600 accent-blue-600 rounded"
+                  />
+                  <span className={`text-sm ${selected.includes(item.id) ? 'text-blue-700 font-medium' : 'text-gray-700'}`}>
+                    {item.name}
+                  </span>
+                </label>
+              ))}
+              {filtered.length === 0 && (
+                <div className="text-sm text-gray-400 text-center py-4">暂无匹配</div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CategoryDropdown({
+  selected,
+  onChange,
+}: {
+  selected: string[];
+  onChange: (cats: string[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const categories = ['香化', '酒水'];
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const allSelected = categories.every((c) => selected.includes(c));
+  const displayText = allSelected || selected.length === 0 ? '全部品类' : selected.join('、');
+
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-sm font-semibold text-gray-700 whitespace-nowrap">品类</span>
+      <div ref={ref} className="relative">
+        <button
+          onClick={() => setOpen(!open)}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:border-blue-400 transition-colors min-w-[90px]"
+        >
+          <span className="flex-1 text-left">{displayText}</span>
+          <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`} />
+        </button>
+        {open && (
+          <div className="absolute left-0 top-full mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-xl z-50 p-1.5">
+            <label className="flex items-center gap-2.5 px-2 py-2 rounded cursor-pointer hover:bg-gray-50 border-b border-gray-100 mb-1">
+              <input
+                type="checkbox"
+                checked={allSelected}
+                onChange={() => onChange(allSelected ? [] : categories)}
+                className="w-4 h-4 accent-blue-600 rounded"
+              />
+              <span className="text-sm font-semibold text-gray-700">全选</span>
+            </label>
+            {categories.map((cat) => (
+              <label
+                key={cat}
+                className={`flex items-center gap-2.5 px-2 py-2 rounded cursor-pointer hover:bg-gray-50 ${selected.includes(cat) ? 'bg-blue-50' : ''}`}
+              >
+                <input
+                  type="checkbox"
+                  checked={selected.includes(cat)}
+                  onChange={() => {
+                    const newCats = selected.includes(cat)
+                      ? selected.filter((c) => c !== cat)
+                      : [...selected, cat];
+                    onChange(newCats);
+                  }}
+                  className="w-4 h-4 accent-blue-600 rounded"
+                />
+                <span className={`text-sm ${selected.includes(cat) ? 'text-blue-700 font-medium' : 'text-gray-700'}`}>{cat}</span>
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const QUICK_RANGES = [
+  { key: 'yesterday', label: '昨天' },
+  { key: '7days', label: '近7天' },
+  { key: '1month', label: '近1月' },
+  { key: '3months', label: '近3月' },
+  { key: 'springFestival', label: '春节' },
+  { key: 'bizMonth', label: '本业务月' },
+];
+
+export function FilterTopBar({ filters, onFiltersChange }: FilterTopBarProps) {
+  const [local, setLocal] = useState<FilterState>(filters);
+  const [quickRange, setQuickRange] = useState<string>('yesterday');
+
+  useEffect(() => { setLocal(filters); }, [filters]);
+
+  const filteredWarehouses = getFilteredWarehouses(local.selectedStores);
+  const filteredStores = getFilteredStores(local.selectedWarehouses);
+
+  const applyQuickRange = (range: string) => {
+    const today = new Date();
+    let start = new Date(today);
+    let end = new Date(today);
+    switch (range) {
+      case 'yesterday':
+        start = subDays(today, 1); end = subDays(today, 1); break;
+      case '7days':
+        start = subDays(today, 6); break;
+      case '1month':
+        start = subDays(today, 29); break;
+      case '3months':
+        start = subDays(today, 89); break;
+      case 'springFestival':
+        start = new Date(2026, 1, 10); end = new Date(2026, 1, 24); break;
+      case 'bizMonth':
+        start = new Date(today.getFullYear(), today.getMonth() - 1, 21);
+        end = new Date(today.getFullYear(), today.getMonth(), 20); break;
+      case '1year':
+        start = subYears(today, 1); break;
+    }
+    setQuickRange(range);
+    setLocal((prev) => ({ ...prev, startDate: start, endDate: end }));
+  };
+
+  const dateText =
+    format(local.startDate, 'yyyy-MM-dd') === format(local.endDate, 'yyyy-MM-dd')
+      ? format(local.startDate, 'MM-dd')
+      : `${format(local.startDate, 'MM-dd')} ~ ${format(local.endDate, 'MM-dd')}`;
+
+  const handleQuery = () => onFiltersChange(local);
+
+  const handleClear = () => {
+    const today = new Date();
+    const yesterday = subDays(today, 1);
+    const reset: FilterState = {
+      startDate: yesterday,
+      endDate: yesterday,
+      showStoreFilter: false,
+      showWarehouseFilter: false,
+      showCategoryFilter: false,
+      selectedStores: [],
+      selectedWarehouses: [],
+      selectedCategories: [],
+      storeRole: 'all',
+      warehouseRole: 'all',
+    };
+    setLocal(reset);
+    setQuickRange('yesterday');
+  };
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg px-5 py-3 mb-0 shadow-sm">
+      <div className="flex items-center gap-4 flex-wrap">
+
+        {/* 时间段 */}
+        <div className="flex items-center gap-2.5">
+          <span className="text-sm font-semibold text-gray-700 whitespace-nowrap">时间段</span>
+          <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-800 font-medium min-w-[88px] whitespace-nowrap">
+            <ChevronLeft className="w-3.5 h-3.5 text-gray-400 cursor-pointer hover:text-gray-600" />
+            <span className="flex-1 text-center">{dateText}</span>
+            <ChevronRight className="w-3.5 h-3.5 text-gray-400 cursor-pointer hover:text-gray-600" />
+          </div>
+          <div className="flex items-center gap-1">
+            {QUICK_RANGES.map((btn) => (
+              <button
+                key={btn.key}
+                onClick={() => applyQuickRange(btn.key)}
+                className={`px-2.5 py-1 text-sm rounded-md transition-colors whitespace-nowrap ${
+                  quickRange === btn.key
+                    ? 'bg-blue-600 text-white font-medium'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {btn.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="h-7 w-px bg-gray-200 flex-shrink-0" />
+
+        {/* 供应链关系标签 */}
+        <span className="text-sm font-semibold text-gray-500 whitespace-nowrap">供应链关系</span>
+
+        {/* 门店: 角色 → 筛选 */}
+        <DimensionDropdown
+          label="门店"
+          items={local.selectedWarehouses.length > 0 ? filteredStores : stores}
+          selected={local.selectedStores}
+          onSelectionChange={(ids) =>
+            setLocal((prev) => ({ ...prev, selectedStores: ids, showStoreFilter: ids.length > 0 }))
+          }
+          role={local.storeRole}
+          onRoleChange={(r) => setLocal((prev) => ({ ...prev, storeRole: r }))}
+        />
+
+        {/* 仓库: 角色 → 筛选 */}
+        <DimensionDropdown
+          label="仓库"
+          items={local.selectedStores.length > 0 ? filteredWarehouses : warehouses}
+          selected={local.selectedWarehouses}
+          onSelectionChange={(ids) =>
+            setLocal((prev) => ({ ...prev, selectedWarehouses: ids, showWarehouseFilter: ids.length > 0 }))
+          }
+          role={local.warehouseRole}
+          onRoleChange={(r) => setLocal((prev) => ({ ...prev, warehouseRole: r }))}
+        />
+
+        <div className="h-7 w-px bg-gray-200 flex-shrink-0" />
+
+        {/* 品类 */}
+        <CategoryDropdown
+          selected={local.selectedCategories}
+          onChange={(cats) =>
+            setLocal((prev) => ({ ...prev, selectedCategories: cats, showCategoryFilter: cats.length > 0 }))
+          }
+        />
+
+        {/* 操作按钮 */}
+        <div className="flex items-center gap-2 ml-auto">
+          <button
+            onClick={handleClear}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+          >
+            <XCircle className="w-4 h-4" />
+            重置
+          </button>
+          <button
+            onClick={handleQuery}
+            className="flex items-center gap-1.5 px-5 py-1.5 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors shadow-sm"
+          >
+            <Search className="w-4 h-4" />
+            查询
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
