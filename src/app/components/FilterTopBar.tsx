@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronDown, Search, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
-import { format, subDays, subYears } from 'date-fns';
+import { ChevronDown, Search, XCircle } from 'lucide-react';
+import { subDays } from 'date-fns';
+import { DateRangePicker } from './DateRangePicker';
 import { getFilteredWarehouses, getFilteredStores, warehouses, stores } from '@/app/data/storeWarehouseMapping';
 import type { FilterState, RoleType } from '../types';
 
@@ -221,17 +222,15 @@ function CategoryDropdown({
 }
 
 const QUICK_RANGES = [
-  { key: 'yesterday', label: '昨天' },
   { key: '7days', label: '近7天' },
-  { key: '1month', label: '近1月' },
-  { key: '3months', label: '近3月' },
+  { key: '1month', label: '近1个月' },
+  { key: '3months', label: '近3个月' },
   { key: 'springFestival', label: '春节' },
-  { key: 'bizMonth', label: '本业务月' },
 ];
 
 export function FilterTopBar({ filters, onFiltersChange }: FilterTopBarProps) {
   const [local, setLocal] = useState<FilterState>(filters);
-  const [quickRange, setQuickRange] = useState<string>('yesterday');
+  const [quickRange, setQuickRange] = useState<string>('');
 
   useEffect(() => { setLocal(filters); }, [filters]);
 
@@ -253,20 +252,10 @@ export function FilterTopBar({ filters, onFiltersChange }: FilterTopBarProps) {
         start = subDays(today, 89); break;
       case 'springFestival':
         start = new Date(2026, 1, 10); end = new Date(2026, 1, 24); break;
-      case 'bizMonth':
-        start = new Date(today.getFullYear(), today.getMonth() - 1, 21);
-        end = new Date(today.getFullYear(), today.getMonth(), 20); break;
-      case '1year':
-        start = subYears(today, 1); break;
     }
     setQuickRange(range);
     setLocal((prev) => ({ ...prev, startDate: start, endDate: end }));
   };
-
-  const dateText =
-    format(local.startDate, 'yyyy-MM-dd') === format(local.endDate, 'yyyy-MM-dd')
-      ? format(local.startDate, 'MM-dd')
-      : `${format(local.startDate, 'MM-dd')} ~ ${format(local.endDate, 'MM-dd')}`;
 
   const handleQuery = () => onFiltersChange(local);
 
@@ -286,46 +275,52 @@ export function FilterTopBar({ filters, onFiltersChange }: FilterTopBarProps) {
       warehouseRole: 'all',
     };
     setLocal(reset);
-    setQuickRange('yesterday');
+    setQuickRange('');
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg px-5 py-3 mb-0 shadow-sm">
-      <div className="flex items-center gap-4 flex-wrap">
-
-        {/* 时间段 */}
-        <div className="flex items-center gap-2.5">
-          <span className="text-sm font-semibold text-gray-700 whitespace-nowrap">时间段</span>
-          <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-800 font-medium min-w-[88px] whitespace-nowrap">
-            <ChevronLeft className="w-3.5 h-3.5 text-gray-400 cursor-pointer hover:text-gray-600" />
-            <span className="flex-1 text-center">{dateText}</span>
-            <ChevronRight className="w-3.5 h-3.5 text-gray-400 cursor-pointer hover:text-gray-600" />
+    <div className="mb-0 rounded-xl border border-gray-200 bg-white px-6 py-5 shadow-sm">
+      <div className="flex flex-col gap-5">
+        <div className="flex flex-wrap items-end gap-x-7 gap-y-4">
+          <div className="flex flex-col gap-3">
+            <span className="text-sm font-semibold text-gray-700">时间段</span>
+            <DateRangePicker
+              startDate={local.startDate}
+              endDate={local.endDate}
+              onDateRangeChange={(startDate, endDate) => {
+                setLocal((prev) => ({ ...prev, startDate, endDate }));
+                setQuickRange('');
+              }}
+            />
           </div>
-          <div className="flex items-center gap-1">
-            {QUICK_RANGES.map((btn) => (
-              <button
-                key={btn.key}
-                onClick={() => applyQuickRange(btn.key)}
-                className={`px-2.5 py-1 text-sm rounded-md transition-colors whitespace-nowrap ${
-                  quickRange === btn.key
-                    ? 'bg-blue-600 text-white font-medium'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {btn.label}
-              </button>
-            ))}
+
+          <div className="flex flex-col gap-3">
+            <span className="text-sm font-semibold text-gray-700">快速选择:</span>
+            <div className="grid grid-cols-4 gap-3">
+              {QUICK_RANGES.map((btn) => (
+                <button
+                  key={btn.key}
+                  onClick={() => applyQuickRange(btn.key)}
+                  className={`h-[52px] min-w-[116px] rounded-lg border px-5 text-xl font-medium transition-colors whitespace-nowrap ${
+                    quickRange === btn.key
+                      ? 'border-blue-600 bg-blue-600 text-white shadow-sm'
+                      : 'border-gray-200 bg-gray-50 text-slate-800 hover:border-gray-300 hover:bg-white'
+                  }`}
+                >
+                  {btn.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="h-7 w-px bg-gray-200 flex-shrink-0" />
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-gray-100 pt-4">
+          {/* 供应链关系标签 */}
+          <span className="text-sm font-semibold text-gray-500 whitespace-nowrap">供应链关系</span>
 
-        {/* 供应链关系标签 */}
-        <span className="text-sm font-semibold text-gray-500 whitespace-nowrap">供应链关系</span>
-
-        {/* 门店: 角色 → 筛选 */}
-        <DimensionDropdown
-          label="门店"
+          {/* 门店: 角色 → 筛选 */}
+          <DimensionDropdown
+            label="门店"
           items={local.selectedWarehouses.length > 0 ? filteredStores : stores}
           selected={local.selectedStores}
           onSelectionChange={(ids) =>
@@ -373,6 +368,7 @@ export function FilterTopBar({ filters, onFiltersChange }: FilterTopBarProps) {
             <Search className="w-4 h-4" />
             查询
           </button>
+          </div>
         </div>
       </div>
     </div>

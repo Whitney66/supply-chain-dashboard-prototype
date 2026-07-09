@@ -2,10 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Calendar, RotateCcw } from 'lucide-react';
 
 interface DateRangePickerProps {
+  startDate?: Date;
+  endDate?: Date;
   onDateRangeChange: (startDate: Date, endDate: Date) => void;
 }
 
-export function DateRangePicker({ onDateRangeChange }: DateRangePickerProps) {
+export function DateRangePicker({ startDate: controlledStartDate, endDate: controlledEndDate, onDateRangeChange }: DateRangePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
@@ -17,16 +19,15 @@ export function DateRangePicker({ onDateRangeChange }: DateRangePickerProps) {
     return yesterday;
   };
   
-  const [startDate, setStartDate] = useState<Date | null>(getYesterday());
-  const [endDate, setEndDate] = useState<Date | null>(getYesterday());
+  const [startDate, setStartDate] = useState<Date | null>(controlledStartDate ?? getYesterday());
+  const [endDate, setEndDate] = useState<Date | null>(controlledEndDate ?? getYesterday());
   const [hoverDate, setHoverDate] = useState<Date | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // 初始化时触发一次日期范围变化
   useEffect(() => {
-    const yesterday = getYesterday();
-    onDateRangeChange(yesterday, yesterday);
-  }, []);
+    if (controlledStartDate) setStartDate(controlledStartDate);
+    if (controlledEndDate) setEndDate(controlledEndDate);
+  }, [controlledStartDate, controlledEndDate]);
 
   // 点击外部关闭下拉框
   useEffect(() => {
@@ -133,25 +134,25 @@ export function DateRangePicker({ onDateRangeChange }: DateRangePickerProps) {
     <div className="relative" ref={containerRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-0 py-0 bg-white border-none w-full flex-nowrap"
+        className="flex items-center gap-4 px-0 py-0 bg-white border-none w-full flex-nowrap"
       >
-        <div className="flex items-center gap-1 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap">
-          <span className="text-sm text-gray-700">
+        <div className="flex h-16 min-w-[220px] items-center justify-between gap-3 rounded-2xl border border-gray-300 bg-white px-5 text-left shadow-sm transition-colors hover:border-gray-400 hover:bg-gray-50">
+          <span className="text-2xl font-medium leading-none text-slate-800">
             {startDate ? formatDate(startDate) : (() => {
               const today = new Date();
               const oneYearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
               return formatDate(oneYearAgo);
             })()}
           </span>
-          <Calendar className="w-4 h-4 text-gray-500" />
+          <Calendar className="h-7 w-7 shrink-0 text-slate-500" />
         </div>
-        <span className="text-gray-400">-</span>
-        <RotateCcw className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600 flex-shrink-0" />
-        <div className="flex items-center gap-1 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap">
-          <span className="text-sm text-gray-700">
+        <span className="text-2xl font-semibold text-slate-400">-</span>
+        <RotateCcw className="h-7 w-7 shrink-0 text-slate-400 transition-colors hover:text-slate-600" />
+        <div className="flex h-16 min-w-[220px] items-center justify-between gap-3 rounded-2xl border border-gray-300 bg-white px-5 text-left shadow-sm transition-colors hover:border-gray-400 hover:bg-gray-50">
+          <span className="text-2xl font-medium leading-none text-slate-800">
             {endDate ? formatDate(endDate) : formatDate(new Date())}
           </span>
-          <Calendar className="w-4 h-4 text-gray-500" />
+          <Calendar className="h-7 w-7 shrink-0 text-slate-500" />
         </div>
       </button>
 
