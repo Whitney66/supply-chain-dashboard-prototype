@@ -81,7 +81,7 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="min-h-screen bg-gray-50 flex flex-col overflow-x-hidden">
         {/* 顶部品牌栏 - 仅Logo和用户信息 */}
         <TopNavigation />
 
