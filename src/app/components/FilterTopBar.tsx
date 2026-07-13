@@ -170,8 +170,9 @@ function CategoryDropdown({
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const allSelected = categories.every((c) => selected.includes(c));
-  const displayText = allSelected || selected.length === 0 ? '全部品类' : selected.join('、');
+  const selectedConcrete = selected.filter((cat) => categories.includes(cat));
+  const isAllCategory = selectedConcrete.length === 0;
+  const displayText = isAllCategory ? '全部品类' : selectedConcrete.join('、');
 
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-2">
@@ -189,7 +190,7 @@ function CategoryDropdown({
             <button
               type="button"
               onClick={() => {
-                const reversed = categories.filter((cat) => !selected.includes(cat));
+                const reversed = categories.filter((cat) => !selectedConcrete.includes(cat));
                 onChange(reversed.length === categories.length ? [] : reversed);
               }}
               className="w-full flex items-center gap-2.5 px-2 py-2 rounded cursor-pointer hover:bg-gray-50 border-b border-gray-100 mb-1 text-left"
@@ -197,32 +198,32 @@ function CategoryDropdown({
               <span className="w-4 h-4 rounded border border-gray-300 flex-shrink-0" />
               <span className="text-sm font-semibold text-gray-700">反选</span>
             </button>
-            <label className={`flex items-center gap-2.5 px-2 py-2 rounded cursor-pointer hover:bg-gray-50 ${selected.length === 0 || allSelected ? 'bg-blue-50' : ''}`}>
+            <label className={`flex items-center gap-2.5 px-2 py-2 rounded cursor-pointer hover:bg-gray-50 ${isAllCategory ? 'bg-blue-50' : ''}`}>
               <input
                 type="checkbox"
-                checked={selected.length === 0 || allSelected}
+                checked={isAllCategory}
                 onChange={() => onChange([])}
                 className="w-4 h-4 accent-blue-600 rounded"
               />
-              <span className={`text-sm ${selected.length === 0 || allSelected ? 'text-blue-700 font-medium' : 'text-gray-700'}`}>全部品类</span>
+              <span className={`text-sm ${isAllCategory ? 'text-blue-700 font-medium' : 'text-gray-700'}`}>全部品类</span>
             </label>
             {categories.map((cat) => (
               <label
                 key={cat}
-                className={`flex items-center gap-2.5 px-2 py-2 rounded cursor-pointer hover:bg-gray-50 ${selected.includes(cat) ? 'bg-blue-50' : ''}`}
+                className={`flex items-center gap-2.5 px-2 py-2 rounded cursor-pointer hover:bg-gray-50 ${selectedConcrete.includes(cat) ? 'bg-blue-50' : ''}`}
               >
                 <input
                   type="checkbox"
-                  checked={selected.includes(cat)}
+                  checked={selectedConcrete.includes(cat)}
                   onChange={() => {
-                    const newCats = selected.includes(cat)
-                      ? selected.filter((c) => c !== cat)
-                      : [...selected, cat];
-                    onChange(newCats);
+                    const newCats = selectedConcrete.includes(cat)
+                      ? selectedConcrete.filter((c) => c !== cat)
+                      : [...selectedConcrete, cat];
+                    onChange(newCats.length === categories.length ? [] : newCats);
                   }}
                   className="w-4 h-4 accent-blue-600 rounded"
                 />
-                <span className={`text-sm ${selected.includes(cat) ? 'text-blue-700 font-medium' : 'text-gray-700'}`}>{cat}</span>
+                <span className={`text-sm ${selectedConcrete.includes(cat) ? 'text-blue-700 font-medium' : 'text-gray-700'}`}>{cat}</span>
               </label>
             ))}
           </div>
