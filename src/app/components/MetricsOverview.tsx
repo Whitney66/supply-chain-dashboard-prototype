@@ -997,6 +997,7 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">10.8D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">84.2%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">86.7%</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">88.5%</td>
                 <td className="px-3 py-2 bg-gray-50">
                   <img src={directStoreFlowImage} alt="直发门店监管仓流程图" className="max-w-xs h-auto" />
                 </td>
@@ -1017,7 +1018,7 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">18.5D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">79.8%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">82.3%</td>
-<td className="px-3 py-2 text-center font-semibold text-gray-900">82.3%</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">82.3%</td>
                 <td rowSpan={9} className="px-3 py-2 align-top bg-gray-50">
                   <img src={distributionFlowImage} alt="分货段流程图" className="max-w-xs h-auto" />
                 </td>
