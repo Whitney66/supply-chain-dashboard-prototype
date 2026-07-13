@@ -191,7 +191,7 @@ function CategoryDropdown({
               type="button"
               onClick={() => {
                 const reversed = categories.filter((cat) => !selectedConcrete.includes(cat));
-                onChange(reversed.length === categories.length ? [] : reversed);
+                onChange(reversed);
               }}
               className="w-full flex items-center gap-2.5 px-2 py-2 rounded cursor-pointer hover:bg-gray-50 border-b border-gray-100 mb-1 text-left"
             >
@@ -219,7 +219,7 @@ function CategoryDropdown({
                     const newCats = selectedConcrete.includes(cat)
                       ? selectedConcrete.filter((c) => c !== cat)
                       : [...selectedConcrete, cat];
-                    onChange(newCats.length === categories.length ? [] : newCats);
+                    onChange(newCats);
                   }}
                   className="w-4 h-4 accent-blue-600 rounded"
                 />
