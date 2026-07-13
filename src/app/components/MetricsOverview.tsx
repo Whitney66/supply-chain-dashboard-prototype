@@ -721,7 +721,7 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">83.9%</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">5.9D</td>
                 <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-5.4%</span></td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">6.4D</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">1天</td>
                 <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-12.5%</span></td>
               </tr>
               {/* 提货点提货全链路平均时效 - 无品类 */}
@@ -740,7 +740,7 @@ export function MetricsOverview() {
                 </td>
                 <td className="px-3 py-2 text-center text-gray-400 text-xs">-</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">3.0D</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">3.2D</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">0.17天</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">91.5%</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">3.4D</td>
                 <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-6.3%</span></td>
@@ -917,7 +917,7 @@ export function MetricsOverview() {
                 <td rowSpan={7} className="px-3 py-2 font-medium text-gray-800 align-top">1.一盘货</td>
                 <td rowSpan={2} className="px-3 py-2 text-gray-700">1.1全链路订货平均时效（一盘货）</td>
                 <td className="px-3 py-2 text-center text-gray-700">香化</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">10、14D</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">14天</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">12.3D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">15.2D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">86.7%</td>
@@ -929,7 +929,7 @@ export function MetricsOverview() {
               </tr>
               <tr className="hover:bg-gray-50">
                 <td className="px-3 py-2 text-center text-gray-700">酒水</td>
-                <td className="px-3 py-2 text-center text-gray-400">-</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">7天</td>
                 <td className="px-3 py-2 text-center text-gray-400">-</td>
                 <td className="px-3 py-2 text-center text-gray-400">-</td>
                 <td className="px-3 py-2 text-center text-gray-400">-</td>
@@ -940,7 +940,7 @@ export function MetricsOverview() {
               <tr className="hover:bg-gray-50">
                 <td rowSpan={2} className="px-3 py-2 text-gray-700">1.2一线通关平均时效</td>
                 <td className="px-3 py-2 text-center text-gray-700">香化</td>
-                <td className="px-3 py-2 text-center text-gray-400">-</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">3天</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">3.8D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">5.1D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">78.3%</td>
@@ -949,7 +949,7 @@ export function MetricsOverview() {
               </tr>
               <tr className="hover:bg-gray-50">
                 <td className="px-3 py-2 text-center text-gray-700">酒水</td>
-                <td className="px-3 py-2 text-center text-gray-400">-</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">3天</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">4.2D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">5.8D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">75.6%</td>
@@ -960,7 +960,7 @@ export function MetricsOverview() {
               <tr className="hover:bg-gray-50">
                 <td className="px-3 py-2 text-gray-700">1.3提货至海综保平均时效</td>
                 <td className="px-3 py-2 text-center text-gray-700">通用</td>
-                <td className="px-3 py-2 text-center text-gray-400">-</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">2.5天</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.6D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">3.9D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">82.4%</td>
@@ -971,7 +971,7 @@ export function MetricsOverview() {
               <tr className="hover:bg-gray-50">
                 <td rowSpan={2} className="px-3 py-2 text-gray-700">1.4仓库入库平均时效</td>
                 <td className="px-3 py-2 text-center text-gray-700">香化</td>
-                <td className="px-3 py-2 text-center text-gray-400">-</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">0.33天</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">1.8D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.5D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">89.5%</td>
@@ -980,7 +980,7 @@ export function MetricsOverview() {
               </tr>
               <tr className="hover:bg-gray-50">
                 <td className="px-3 py-2 text-center text-gray-700">酒水</td>
-                <td className="px-3 py-2 text-center text-gray-400">-</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">0.17天</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.1D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">3.2D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">87.8%</td>
@@ -1029,52 +1029,58 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">20.1D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">76.5%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">79.2%</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">79.2%</td>
               </tr>
 
               <tr className="hover:bg-gray-50">
                 <td rowSpan={2} className="px-3 py-2 text-gray-700">1.2仓库出库平均时效</td>
                 <td className="px-3 py-2 text-center text-gray-700">香化</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">10D</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">7天</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">8.9D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">11.2D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">92.3%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">93.8%</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">94.6%</td>
               </tr>
               <tr className="hover:bg-gray-50">
                 <td className="px-3 py-2 text-center text-gray-700">酒水</td>
-                <td className="px-3 py-2 text-center text-gray-400">-</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">12天</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">9.5D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">12.3D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">90.1%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">91.8%</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">92.4%</td>
               </tr>
 
               <tr className="hover:bg-gray-50">
                 <td rowSpan={2} className="px-3 py-2 text-gray-700">1.3二线通关平均时效</td>
                 <td className="px-3 py-2 text-center text-gray-700">香化</td>
-                <td className="px-3 py-2 text-center text-gray-400">-</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">0.13天</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">1.9D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.8D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">88.6%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">90.2%</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">91.0%</td>
               </tr>
               <tr className="hover:bg-gray-50">
                 <td className="px-3 py-2 text-center text-gray-700">酒水</td>
-                <td className="px-3 py-2 text-center text-gray-400">-</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">0.29天</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.2D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">3.1D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">85.4%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">87.8%</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">88.6%</td>
               </tr>
 
               <tr className="hover:bg-gray-50">
                 <td className="px-3 py-2 text-gray-700">1.4门店提货至上架平均时效</td>
                 <td className="px-3 py-2 text-center text-gray-400">-</td>
-                <td className="px-3 py-2 text-center text-gray-400">-</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">0.17天</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.3D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">3.5D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">85.5%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">87.3%</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">88.1%</td>
               </tr>
               </>
               )}
@@ -1087,7 +1093,7 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 font-medium text-gray-800">1.监管仓-周转仓</td>
                 <td className="px-3 py-2 text-gray-700">1.1监管仓-周转仓调拨平均时效</td>
                 <td className="px-3 py-2 text-center bg-gray-50 text-gray-300 text-xs">—</td>
-                <td className="px-3 py-2 text-center text-gray-700">-</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">1天</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">12.5D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">15.8D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">83.4%</td>
@@ -1130,7 +1136,7 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 font-medium text-gray-800">3.卖场-分拣仓</td>
                 <td className="px-3 py-2 text-gray-700">3.1卖场-分拣仓入库平均时效</td>
                 <td className="px-3 py-2 text-center bg-gray-50 text-gray-300 text-xs">—</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">6H、4H</td>
+                <td className="px-3 py-2 text-center text-gray-700">-</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">5.2H</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">7.8H</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">86.5%</td>
