@@ -1,6 +1,7 @@
 // 门店-仓库映射数据
+// Source: 20260529门店映射关系表+目标值维护.xlsx / Sheet1 门店-仓库映射表
 
-export type WarehouseCategory = '监管仓' | '周转仓' | '分拣仓' | '预定仓' | '柜台' | '自建仓' | '其他';
+export type WarehouseCategory = '监管仓' | '周转仓' | '分拣仓' | '预定仓' | '柜台' | '自建仓' | '一盘货仓' | '其他';
 
 export interface Store {
   id: string;
@@ -13,131 +14,613 @@ export interface Warehouse {
   name: string;
   storeId: string;
   category: WarehouseCategory;
+  businessType: string;
+  shopNo: string;
+  ciboCode: string;
+  source: string;
+  remark: string;
 }
 
-// 门店数据
 export const stores: Store[] = [
   {
-    id: '7063',
-    name: '【7063】海南国际物流中心',
-    warehouseIds: ['7063-B01', '7063-B02', '7063-B03', '7063-B04'],
-  },
-  {
-    id: '6868',
-    name: '【6868】三亚海棠湾店',
-    warehouseIds: ['6868-A01', '6868-A02', '6868-A06', '6868-bangda', '6868-sorting', '6868-counter'],
-  },
-  {
-    id: '7048',
-    name: '【7048】新海港店',
-    warehouseIds: ['7048-B11', '7048-B16', '7048-sorting', '7048-counter'],
-  },
-  {
-    id: '7016',
-    name: '【7016】三亚凤凰机场店',
-    warehouseIds: ['7016-A11', '7016-A16', '7016-counter'],
-  },
-  {
-    id: '6132',
-    name: '【6132】海口美兰机场店',
-    warehouseIds: ['6132-B21', '6132-B26', '6132-counter'],
-  },
-  {
-    id: '6922',
-    name: '【6922】海口日月店',
-    warehouseIds: ['6922-B31', '6922-B36', '6922-zbq', '6922-sorting', '6922-counter'],
-  },
-  {
-    id: '6921',
-    name: '【6921】博鳌店',
-    warehouseIds: ['6921-C01', '6921-C06', '6921-tax', '6921-counter'],
-  },
-  {
-    id: '7017',
-    name: '【7017】电商',
+    id: "7063",
+    name: "【7063】海南国际物流中心",
     warehouseIds: [
-      '7017-sanya',
-      '7017-sanya-pre',
-      '7017-hk-pre',
-      '7017-zbq-member',
-      '7017-zbq-build',
-      '7017-zbq-haijiao',
-      '7017-zbq-self',
-      '7017-jinma',
-      '7017-daifa',
-      '7017-exp',
-    ],
+      "7063-706302",
+      "7063-706305"
+    ]
   },
   {
-    id: '7052',
-    name: '【7052】跨境电商',
-    warehouseIds: ['7052-zbq', '7052-sanya'],
+    id: "6867",
+    name: "【6867】三亚海棠湾店",
+    warehouseIds: [
+      "6867-686701"
+    ]
   },
+  {
+    id: "7018",
+    name: "【7018】三亚海棠湾店",
+    warehouseIds: [
+      "7018-701804",
+      "7018-701802",
+      "7018-704802",
+      "7018-704803"
+    ]
+  },
+  {
+    id: "6868",
+    name: "【6868】三亚海棠湾店",
+    warehouseIds: [
+      "6868-686801",
+      "6868-686802",
+      "6868-686803",
+      "6868-686701",
+      "6868-6868"
+    ]
+  },
+  {
+    id: "7048",
+    name: "【7048】新海港店",
+    warehouseIds: [
+      "7048-704801",
+      "7048-704804",
+      "7048-7048",
+      "7048-704801-2"
+    ]
+  },
+  {
+    id: "7016",
+    name: "【7016】三亚凤凰机场店",
+    warehouseIds: [
+      "7016-701607",
+      "7016-701615",
+      "7016-701608",
+      "7016-701605",
+      "7016-7016",
+      "7016-701607-2",
+      "7016-701615-2"
+    ]
+  },
+  {
+    id: "6132",
+    name: "【6132】海口美兰机场店",
+    warehouseIds: [
+      "6132-613266",
+      "6132-613201",
+      "6132-613217",
+      "6132-6132",
+      "6132-613266-2"
+    ]
+  },
+  {
+    id: "6922",
+    name: "【6922】海口日月店",
+    warehouseIds: [
+      "6922-692267",
+      "6922-692268",
+      "6922-613267",
+      "6922-692206",
+      "6922-692207",
+      "6922-692264",
+      "6922-692265",
+      "6922-692266",
+      "6922-6922",
+      "6922-692267-2",
+      "6922-692268-2",
+      "6922-613267-2"
+    ]
+  },
+  {
+    id: "6921",
+    name: "【6921】博鳌店",
+    warehouseIds: [
+      "6921-692166",
+      "6921-692102",
+      "6921-692103",
+      "6921-6921",
+      "6921-692166-2"
+    ]
+  }
 ];
 
-// 仓库数据
 export const warehouses: Warehouse[] = [
-  // 7063 - 海南国际物流中心
-  { id: '7063-B01', name: '海口综保区自建仓[B01]', storeId: '7063', category: '自建仓' },
-  { id: '7063-B02', name: '海口综保区自建仓[B02]', storeId: '7063', category: '自建仓' },
-  { id: '7063-B03', name: '海口综保区自建仓[B03]', storeId: '7063', category: '自建仓' },
-  { id: '7063-B04', name: '海口综保区自建仓[B04]', storeId: '7063', category: '自建仓' },
-  
-  // 6868 - 三亚海棠湾店
-  { id: '6868-A01', name: '海棠湾店基地仓[A01]', storeId: '6868', category: '监管仓' },
-  { id: '6868-A02', name: '海棠湾店佳翔仓[A02]', storeId: '6868', category: '自建仓' },
-  { id: '6868-A06', name: '海棠湾店周转仓[A06]', storeId: '6868', category: '周转仓' },
-  { id: '6868-bangda', name: '海口综保区邦达仓', storeId: '6868', category: '其他' },
-  { id: '6868-sorting', name: '海棠湾店分拣仓', storeId: '6868', category: '分拣仓' },
-  { id: '6868-counter', name: '海棠湾店柜台', storeId: '6868', category: '柜台' },
-  
-  // 7048 - 新海港店
-  { id: '7048-B11', name: '新海港店监管仓[B11]', storeId: '7048', category: '监管仓' },
-  { id: '7048-B16', name: '新海港店周转仓[B16]', storeId: '7048', category: '周转仓' },
-  { id: '7048-sorting', name: '新海港店分拣仓', storeId: '7048', category: '分拣仓' },
-  { id: '7048-counter', name: '新海港店柜台', storeId: '7048', category: '柜台' },
-  
-  // 7016 - 三亚凤凰机场店
-  { id: '7016-A11', name: '三亚机场店监管仓[A11]', storeId: '7016', category: '监管仓' },
-  { id: '7016-A16', name: '三亚机场店周转仓[A16]', storeId: '7016', category: '周转仓' },
-  { id: '7016-counter', name: '三亚凤凰机场店柜台', storeId: '7016', category: '柜台' },
-  
-  // 6132 - 海口美兰机场店
-  { id: '6132-B21', name: '美兰店监管仓[B21]', storeId: '6132', category: '监管仓' },
-  { id: '6132-B26', name: '美兰店周转仓[B26]', storeId: '6132', category: '周转仓' },
-  { id: '6132-counter', name: '美兰店柜台', storeId: '6132', category: '柜台' },
-  
-  // 6922 - 海口日月店
-  { id: '6922-B31', name: '日月店监管仓[B31]', storeId: '6922', category: '监管仓' },
-  { id: '6922-B36', name: '日月店周转仓[B36]', storeId: '6922', category: '周转仓' },
-  { id: '6922-zbq', name: '综保区监管仓', storeId: '6922', category: '其他' },
-  { id: '6922-sorting', name: '日月店分拣仓', storeId: '6922', category: '分拣仓' },
-  { id: '6922-counter', name: '日月店柜台', storeId: '6922', category: '柜台' },
-  
-  // 6921 - 博鳌店
-  { id: '6921-C01', name: '博鳌店监管仓[C01]', storeId: '6921', category: '监管仓' },
-  { id: '6921-C06', name: '博鳌店周转仓[C06]', storeId: '6921', category: '周转仓' },
-  { id: '6921-tax', name: '博鳌店有税仓', storeId: '6921', category: '其他' },
-  { id: '6921-counter', name: '博鳌店柜台', storeId: '6921', category: '柜台' },
-  
-  // 7017 - 电商
-  { id: '7017-sanya', name: '三亚物流基地(免税仓)', storeId: '7017', category: '其他' },
-  { id: '7017-sanya-pre', name: '三亚免税预定(佳翔仓)', storeId: '7017', category: '预定仓' },
-  { id: '7017-hk-pre', name: '海口预定仓(免税仓)', storeId: '7017', category: '预定仓' },
-  { id: '7017-zbq-member', name: '综保区会员购（管委会仓）', storeId: '7017', category: '其他' },
-  { id: '7017-zbq-build', name: '综保区自建仓会员购', storeId: '7017', category: '自建仓' },
-  { id: '7017-zbq-haijiao', name: '海口综保区海胶仓(会员购)', storeId: '7017', category: '自建仓' },
-  { id: '7017-zbq-self', name: '海口综保区自建仓(会员购)', storeId: '7017', category: '自建仓' },
-  { id: '7017-jinma', name: '海口金马有税苏宁云仓', storeId: '7017', category: '其他' },
-  { id: '7017-daifa', name: '电商代发仓', storeId: '7017', category: '其他' },
-  { id: '7017-exp', name: '电商体验店', storeId: '7017', category: '其他' },
-  
-  // 7052 - 跨境电商
-  { id: '7052-zbq', name: '综保区管委会跨境仓', storeId: '7052', category: '其他' },
-  { id: '7052-sanya', name: '三亚跨境电商仓', storeId: '7052', category: '其他' },
+  {
+    id: "7063-706302",
+    name: "香化仓-2号库",
+    storeId: "7063",
+    category: "一盘货仓",
+    businessType: "订、分货段",
+    shopNo: "706302",
+    ciboCode: "SWHS0001032214910",
+    source: "海综保 分货台账【品类】字段区分香化仓或酒水仓",
+    remark: ""
+  },
+  {
+    id: "7063-706305",
+    name: "酒水仓-4号库",
+    storeId: "7063",
+    category: "一盘货仓",
+    businessType: "订、分货段",
+    shopNo: "706305",
+    ciboCode: "SWHS0001032214910",
+    source: "海综保 分货台账【品类】字段区分香化仓或酒水仓",
+    remark: ""
+  },
+  {
+    id: "6867-686701",
+    name: "海棠湾店监管仓（物流基地）",
+    storeId: "6867",
+    category: "监管仓",
+    businessType: "订、分货段",
+    shopNo: "686701",
+    ciboCode: "SWHS0001032215155",
+    source: "中免集团三亚市内免税店免税品监管仓 （一盘货出库段不与凤凰机场店拆开）",
+    remark: "佳翔监管仓的有效柜组为686703，但香化基本是单品量很大由物流基地调过去存储或部分精品会直接在佳翔卸货。目前看板包含的香化及酒水暂不涉及"
+  },
+  {
+    id: "7018-701804",
+    name: "三亚免税预定(佳翔仓)",
+    storeId: "7018",
+    category: "预定仓",
+    businessType: "门店段",
+    shopNo: "701804",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6868-686801",
+    name: "海棠湾店周转仓[A06]",
+    storeId: "6868",
+    category: "周转仓",
+    businessType: "门店段",
+    shopNo: "686801",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6868-686802",
+    name: "海棠湾店周转仓[A06]",
+    storeId: "6868",
+    category: "周转仓",
+    businessType: "门店段",
+    shopNo: "686802",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6868-686803",
+    name: "海棠湾店周转仓[A06]",
+    storeId: "6868",
+    category: "周转仓",
+    businessType: "门店段",
+    shopNo: "686803",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6868-686701",
+    name: "海棠湾店监管仓（物流基地）",
+    storeId: "6868",
+    category: "监管仓",
+    businessType: "门店段",
+    shopNo: "686701",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6868-6868",
+    name: "海棠湾店分拣仓",
+    storeId: "6868",
+    category: "分拣仓",
+    businessType: "门店段",
+    shopNo: "6868",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "7048-704801",
+    name: "新海港店监管仓[B11]",
+    storeId: "7048",
+    category: "监管仓",
+    businessType: "订、分货段",
+    shopNo: "704801",
+    ciboCode: "SWHS0001032214784",
+    source: "中免(海口)国际免税城免税品监管仓",
+    remark: ""
+  },
+  {
+    id: "7018-701802",
+    name: "海口预定仓(免税仓)",
+    storeId: "7018",
+    category: "预定仓",
+    businessType: "门店段",
+    shopNo: "701802",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "7018-704802",
+    name: "海口预定仓(免税仓)",
+    storeId: "7018",
+    category: "预定仓",
+    businessType: "门店段",
+    shopNo: "704802",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "7018-704803",
+    name: "海口预定仓(免税仓)",
+    storeId: "7018",
+    category: "预定仓",
+    businessType: "门店段",
+    shopNo: "704803",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "7048-704804",
+    name: "新海港店周转仓[B16]",
+    storeId: "7048",
+    category: "周转仓",
+    businessType: "门店段",
+    shopNo: "704804",
+    ciboCode: "29",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "7048-7048",
+    name: "新海港店分拣仓",
+    storeId: "7048",
+    category: "分拣仓",
+    businessType: "门店段",
+    shopNo: "7048",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "7048-704801-2",
+    name: "新海港店监管仓[B11]",
+    storeId: "7048",
+    category: "监管仓",
+    businessType: "门店段",
+    shopNo: "704801",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "7016-701607",
+    name: "凤凰机场店监管仓[A11]",
+    storeId: "7016",
+    category: "监管仓",
+    businessType: "订、分货段",
+    shopNo: "701607",
+    ciboCode: "SWHS0001032215155",
+    source: "中免集团三亚市内免税店免税品监管仓（一盘货出库段不与三亚店拆开）",
+    remark: ""
+  },
+  {
+    id: "7016-701615",
+    name: "凤凰机场店监管仓[A11]",
+    storeId: "7016",
+    category: "监管仓",
+    businessType: "订、分货段",
+    shopNo: "701615",
+    ciboCode: "SWHS0001032215155",
+    source: "中免集团三亚市内免税店免税品监管仓（一盘货出库段不与三亚店拆开）",
+    remark: "701615（有税）"
+  },
+  {
+    id: "7016-701608",
+    name: "凤凰机场店周转仓[A16]",
+    storeId: "7016",
+    category: "周转仓",
+    businessType: "门店段",
+    shopNo: "701608",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "7016-701605",
+    name: "凤凰机场店周转仓[A16]",
+    storeId: "7016",
+    category: "周转仓",
+    businessType: "门店段",
+    shopNo: "701605",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "7016-7016",
+    name: "凤凰机场店分拣仓",
+    storeId: "7016",
+    category: "分拣仓",
+    businessType: "门店段",
+    shopNo: "7016",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "7016-701607-2",
+    name: "凤凰机场店监管仓[A11]",
+    storeId: "7016",
+    category: "监管仓",
+    businessType: "门店段",
+    shopNo: "701607",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "7016-701615-2",
+    name: "凤凰机场店监管仓[A11]",
+    storeId: "7016",
+    category: "监管仓",
+    businessType: "门店段",
+    shopNo: "701615",
+    ciboCode: "34",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6132-613266",
+    name: "美兰机场店监管仓[B21]",
+    storeId: "6132",
+    category: "监管仓",
+    businessType: "订、分货段",
+    shopNo: "613266",
+    ciboCode: "SWHS0001032214990",
+    source: "海免海口美兰机场免税店免税品监管仓",
+    remark: ""
+  },
+  {
+    id: "6132-613201",
+    name: "美兰店周转仓[B26]",
+    storeId: "6132",
+    category: "周转仓",
+    businessType: "门店段",
+    shopNo: "613201",
+    ciboCode: "42",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6132-613217",
+    name: "美兰店周转仓[B26]",
+    storeId: "6132",
+    category: "周转仓",
+    businessType: "门店段",
+    shopNo: "613217",
+    ciboCode: "43",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6132-6132",
+    name: "美兰机场店分拣仓",
+    storeId: "6132",
+    category: "分拣仓",
+    businessType: "门店段",
+    shopNo: "6132",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6132-613266-2",
+    name: "美兰机场店监管仓[B21]",
+    storeId: "6132",
+    category: "监管仓",
+    businessType: "门店段",
+    shopNo: "613266",
+    ciboCode: "45",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6922-692267",
+    name: "日月店监管仓",
+    storeId: "6922",
+    category: "监管仓",
+    businessType: "订、分货段",
+    shopNo: "692267",
+    ciboCode: "SWHS0001032214968",
+    source: "海免(海口)免税店免税品监管仓",
+    remark: ""
+  },
+  {
+    id: "6922-692268",
+    name: "日月店监管仓",
+    storeId: "6922",
+    category: "监管仓",
+    businessType: "订、分货段",
+    shopNo: "692268",
+    ciboCode: "SWHS0001032214968",
+    source: "海免(海口)免税店免税品监管仓",
+    remark: ""
+  },
+  {
+    id: "6922-613267",
+    name: "日月店监管仓",
+    storeId: "6922",
+    category: "监管仓",
+    businessType: "订、分货段",
+    shopNo: "613267",
+    ciboCode: "SWHS0001032214968",
+    source: "海免(海口)免税店免税品监管仓",
+    remark: ""
+  },
+  {
+    id: "6922-692206",
+    name: "日月店周转仓[B36]",
+    storeId: "6922",
+    category: "周转仓",
+    businessType: "门店段",
+    shopNo: "692206",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6922-692207",
+    name: "日月店周转仓[B36]",
+    storeId: "6922",
+    category: "周转仓",
+    businessType: "门店段",
+    shopNo: "692207",
+    ciboCode: "51",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6922-692264",
+    name: "日月店周转仓[B36]",
+    storeId: "6922",
+    category: "周转仓",
+    businessType: "门店段",
+    shopNo: "692264",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6922-692265",
+    name: "日月店周转仓[B36]",
+    storeId: "6922",
+    category: "周转仓",
+    businessType: "门店段",
+    shopNo: "692265",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6922-692266",
+    name: "日月店周转仓[B36]",
+    storeId: "6922",
+    category: "周转仓",
+    businessType: "门店段",
+    shopNo: "692266",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6922-6922",
+    name: "日月店分拣仓",
+    storeId: "6922",
+    category: "分拣仓",
+    businessType: "门店段",
+    shopNo: "6922",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6922-692267-2",
+    name: "日月店监管仓",
+    storeId: "6922",
+    category: "监管仓",
+    businessType: "门店段",
+    shopNo: "692267",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6922-692268-2",
+    name: "日月店监管仓",
+    storeId: "6922",
+    category: "监管仓",
+    businessType: "门店段",
+    shopNo: "692268",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6922-613267-2",
+    name: "日月店监管仓",
+    storeId: "6922",
+    category: "监管仓",
+    businessType: "门店段",
+    shopNo: "613267",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6921-692166",
+    name: "博鳌店监管仓",
+    storeId: "6921",
+    category: "监管仓",
+    businessType: "订、分货段",
+    shopNo: "692166",
+    ciboCode: "SWHS0001032214924",
+    source: "琼海海中免免税品监管仓",
+    remark: ""
+  },
+  {
+    id: "6921-692102",
+    name: "博鳌店周转仓[C06]",
+    storeId: "6921",
+    category: "周转仓",
+    businessType: "门店段",
+    shopNo: "692102",
+    ciboCode: "59",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6921-692103",
+    name: "博鳌店分拣仓",
+    storeId: "6921",
+    category: "分拣仓",
+    businessType: "门店段",
+    shopNo: "692103",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6921-6921",
+    name: "博鳌店有税仓",
+    storeId: "6921",
+    category: "其他",
+    businessType: "门店段",
+    shopNo: "6921",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  },
+  {
+    id: "6921-692166-2",
+    name: "博鳌店监管仓",
+    storeId: "6921",
+    category: "监管仓",
+    businessType: "门店段",
+    shopNo: "692166",
+    ciboCode: "",
+    source: "",
+    remark: ""
+  }
 ];
 
-// 智能过滤函数
 export function getFilteredWarehouses(selectedStores: string[]): Warehouse[] {
   if (selectedStores.length === 0) {
     return warehouses;

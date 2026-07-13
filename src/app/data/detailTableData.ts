@@ -1,7 +1,10 @@
 // 明细表格数据
+import { getDurationTargetDays } from './targetValues';
+
 export interface MonthlyData {
   dimension: string;
   store: string;
+  targetDays: number | null;
   jan: number;
   feb: number;
   mar: number;
@@ -113,7 +116,10 @@ export function getDetailTableData(metricId: string): MonthlyData[] {
     },
   ];
 
-  return baseData;
+  return baseData.map(row => ({
+    ...row,
+    targetDays: getDurationTargetDays(metricId, row.store),
+  }));
 }
 
 // 指标树形结构

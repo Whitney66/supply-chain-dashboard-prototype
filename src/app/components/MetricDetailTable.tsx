@@ -40,6 +40,7 @@ export function MetricDetailTable({ metricId }: MetricDetailTableProps) {
             <tr>
               <th className="px-4 py-3 text-left sticky left-0 bg-gray-50 z-10">维度</th>
               <th className="px-4 py-3 text-left sticky left-20 bg-gray-50 z-10">门店</th>
+              <th className="px-4 py-3 text-center bg-amber-50 text-amber-700">目标值（天）</th>
               <th className="px-4 py-3 text-center">1月</th>
               <th className="px-4 py-3 text-center">2月</th>
               <th className="px-4 py-3 text-center">3月</th>
@@ -61,6 +62,9 @@ export function MetricDetailTable({ metricId }: MetricDetailTableProps) {
               <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
                 <td className="px-4 py-3 sticky left-0 bg-white z-10">{row.dimension}</td>
                 <td className="px-4 py-3 sticky left-20 bg-white z-10">{row.store}</td>
+                <td className="px-4 py-3 text-center bg-amber-50 text-amber-700 font-medium">
+                  {row.targetDays === null ? '-' : `${row.targetDays}天`}
+                </td>
                 <td className={`px-4 py-3 text-center ${getCellColor(row.jan)}`}>
                   {row.jan.toFixed(2)}%
                 </td>

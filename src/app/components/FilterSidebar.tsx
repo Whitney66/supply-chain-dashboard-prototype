@@ -491,11 +491,16 @@ export function FilterSidebar({ filters, onFiltersChange, isCollapsed, onToggleC
                             <Check className="w-3.5 h-3.5 text-blue-600 absolute top-0 left-0 pointer-events-none" strokeWidth={4} />
                           )}
                         </div>
-                        <span className={`text-sm ${
-                          localFilters.selectedWarehouses.includes(warehouse.id) 
-                            ? 'text-blue-700 font-medium' 
-                            : 'text-gray-700 group-hover:text-gray-900'
-                        }`}>{warehouse.name}</span>
+                        <span className="min-w-0 flex-1">
+                          <span className={`block text-sm ${
+                            localFilters.selectedWarehouses.includes(warehouse.id)
+                              ? 'text-blue-700 font-medium'
+                              : 'text-gray-700 group-hover:text-gray-900'
+                          }`}>{warehouse.name}</span>
+                          <span className="block text-[11px] text-gray-400 truncate">
+                            {warehouse.businessType} · {warehouse.shopNo || '无店面号'} · {warehouse.category}
+                          </span>
+                        </span>
                       </label>
                     ))}
                   {(localFilters.selectedStores.length > 0 ? filteredWarehouses : warehouses)

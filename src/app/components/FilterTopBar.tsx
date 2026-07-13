@@ -185,15 +185,26 @@ function CategoryDropdown({
           <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`} />
         </button>
         {open && (
-          <div className="absolute left-0 top-full mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-xl z-50 p-1.5">
-            <label className="flex items-center gap-2.5 px-2 py-2 rounded cursor-pointer hover:bg-gray-50 border-b border-gray-100 mb-1">
+          <div className="absolute left-0 top-full mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-xl z-50 p-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                const reversed = categories.filter((cat) => !selected.includes(cat));
+                onChange(reversed.length === categories.length ? [] : reversed);
+              }}
+              className="w-full flex items-center gap-2.5 px-2 py-2 rounded cursor-pointer hover:bg-gray-50 border-b border-gray-100 mb-1 text-left"
+            >
+              <span className="w-4 h-4 rounded border border-gray-300 flex-shrink-0" />
+              <span className="text-sm font-semibold text-gray-700">反选</span>
+            </button>
+            <label className={`flex items-center gap-2.5 px-2 py-2 rounded cursor-pointer hover:bg-gray-50 ${selected.length === 0 || allSelected ? 'bg-blue-50' : ''}`}>
               <input
                 type="checkbox"
-                checked={allSelected}
-                onChange={() => onChange(allSelected ? [] : categories)}
+                checked={selected.length === 0 || allSelected}
+                onChange={() => onChange([])}
                 className="w-4 h-4 accent-blue-600 rounded"
               />
-              <span className="text-sm font-semibold text-gray-700">全选</span>
+              <span className={`text-sm ${selected.length === 0 || allSelected ? 'text-blue-700 font-medium' : 'text-gray-700'}`}>全部品类</span>
             </label>
             {categories.map((cat) => (
               <label
