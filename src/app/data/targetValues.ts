@@ -25,7 +25,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 14,
     targetUnit: "day",
     targetDays: 14,
-    targetDisplay: "14天"
+    targetDisplay: "14D"
   },
   {
     businessLink: "1.订货段",
@@ -47,7 +47,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 7,
     targetUnit: "day",
     targetDays: 7,
-    targetDisplay: "7天"
+    targetDisplay: "7D"
   },
   {
     businessLink: "1.订货段",
@@ -58,7 +58,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 76,
     targetUnit: "hour",
     targetDays: 3.17,
-    targetDisplay: "3.17天"
+    targetDisplay: "3.17D"
   },
   {
     businessLink: "1.订货段",
@@ -69,7 +69,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 72,
     targetUnit: "hour",
     targetDays: 3,
-    targetDisplay: "3天"
+    targetDisplay: "3D"
   },
   {
     businessLink: "1.订货段",
@@ -91,7 +91,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 72,
     targetUnit: "hour",
     targetDays: 3,
-    targetDisplay: "3天"
+    targetDisplay: "3D"
   },
   {
     businessLink: "1.订货段",
@@ -102,7 +102,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 72,
     targetUnit: "hour",
     targetDays: 3,
-    targetDisplay: "3天"
+    targetDisplay: "3D"
   },
   {
     businessLink: "1.订货段",
@@ -113,7 +113,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 72,
     targetUnit: "hour",
     targetDays: 3,
-    targetDisplay: "3天"
+    targetDisplay: "3D"
   },
   {
     businessLink: "1.订货段",
@@ -124,7 +124,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 72,
     targetUnit: "hour",
     targetDays: 3,
-    targetDisplay: "3天"
+    targetDisplay: "3D"
   },
   {
     businessLink: "1.订货段",
@@ -135,7 +135,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 72,
     targetUnit: "hour",
     targetDays: 3,
-    targetDisplay: "3天"
+    targetDisplay: "3D"
   },
   {
     businessLink: "1.订货段",
@@ -146,7 +146,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 72,
     targetUnit: "hour",
     targetDays: 3,
-    targetDisplay: "3天"
+    targetDisplay: "3D"
   },
   {
     businessLink: "1.订货段",
@@ -157,7 +157,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 2.5,
     targetUnit: "day",
     targetDays: 2.5,
-    targetDisplay: "2.5天"
+    targetDisplay: "2.5D"
   },
   {
     businessLink: "1.订货段",
@@ -168,7 +168,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 2.5,
     targetUnit: "day",
     targetDays: 2.5,
-    targetDisplay: "2.5天"
+    targetDisplay: "2.5D"
   },
   {
     businessLink: "1.订货段",
@@ -179,7 +179,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 8,
     targetUnit: "hour",
     targetDays: 0.33,
-    targetDisplay: "0.33天"
+    targetDisplay: "0.33D"
   },
   {
     businessLink: "1.订货段",
@@ -190,7 +190,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 4,
     targetUnit: "hour",
     targetDays: 0.17,
-    targetDisplay: "0.17天"
+    targetDisplay: "0.17D"
   },
   {
     businessLink: "1.订货段",
@@ -201,7 +201,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 93,
     targetUnit: "hour",
     targetDays: 3.88,
-    targetDisplay: "3.88天"
+    targetDisplay: "3.88D"
   },
   {
     businessLink: "2.分货段",
@@ -212,7 +212,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 7,
     targetUnit: "hour",
     targetDays: 0.29,
-    targetDisplay: "0.29天"
+    targetDisplay: "0.29D"
   },
   {
     businessLink: "2.分货段",
@@ -234,7 +234,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 12,
     targetUnit: "hour",
     targetDays: 0.5,
-    targetDisplay: "0.5天"
+    targetDisplay: "0.5D"
   },
   {
     businessLink: "2.分货段",
@@ -245,7 +245,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 76,
     targetUnit: "hour",
     targetDays: 3.17,
-    targetDisplay: "3.17天"
+    targetDisplay: "3.17D"
   },
   {
     businessLink: "2.分货段",
@@ -256,7 +256,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 3,
     targetUnit: "hour",
     targetDays: 0.13,
-    targetDisplay: "0.13天"
+    targetDisplay: "0.13D"
   },
   {
     businessLink: "2.分货段",
@@ -267,7 +267,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 7,
     targetUnit: "hour",
     targetDays: 0.29,
-    targetDisplay: "0.29天"
+    targetDisplay: "0.29D"
   },
   {
     businessLink: "2.分货段",
@@ -278,7 +278,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 4,
     targetUnit: "hour",
     targetDays: 0.17,
-    targetDisplay: "0.17天"
+    targetDisplay: "0.17D"
   },
   {
     businessLink: "2.分货段",
@@ -300,7 +300,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 4,
     targetUnit: "hour",
     targetDays: 0.17,
-    targetDisplay: "0.17天"
+    targetDisplay: "0.17D"
   },
   {
     businessLink: "2.分货段",
@@ -311,7 +311,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 4,
     targetUnit: "hour",
     targetDays: 0.17,
-    targetDisplay: "0.17天"
+    targetDisplay: "0.17D"
   },
   {
     businessLink: "2.分货段",
@@ -322,7 +322,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 4,
     targetUnit: "hour",
     targetDays: 0.17,
-    targetDisplay: "0.17天"
+    targetDisplay: "0.17D"
   },
   {
     businessLink: "2.分货段",
@@ -333,7 +333,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 4,
     targetUnit: "hour",
     targetDays: 0.17,
-    targetDisplay: "0.17天"
+    targetDisplay: "0.17D"
   },
   {
     businessLink: "2.分货段",
@@ -344,7 +344,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 4,
     targetUnit: "hour",
     targetDays: 0.17,
-    targetDisplay: "0.17天"
+    targetDisplay: "0.17D"
   },
   {
     businessLink: "3.门店段",
@@ -355,7 +355,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 24,
     targetUnit: "hour",
     targetDays: 1,
-    targetDisplay: "1天"
+    targetDisplay: "1D"
   },
   {
     businessLink: "3.门店段",
@@ -366,7 +366,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 24,
     targetUnit: "hour",
     targetDays: 1,
-    targetDisplay: "1天"
+    targetDisplay: "1D"
   },
   {
     businessLink: "3.门店段",
@@ -377,7 +377,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 24,
     targetUnit: "hour",
     targetDays: 1,
-    targetDisplay: "1天"
+    targetDisplay: "1D"
   },
   {
     businessLink: "3.门店段",
@@ -388,7 +388,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 24,
     targetUnit: "hour",
     targetDays: 1,
-    targetDisplay: "1天"
+    targetDisplay: "1D"
   },
   {
     businessLink: "3.门店段",
@@ -399,7 +399,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 24,
     targetUnit: "hour",
     targetDays: 1,
-    targetDisplay: "1天"
+    targetDisplay: "1D"
   },
   {
     businessLink: "3.门店段",
@@ -410,7 +410,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 24,
     targetUnit: "hour",
     targetDays: 1,
-    targetDisplay: "1天"
+    targetDisplay: "1D"
   },
   {
     businessLink: "3.门店段",
@@ -421,7 +421,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 118,
     targetUnit: "hour",
     targetDays: 4.92,
-    targetDisplay: "4.92天"
+    targetDisplay: "4.92D"
   },
   {
     businessLink: "3.门店段",
@@ -432,7 +432,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 81,
     targetUnit: "hour",
     targetDays: 3.38,
-    targetDisplay: "3.38天"
+    targetDisplay: "3.38D"
   },
   {
     businessLink: "3.门店段",
@@ -443,7 +443,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 82,
     targetUnit: "hour",
     targetDays: 3.42,
-    targetDisplay: "3.42天"
+    targetDisplay: "3.42D"
   },
   {
     businessLink: "3.门店段",
@@ -454,7 +454,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 83,
     targetUnit: "hour",
     targetDays: 3.46,
-    targetDisplay: "3.46天"
+    targetDisplay: "3.46D"
   },
   {
     businessLink: "3.门店段",
@@ -465,7 +465,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 84,
     targetUnit: "hour",
     targetDays: 3.5,
-    targetDisplay: "3.5天"
+    targetDisplay: "3.5D"
   },
   {
     businessLink: "3.门店段",
@@ -476,7 +476,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 110,
     targetUnit: "hour",
     targetDays: 4.58,
-    targetDisplay: "4.58天"
+    targetDisplay: "4.58D"
   },
   {
     businessLink: "3.门店段",
@@ -487,7 +487,7 @@ export const targetValueRules: TargetValueRule[] = [
     targetValue: 85,
     targetUnit: "hour",
     targetDays: 3.54,
-    targetDisplay: "3.54天"
+    targetDisplay: "3.54D"
   }
 ];
 
@@ -515,10 +515,10 @@ function includesAny(value: string, keywords: string[]) {
 export function getDurationTargetDays(metricId: string, storeName?: string): number | null {
   const aliases = metricAliases[metricId] ?? [];
   const matched = durationTargetRules.find(rule => includesAny(rule.metric, aliases) && (!storeName || rule.store === storeName || rule.store === '全部'));
-  return matched?.targetDays ?? durationTargetRules[0]?.targetDays ?? null;
+  return matched?.targetDays ?? null;
 }
 
 export function getDurationTargetDisplay(metricId: string, storeName?: string): string {
   const days = getDurationTargetDays(metricId, storeName);
-  return days === null ? '-' : `${days}天`;
+  return days === null ? '-' : `${days}D`;
 }
