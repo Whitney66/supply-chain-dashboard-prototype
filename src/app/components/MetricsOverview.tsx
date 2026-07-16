@@ -845,8 +845,8 @@ export function MetricsOverview() {
               {/* 1.订货段 */}
               <tr className="hover:bg-gray-50">
                 <td rowSpan={5} className="px-3 py-2 font-medium text-gray-800 align-top">1.一盘货</td>
-                <td className="px-3 py-2 text-gray-700">1.1全链路订货平均时效（一盘货）</td>
-                <td className="px-3 py-2 text-center text-gray-400">-</td>
+                <td rowSpan={2} className="px-3 py-2 text-gray-700">1.1全链路订货平均时效（一盘货）</td>
+                <td className="px-3 py-2 text-center text-gray-700">香化</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">14D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">12.3D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">15.2D</td>
@@ -856,6 +856,15 @@ export function MetricsOverview() {
                 <td rowSpan={5} className="px-3 py-2 align-top bg-gray-50">
                   <img src={orderFlowImage} alt="一盘货流程图" className="max-w-xs h-auto" />
                 </td>
+              </tr>
+              <tr className="hover:bg-gray-50">
+                <td className="px-3 py-2 text-center text-gray-700">酒水</td>
+                <td className="px-3 py-2 text-center font-semibold text-gray-900">7D</td>
+                <td className="px-3 py-2 text-center text-gray-400">-</td>
+                <td className="px-3 py-2 text-center text-gray-400">-</td>
+                <td className="px-3 py-2 text-center text-gray-400">-</td>
+                <td className="px-3 py-2 text-center text-gray-400">-</td>
+                <td className="px-3 py-2 text-center text-gray-400">-</td>
               </tr>
               
               <tr className="hover:bg-gray-50">
