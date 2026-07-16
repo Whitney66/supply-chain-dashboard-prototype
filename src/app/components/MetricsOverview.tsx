@@ -914,27 +914,18 @@ export function MetricsOverview() {
                 <>
               {/* 1.订货段 */}
               <tr className="hover:bg-gray-50">
-                <td rowSpan={8} className="px-3 py-2 font-medium text-gray-800 align-top">1.一盘货</td>
-                <td rowSpan={2} className="px-3 py-2 text-gray-700">1.1全链路订货平均时效（一盘货）</td>
-                <td className="px-3 py-2 text-center text-gray-700">香化</td>
+                <td rowSpan={6} className="px-3 py-2 font-medium text-gray-800 align-top">1.一盘货</td>
+                <td className="px-3 py-2 text-gray-700">1.1全链路订货平均时效（一盘货）</td>
+                <td className="px-3 py-2 text-center text-gray-400">-</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">14D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">12.3D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">15.2D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">86.7%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">88.2%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">90.1%</td>
-                <td rowSpan={7} className="px-3 py-2 align-top bg-gray-50">
+                <td rowSpan={6} className="px-3 py-2 align-top bg-gray-50">
                   <img src={orderFlowImage} alt="一盘货流程图" className="max-w-xs h-auto" />
                 </td>
-              </tr>
-              <tr className="hover:bg-gray-50">
-                <td className="px-3 py-2 text-center text-gray-700">酒水</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">7D</td>
-                <td className="px-3 py-2 text-center text-gray-400">-</td>
-                <td className="px-3 py-2 text-center text-gray-400">-</td>
-                <td className="px-3 py-2 text-center text-gray-400">-</td>
-                <td className="px-3 py-2 text-center text-gray-400">-</td>
-                <td className="px-3 py-2 text-center text-gray-400">-</td>
               </tr>
               
               <tr className="hover:bg-gray-50">
@@ -958,8 +949,8 @@ export function MetricsOverview() {
               </tr>
               
               <tr className="hover:bg-gray-50">
-                <td rowSpan={2} className="px-3 py-2 text-gray-700">1.3提货至海综保平均时效</td>
-                <td className="px-3 py-2 text-center text-gray-700">香化</td>
+                <td className="px-3 py-2 text-gray-700">1.3提货至海综保平均时效</td>
+                <td className="px-3 py-2 text-center text-gray-400">-</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.5D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.6D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">3.9D</td>
@@ -967,34 +958,16 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">85.3%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">87.1%</td>
               </tr>
-              <tr className="hover:bg-gray-50">
-                <td className="px-3 py-2 text-center text-gray-700">酒水</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">2.5D</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">2.9D</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">4.1D</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">80.8%</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">83.6%</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">85.4%</td>
-              </tr>
               
               <tr className="hover:bg-gray-50">
-                <td rowSpan={2} className="px-3 py-2 text-gray-700">1.4仓库入库平均时效</td>
-                <td className="px-3 py-2 text-center text-gray-700">香化</td>
+                <td className="px-3 py-2 text-gray-700">1.4仓库入库平均时效</td>
+                <td className="px-3 py-2 text-center text-gray-400">-</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">0.33D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">1.8D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.5D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">89.5%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">91.2%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">92.8%</td>
-              </tr>
-              <tr className="hover:bg-gray-50">
-                <td className="px-3 py-2 text-center text-gray-700">酒水</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">0.17D</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">2.1D</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">3.2D</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">87.8%</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">89.6%</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">91.3%</td>
               </tr>
               
               <tr className="hover:bg-gray-50">
@@ -1019,7 +992,7 @@ export function MetricsOverview() {
                 <>
               {/* 2.分货段 */}
               <tr className="hover:bg-gray-50">
-                <td rowSpan={9} className="px-3 py-2 font-medium text-gray-800 align-top">1.一盘货-门店监管仓</td>
+                <td rowSpan={7} className="px-3 py-2 font-medium text-gray-800 align-top">1.一盘货-门店监管仓</td>
                 <td rowSpan={2} className="px-3 py-2 text-gray-700">1.1全链路分货平均时效</td>
                 <td className="px-3 py-2 text-center text-gray-700">香化</td>
                 <td className="px-3 py-2 text-center text-gray-400">-</td>
@@ -1028,7 +1001,7 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">79.8%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">82.3%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">82.3%</td>
-                <td rowSpan={9} className="px-3 py-2 align-top bg-gray-50">
+                <td rowSpan={7} className="px-3 py-2 align-top bg-gray-50">
                   <img src={distributionFlowImage} alt="分货段流程图" className="max-w-xs h-auto" />
                 </td>
               </tr>
@@ -1043,8 +1016,8 @@ export function MetricsOverview() {
               </tr>
 
               <tr className="hover:bg-gray-50">
-                <td rowSpan={2} className="px-3 py-2 text-gray-700">1.2仓库出库平均时效</td>
-                <td className="px-3 py-2 text-center text-gray-700">香化</td>
+                <td className="px-3 py-2 text-gray-700">1.2仓库出库平均时效</td>
+                <td className="px-3 py-2 text-center text-gray-400">-</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">7D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">8.9D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">11.2D</td>
@@ -1052,34 +1025,16 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">93.8%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">94.6%</td>
               </tr>
-              <tr className="hover:bg-gray-50">
-                <td className="px-3 py-2 text-center text-gray-700">酒水</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">12D</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">9.5D</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">12.3D</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">90.1%</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">91.8%</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">92.4%</td>
-              </tr>
 
               <tr className="hover:bg-gray-50">
-                <td rowSpan={2} className="px-3 py-2 text-gray-700">1.3二线通关平均时效</td>
-                <td className="px-3 py-2 text-center text-gray-700">香化</td>
+                <td className="px-3 py-2 text-gray-700">1.3二线通关平均时效</td>
+                <td className="px-3 py-2 text-center text-gray-400">-</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">0.13D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">1.9D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.8D</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">88.6%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">90.2%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">91.0%</td>
-              </tr>
-              <tr className="hover:bg-gray-50">
-                <td className="px-3 py-2 text-center text-gray-700">酒水</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">0.29D</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">2.2D</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">3.1D</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">85.4%</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">87.8%</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">88.6%</td>
               </tr>
 
               <tr className="hover:bg-gray-50">
