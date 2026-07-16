@@ -829,7 +829,7 @@ export function MetricsOverview() {
         </h3>
         
         {/* Tab切换 */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="sticky top-0 z-30 flex items-center justify-between mb-4 bg-white py-2 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setOrderDeliveryTab('order')}
@@ -883,9 +883,9 @@ export function MetricsOverview() {
           </button>
         </div>
         
-        <div className="overflow-x-auto custom-scrollbar">
+        <div className="max-h-[560px] overflow-auto custom-scrollbar rounded-md border border-gray-100">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 sticky top-0">
+            <thead className="sticky top-0 z-20 bg-gray-50 shadow-sm">
               <tr>
                 <th className="px-3 py-2 text-left font-bold text-gray-900 border-b border-gray-200 min-w-[140px] whitespace-nowrap">业务节点</th>
                 <th className="px-3 py-2 text-left font-bold text-gray-900 border-b border-gray-200 min-w-[200px] whitespace-nowrap">具体指标</th>
