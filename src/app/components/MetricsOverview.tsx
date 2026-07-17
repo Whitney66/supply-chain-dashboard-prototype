@@ -272,9 +272,9 @@ export function MetricsOverview() {
             </div>
           </div>
         </h3>
-        <div className="overflow-visible">
+        <div className="max-h-[640px] overflow-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 sticky top-0">
+            <thead className="bg-gray-50 sticky top-0 z-20 shadow-sm">
               <tr>
                 <th className="px-3 py-2 text-left font-bold text-gray-900 border-b border-gray-200">指标名称</th>
                 <th className="px-3 py-2 text-center font-bold text-gray-900 border-b border-gray-200 w-16">品类</th>
@@ -572,7 +572,7 @@ export function MetricsOverview() {
                   </div>
                 </td>
                 <td className="px-3 py-2 text-center text-gray-400 text-xs">-</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">4.0D</td>
+                <td className="px-3 py-2 text-center text-gray-400">-</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">4.8D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">71.2%</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">4.6D</td>
@@ -595,7 +595,7 @@ export function MetricsOverview() {
                   </div>
                 </td>
                 <td className="px-3 py-2 text-center text-gray-400 text-xs">-</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">5.0D</td>
+                <td className="px-3 py-2 text-center text-gray-400">-</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">5.7D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">75.8%</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">5.9D</td>
@@ -618,7 +618,7 @@ export function MetricsOverview() {
                   </div>
                 </td>
                 <td className="px-3 py-2 text-center text-gray-400 text-xs">-</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">1.5D</td>
+                <td className="px-3 py-2 text-center text-gray-400">-</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">1.9D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">88.4%</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.0D</td>
@@ -641,7 +641,7 @@ export function MetricsOverview() {
                   </div>
                 </td>
                 <td className="px-3 py-2 text-center text-gray-400 text-xs">-</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">1.5D</td>
+                <td className="px-3 py-2 text-center text-gray-400">-</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.0D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">86.1%</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.1D</td>
@@ -664,7 +664,7 @@ export function MetricsOverview() {
                   </div>
                 </td>
                 <td className="px-3 py-2 text-center text-gray-400 text-xs">-</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">5.0D</td>
+                <td className="px-3 py-2 text-center text-gray-400">-</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">5.6D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">83.9%</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">5.9D</td>
@@ -687,7 +687,7 @@ export function MetricsOverview() {
                   </div>
                 </td>
                 <td className="px-3 py-2 text-center text-gray-400 text-xs">-</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">3.0D</td>
+                <td className="px-3 py-2 text-center text-gray-400">-</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">0.17D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">91.5%</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">3.4D</td>
@@ -710,7 +710,7 @@ export function MetricsOverview() {
                   </div>
                 </td>
                 <td className="px-3 py-2 text-center text-gray-400 text-xs">-</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">6.0D</td>
+                <td className="px-3 py-2 text-center text-gray-400">-</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">6.8D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">79.1%</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">6.5D</td>
@@ -733,7 +733,7 @@ export function MetricsOverview() {
                   </div>
                 </td>
                 <td className="px-3 py-2 text-center text-gray-400 text-xs">-</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">6.5D</td>
+                <td className="px-3 py-2 text-center text-gray-400">-</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">7.3D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">81.5%</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">7.7D</td>
@@ -756,7 +756,7 @@ export function MetricsOverview() {
                   </div>
                 </td>
                 <td className="px-3 py-2 text-center text-gray-400 text-xs">-</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">4.0D</td>
+                <td className="px-3 py-2 text-center text-gray-400">-</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">4.5D</td>
                 <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">84.4%</span></td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">4.6D</td>

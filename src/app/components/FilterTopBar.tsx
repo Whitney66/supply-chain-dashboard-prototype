@@ -45,7 +45,7 @@ function DimensionDropdown({
   onRoleChange,
 }: {
   label: string;
-  items: { id: string; name: string }[];
+  items: { id: string; name: string; shopNo?: string }[];
   selected: string[];
   onSelectionChange: (ids: string[]) => void;
   role: RoleType;
@@ -54,6 +54,8 @@ function DimensionDropdown({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const ref = useRef<HTMLDivElement>(null);
+  const getItemLabel = (item: { name: string; shopNo?: string }) =>
+    label === '仓库' && item.shopNo ? `【${item.shopNo}】${item.name}` : item.name;
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -63,7 +65,8 @@ function DimensionDropdown({
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const filtered = items.filter((i) => i.name.toLowerCase().includes(query.toLowerCase()));
+  const normalizedQuery = query.toLowerCase();
+  const filtered = items.filter((i) => getItemLabel(i).toLowerCase().includes(normalizedQuery));
   const allSelected = filtered.length > 0 && filtered.every((i) => selected.includes(i.id));
 
   const toggleAll = () => {
@@ -136,7 +139,7 @@ function DimensionDropdown({
                     className="w-4 h-4 text-blue-600 accent-blue-600 rounded"
                   />
                   <span className={`text-sm ${selected.includes(item.id) ? 'text-blue-700 font-medium' : 'text-gray-700'}`}>
-                    {item.name}
+                    {getItemLabel(item)}
                   </span>
                 </label>
               ))}
