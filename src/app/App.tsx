@@ -4,6 +4,7 @@ import { FilterTopBar } from "@/app/components/FilterTopBar";
 import { IndicatorOverview } from "@/app/components/IndicatorOverview";
 import { IndicatorDetail } from "@/app/components/IndicatorDetail";
 import { Settings } from "@/app/components/Settings";
+import { PageGuideCard } from "@/app/components/PageGuideCard";
 import { ErrorBoundary } from "@/app/components/ErrorBoundary";
 import type { ViewType, FilterState } from "@/app/types";
 
@@ -116,6 +117,10 @@ function App() {
           {/* 内容区 */}
           <div className="px-6 pb-6">
             <div className="bg-white border border-gray-200 rounded-b-lg rounded-tr-lg p-6 min-h-[400px]">
+
+              {(currentView === "detail" || currentView === "settings") && (
+                <PageGuideCard page={currentView === "detail" ? "detail" : "exception"} />
+              )}
 
               {/* 指标明细页额外筛选条件 */}
               {currentView === "detail" && (
