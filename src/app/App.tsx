@@ -52,9 +52,10 @@ function App() {
   const today = new Date();
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
+  const startOfYear = new Date(yesterday.getFullYear(), 0, 1);
 
   const [filters, setFilters] = useState<FilterState>({
-    startDate: yesterday,
+    startDate: startOfYear,
     endDate: yesterday,
     showStoreFilter: false,
     showWarehouseFilter: false,

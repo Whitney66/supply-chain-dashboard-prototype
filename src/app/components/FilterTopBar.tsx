@@ -276,7 +276,7 @@ export function FilterTopBar({ filters, onFiltersChange }: FilterTopBarProps) {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const reset: FilterState = {
-      startDate: yesterday,
+      startDate: new Date(yesterday.getFullYear(), 0, 1),
       endDate: yesterday,
       showStoreFilter: false,
       showWarehouseFilter: false,
