@@ -1116,23 +1116,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   </th>
                 )}
                 {!options?.hideIndicatorColumn && <th className="px-2 py-1.5 text-left font-bold text-gray-700 border-r border-gray-200 min-w-[140px] whitespace-nowrap">
-                  <div className="flex items-center gap-1.5 relative group">
-                    <span>指标</span>
-                    <div className="relative cursor-help">
-                      <Info className="w-3.5 h-3.5 text-gray-400" />
-                      <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-blue-600 text-white text-[8px] font-bold rounded-full flex items-center justify-center">6</span>
-                    </div>
-                    <div className="absolute left-0 top-full mt-2 w-96 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 whitespace-normal">
-                      <div className="font-semibold mb-2">批注⑥</div>
-                      <div className="text-gray-300 space-y-1.5">
-                        <div>需求标注：</div>
-                        <div>1、大于10天的订单数量：指的是所选时间范围内，时效大于目标值10天对应的订单总数。</div>
-                        <div>2、大于14天的订单总数：指的是所选时间范围内，时效大于目标值14天对应的订单总数。</div>
-                        <div>3、10天订单达标率：指的是所选时间范围内，满足时效目标值为10天的订单数量/所选时间范围内的订单总数。</div>
-                        <div>4、14天订单达标率：指的是所选时间范围内，满足时效目标值为14天的订单数量/所选时间范围内的订单总数。</div>
-                      </div>
-                    </div>
-                  </div>
+                  指标
                 </th>}
                 <th className="px-2 py-1.5 text-center font-bold text-gray-700 border-r border-gray-200 min-w-[65px] whitespace-nowrap">
                   <div className="flex items-center justify-center gap-1.5 relative group">
