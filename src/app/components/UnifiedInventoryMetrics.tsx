@@ -1064,6 +1064,11 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
         rate10Days: { monthlyData: number[]; weeklyData: number[] };
         rate14Days: { monthlyData: number[]; weeklyData: number[] };
       };
+    },
+    options?: {
+      alcoholThreshold?: string;
+      cosmeticsThreshold?: string;
+      hideIndicatorColumn?: boolean;
     }
   ) => {
     const labels = getTimeLabels();
@@ -1077,13 +1082,20 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
       return avg > 0 ? (isRate ? `${avg.toFixed(2)}%` : avg.toFixed(2)) : '-';
     };
     
-    const subItems = [
+    const defaultSubItems = [
       { name: '大于10天的订单数量', key: 'over10Days' },
       { name: '大于14天的订单数量', key: 'over14Days' },
       { name: '订单总数', key: 'totalOrders' },
       { name: '10天订单达标率', key: 'rate10Days' },
       { name: '14天订单达标率', key: 'rate14Days' },
     ];
+    const getSubItems = (threshold?: string) => threshold ? [
+      { name: `大于${threshold}D的订单数量`, key: 'over10Days' },
+      { name: '订单总数', key: 'totalOrders' },
+      { name: '达标率', key: 'rate10Days' },
+    ] : defaultSubItems;
+    const alcoholSubItems = getSubItems(options?.alcoholThreshold);
+    const cosmeticsSubItems = getSubItems(options?.cosmeticsThreshold);
 
     // 判断是否显示品类列：默认（未选择）或选择两个品类时显示
     const showCategoryColumn = !selectedCategories || selectedCategories.length === 0 || selectedCategories.length === 2;
@@ -1103,7 +1115,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                     品类
                   </th>
                 )}
-                <th className="px-2 py-1.5 text-left font-bold text-gray-700 border-r border-gray-200 min-w-[140px] whitespace-nowrap">
+                {!options?.hideIndicatorColumn && <th className="px-2 py-1.5 text-left font-bold text-gray-700 border-r border-gray-200 min-w-[140px] whitespace-nowrap">
                   <div className="flex items-center gap-1.5 relative group">
                     <span>指标</span>
                     <div className="relative cursor-help">
@@ -1121,7 +1133,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                       </div>
                     </div>
                   </div>
-                </th>
+                </th>}
                 <th className="px-2 py-1.5 text-center font-bold text-gray-700 border-r border-gray-200 min-w-[65px] whitespace-nowrap">
                   <div className="flex items-center justify-center gap-1.5 relative group">
                     <span>均值天数</span>
@@ -1156,7 +1168,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
             </thead>
             <tbody>
               {/* 酒水品类 */}
-              {shouldShowAlcohol && subItems.map((item, rowIndex) => {
+              {shouldShowAlcohol && alcoholSubItems.map((item, rowIndex) => {
                 const dataKey = item.key as keyof typeof categoryData.alcohol;
                 const data = timeDimension === 'monthly' 
                   ? categoryData.alcohol[dataKey].monthlyData 
@@ -1166,15 +1178,15 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <tr key={`liquor-${rowIndex}`} className="border-t border-gray-200 hover:bg-gray-50">
                     {showCategoryColumn && rowIndex === 0 && (
                       <td 
-                        rowSpan={subItems.length} 
+                        rowSpan={alcoholSubItems.length} 
                         className="px-2 py-1.5 text-gray-700 border-r border-gray-200 align-middle font-medium bg-blue-50"
                       >
                         酒水
                       </td>
                     )}
-                    <td className="px-2 py-1.5 text-gray-700 border-r border-gray-200">
-                      {item.name}
-                    </td>
+                    {!options?.hideIndicatorColumn && (
+                      <td className="px-2 py-1.5 text-gray-700 border-r border-gray-200">{item.name}</td>
+                    )}
                     <td className="px-2 py-1.5 text-center text-gray-700 border-r border-gray-200">
                       -
                     </td>
@@ -1201,7 +1213,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                 );
               })}
               {/* 香化品类 */}
-              {shouldShowCosmetics && subItems.map((item, rowIndex) => {
+              {shouldShowCosmetics && cosmeticsSubItems.map((item, rowIndex) => {
                 const dataKey = item.key as keyof typeof categoryData.cosmetics;
                 const data = timeDimension === 'monthly' 
                   ? categoryData.cosmetics[dataKey].monthlyData 
@@ -1211,15 +1223,15 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <tr key={`cosmetics-${rowIndex}`} className="border-t border-gray-200 hover:bg-gray-50">
                     {showCategoryColumn && rowIndex === 0 && (
                       <td 
-                        rowSpan={subItems.length} 
+                        rowSpan={cosmeticsSubItems.length} 
                         className="px-2 py-1.5 text-gray-700 border-r border-gray-200 align-middle font-medium bg-green-50"
                       >
                         香化
                       </td>
                     )}
-                    <td className="px-2 py-1.5 text-gray-700 border-r border-gray-200">
-                      {item.name}
-                    </td>
+                    {!options?.hideIndicatorColumn && (
+                      <td className="px-2 py-1.5 text-gray-700 border-r border-gray-200">{item.name}</td>
+                    )}
                     <td className="px-2 py-1.5 text-center text-gray-700 border-r border-gray-200">
                       -
                     </td>
@@ -2131,7 +2143,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
             <div className="ml-3">
               {renderMetricTableWithCategory(
                 '入库时效达标率', 
-                inboundTableDataByCategory[dimension]
+                inboundTableDataByCategory[dimension],
+                { alcoholThreshold: '0.17', cosmeticsThreshold: '0.33' }
               )}
             </div>
           </div>
@@ -2745,7 +2758,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
             <div className="ml-3">
               {renderMetricTableWithCategory(
                 '全链路分货平均时效', 
-                distributionFullChainTableDataByCategory[dimension]
+                distributionFullChainTableDataByCategory[dimension],
+                { hideIndicatorColumn: true }
               )}
             </div>
           </div>
@@ -2929,7 +2943,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
             <div className="ml-3">
               {renderMetricTableWithCategory(
                 '仓库出库平均时效', 
-                outboundTableDataByCategory[dimension]
+                outboundTableDataByCategory[dimension],
+                { alcoholThreshold: '0.5', cosmeticsThreshold: '0.875' }
               )}
             </div>
           </div>
