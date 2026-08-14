@@ -99,39 +99,56 @@ export function OtherMetricsModule({ tableHeaderClass, tableCellClass, tableCell
     { store: '[6921] 博鳌店', values: [2, 1, 3, 0, 2, 4, 1, 3, 0, 2, 1, 3, 1] },
   ];
 
-  // 定义标页数据
+  const withOverall = (rows: { store: string; values: number[] }[]) => {
+    const overallValues = rows[0].values.map((_, index) => {
+      const average = rows.reduce((sum, row) => sum + row.values[index], 0) / rows.length;
+      return Number(average.toFixed(2));
+    });
+
+    return [
+      { store: '整体', values: overallValues },
+      ...rows.map(row => ({
+        ...row,
+        store: row.store.replace(/^\[\d+\]\s*/, '')
+          .replace('海口兰机场店', '海口美兰机场店')
+          .replace('海口日月', '海口日月店'),
+      })),
+    ];
+  };
+
+  // 定义标签页数据
   const tabs = [
     {
       id: 0,
       title: '调拨满足率',
       metrics: [
-        { name: 'TOP300调拨满足率', unit: '%', data: top300Data },
-        { name: '非TOP300香化调拨满足率', unit: '%', data: top300CosmeticsData },
+        { name: 'TOP300调拨满足率', unit: '%', data: withOverall(top300Data) },
+        { name: '非TOP300香化调拨满足率', unit: '%', data: withOverall(top300CosmeticsData) },
       ]
     },
     {
       id: 1,
       title: '准确率',
       metrics: [
-        { name: '库存准确率', unit: '%', data: inventoryAccuracyData },
-        { name: '效期准确率', unit: '%', data: expiryAccuracyData },
+        { name: '库存准确率', unit: '%', data: withOverall(inventoryAccuracyData) },
+        { name: '效期准确率', unit: '%', data: withOverall(expiryAccuracyData) },
       ]
     },
     {
       id: 2,
       title: '邮寄情况',
       metrics: [
-        { name: '邮寄遗失率', unit: '%', data: mailLossRateData },
-        { name: '邮寄破损率', unit: '%', data: mailDamageRateData },
+        { name: '邮寄遗失率', unit: '%', data: withOverall(mailLossRateData) },
+        { name: '邮寄破损率', unit: '%', data: withOverall(mailDamageRateData) },
       ]
     },
     {
       id: 3,
       title: '客诉情况',
       metrics: [
-        { name: '快递有责客诉率', unit: '%', data: expressComplaintRateData },
-        { name: '物流有责客诉率', unit: '%', data: logisticsComplaintRateData },
-        { name: '中免物流舆情投诉量', unit: '件', data: publicOpinionCountData },
+        { name: '快递有责客诉率', unit: '%', data: withOverall(expressComplaintRateData) },
+        { name: '物流有责客诉率', unit: '%', data: withOverall(logisticsComplaintRateData) },
+        { name: '中免物流舆情投诉量', unit: '件', data: withOverall(publicOpinionCountData) },
       ]
     }
   ];
