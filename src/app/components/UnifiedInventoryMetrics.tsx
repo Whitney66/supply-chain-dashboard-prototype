@@ -67,28 +67,34 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
   };
 
   // 月度列与销售日期联动：同年显示月份，跨年显示完整年月。
-  const getTimeLabels = () => {
-    if (timeDimension === 'weekly') {
-      return ['第1周', '第2周', '第3周', '第4周', '第5周', '第6周', '第7周', '第8周'];
-    }
-
+  const getMonthRange = () => {
     const rangeStart = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
     const rangeEnd = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
     const isCrossYear = rangeStart.getFullYear() !== rangeEnd.getFullYear();
-    const labels: string[] = [];
+    const months: { label: string; monthIndex: number }[] = [];
     const cursor = new Date(rangeStart);
 
     while (cursor <= rangeEnd) {
-      labels.push(
-        isCrossYear
+      months.push({
+        label: isCrossYear
           ? `${cursor.getFullYear()}年${cursor.getMonth() + 1}月`
-          : `${cursor.getMonth() + 1}月`
-      );
+          : `${cursor.getMonth() + 1}月`,
+        monthIndex: cursor.getMonth(),
+      });
       cursor.setMonth(cursor.getMonth() + 1);
     }
 
-    return labels;
+    return months;
   };
+
+  const getTimeLabels = () => timeDimension === 'monthly'
+    ? getMonthRange().map(month => month.label)
+    : ['第1周', '第2周', '第3周', '第4周', '第5周', '第6周', '第7周', '第8周'];
+
+  const getDataForDimension = (data: number[], activeDimension: TimeDimension = timeDimension) =>
+    activeDimension === 'monthly'
+      ? getMonthRange().map(month => data[month.monthIndex] ?? 0)
+      : data.slice(0, 8);
 
   // 导出数据为CSV
   const handleExport = () => {
@@ -852,9 +858,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
   const currentOutbound = outboundData[dimension];
   const currentCustoms = customsClearanceData[dimension];
 
-  const getDisplayData = (data: number[]) => {
-    return timeDimension === 'monthly' ? data : data.slice(0, 8);
-  };
+  const getDisplayData = (data: number[]) => getDataForDimension(data);
 
   // 格式化数值为两位小数
   const formatNumber = (value: any): string => {
@@ -866,7 +870,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
     const labels = activeTimeDimension === 'monthly'
       ? getTimeLabels()
       : ['第1周', '第2周', '第3周', '第4周', '第5周', '第6周', '第7周', '第8周'];
-    const displayData = activeTimeDimension === 'monthly' ? metric.monthlyData : metric.monthlyData.slice(0, 8);
+    const displayData = getDataForDimension(activeTimeDimension === 'monthly' ? metric.monthlyData : metric.weeklyData, activeTimeDimension);
     
     // 计算月度均值（仅针对月度数据，跳过索引11）
     const calculateMonthlyAverage = (data: number[]) => {
@@ -931,9 +935,9 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                         {calculateMonthlyAverage(item.data)}
                       </td>
                     )}
-                    {(activeTimeDimension === 'monthly' ? item.data : item.data.slice(0, 8)).map((value, index) => {
+                    {getDataForDimension(item.data, activeTimeDimension).map((value, index) => {
                       // 跳过"12月"列（索引11）
-                          const currentData = activeTimeDimension === 'monthly' ? item.data : item.data.slice(0, 8);
+                          const currentData = getDataForDimension(item.data, activeTimeDimension);
                       return (
                         <td
                           key={index}
@@ -959,9 +963,9 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                         {calculateMonthlyAverage(item.data)}
                       </td>
                     )}
-                    {(activeTimeDimension === 'monthly' ? item.data : item.data.slice(0, 8)).map((value, index) => {
+                    {getDataForDimension(item.data, activeTimeDimension).map((value, index) => {
                       // 跳过\"12月\"列（索引11）
-                          const currentData = activeTimeDimension === 'monthly' ? item.data : item.data.slice(0, 8);
+                          const currentData = getDataForDimension(item.data, activeTimeDimension);
                       return (
                         <td
                           key={index}
@@ -1825,7 +1829,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                               const data = timeDimension === 'monthly' 
                                 ? [8.2, 8.9, 10.2, 11.0, 9.5, 9.9, 9.2, 10.5, 11.2, 9.8, 9.4, null, 9.0]
                                 : [9.9, 9.5, 10.8, 10.2, 9.6, 10.0, 9.3, 9.7];
-                              return data.map((value, index) => {
+                              return getDisplayData(data).map((value, index) => {
                                               return (
                                   <td key={index} className="px-4 py-3 text-center whitespace-nowrap text-gray-900">
                                     {value ? Number(value).toFixed(2) : '-'}
@@ -1854,7 +1858,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                               const data = timeDimension === 'monthly' 
                                 ? [8.5, 9.2, 10.5, 11.3, 9.8, 10.2, 9.5, 10.8, 11.5, 10.1, 9.7, null, 9.3]
                                 : [10.2, 9.8, 11.1, 10.5, 9.9, 10.3, 9.6, 10.0];
-                              return data.map((value, index) => {
+                              return getDisplayData(data).map((value, index) => {
                                               return (
                                   <td key={index} className="px-4 py-3 text-center whitespace-nowrap text-gray-900">
                                     {value ? Number(value).toFixed(2) : '-'}
@@ -1895,7 +1899,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                               const data = timeDimension === 'monthly'
                                 ? [8.8, 9.5, 10.8, 11.6, 10.1, 10.5, 9.8, 11.1, 11.8, 10.4, 10.0, null, 9.6]
                                 : [10.5, 10.1, 11.4, 10.8, 10.2, 10.6, 9.9, 10.3];
-                              return data.map((value, index) => {
+                              return getDisplayData(data).map((value, index) => {
                                               return (
                                   <td key={index} className="px-4 py-3 text-center whitespace-nowrap text-gray-900">
                                     {value ? Number(value).toFixed(2) : '-'}
@@ -1924,7 +1928,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                               const data = timeDimension === 'monthly'
                                 ? [9.1, 9.8, 11.1, 11.9, 10.4, 10.8, 10.1, 11.4, 12.1, 10.7, 10.3, null, 9.9]
                                 : [10.8, 10.4, 11.7, 11.1, 10.5, 10.9, 10.2, 10.6];
-                              return data.map((value, index) => {
+                              return getDisplayData(data).map((value, index) => {
                                               return (
                                   <td key={index} className="px-4 py-3 text-center whitespace-nowrap text-gray-900">
                                     {value ? Number(value).toFixed(2) : '-'}
@@ -2507,15 +2511,49 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
               <div className="w-1 h-4 bg-blue-600 rounded"></div>
               全链路入库平均时效（直发）
             </h4>
-            <div className="ml-3">
-              {renderMetricTable({
-                name: '全链路入库平均时效（直发）',
-                avgDays: 4.6,
-                trend: -0.2,
-                monthlyData: [4.8, 4.6, 4.7, 4.5, 4.4, 4.6, 4.3, 4.5, 4.7, 4.4, 4.2, 4.6],
-                weeklyData: [4.6, 4.5, 4.4, 4.7, 4.3, 4.5, 4.2, 4.4],
-              })}
-            </div>
+            {(() => {
+              const alcohol = [4.4, 4.2, 4.5, 4.3, 4.1, 4.4, 4.0, 4.2, 4.5, 4.3, 4.1, 4.2];
+              const cosmetics = [5.1, 4.9, 5.2, 5.0, 4.8, 5.1, 4.7, 4.9, 5.2, 5.0, 4.8, 4.9];
+              const labels = getTimeLabels();
+              const alcoholDisplay = getDisplayData(alcohol);
+              const cosmeticsDisplay = getDisplayData(cosmetics);
+              const chartData = labels.map((label, index) => ({
+                name: label,
+                酒水票数: alcoholDisplay[index],
+                香化票数: cosmeticsDisplay[index],
+                酒水件数: alcoholDisplay[index] == null ? undefined : alcoholDisplay[index] + 0.3,
+                香化件数: cosmeticsDisplay[index] == null ? undefined : cosmeticsDisplay[index] + 0.3,
+              }));
+
+              return (
+                <>
+                  <div className="bg-gradient-to-br from-blue-50 to-white rounded-lg border border-blue-100 p-4 mb-4 ml-3 max-w-full overflow-hidden">
+                    <div className="text-xs text-gray-600 mb-2">酒水 vs 香化（双轴：票数 | 件数）</div>
+                    <ResponsiveContainer width="100%" height={280} minHeight={280}>
+                      <LineChart data={chartData} margin={{ top: 10, right: 40, left: 10, bottom: 10 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#6b7280" />
+                        <YAxis yAxisId="left" tick={{ fontSize: 11 }} stroke="#6b7280" domain={[0, 8]} />
+                        <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} stroke="#6b7280" domain={[0, 8]} />
+                        <Tooltip formatter={(value: any) => [`${Number(value).toFixed(2)}天`, '']} />
+                        <Legend wrapperStyle={{ fontSize: '12px' }} iconType="line" />
+                        <ReferenceLine yAxisId="left" y={5} stroke="#f59e0b" strokeDasharray="5 5" label={{ value: '5D', fill: '#f59e0b', fontSize: 10 }} />
+                        {shouldShowCategory('酒水') && <Line yAxisId="left" type="linear" dataKey="酒水票数" stroke="#3b82f6" strokeWidth={2} dot={{ r: 4 }} />}
+                        {shouldShowCategory('香化') && <Line yAxisId="left" type="linear" dataKey="香化票数" stroke="#10b981" strokeWidth={2} dot={{ r: 4 }} />}
+                        {shouldShowCategory('酒水') && <Line yAxisId="right" type="linear" dataKey="酒水件数" stroke="#f59e0b" strokeWidth={2} dot={{ r: 4 }} />}
+                        {shouldShowCategory('香化') && <Line yAxisId="right" type="linear" dataKey="香化件数" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 4 }} />}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="ml-3">
+                    {renderMetricTable({ name: '全链路入库平均时效（直发）', avgDays: 4.6, trend: -0.2, monthlyData: alcohol, weeklyData: alcohol.slice(0, 8) }, [
+                      ...(shouldShowCategory('酒水') ? [{ name: '酒水', data: alcohol }] : []),
+                      ...(shouldShowCategory('香化') ? [{ name: '香化', data: cosmetics }] : []),
+                    ])}
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
         )}
