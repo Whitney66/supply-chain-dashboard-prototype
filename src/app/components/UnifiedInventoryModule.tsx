@@ -7,11 +7,13 @@ type TimeDimension = 'monthly' | 'weekly';
 
 interface UnifiedInventoryModuleProps {
   selectedCategories: string[];
+  startDate: Date;
+  endDate: Date;
   businessSegment?: 'all' | 'ordering' | 'distribution' | 'store' | 'other';
   indicatorType?: 'all' | 'timeliness' | 'quality' | 'efficiency' | 'cost' | 'planning';
 }
 
-export function UnifiedInventoryModule({ selectedCategories, businessSegment = 'all', indicatorType = 'all' }: UnifiedInventoryModuleProps) {
+export function UnifiedInventoryModule({ selectedCategories, startDate, endDate, businessSegment = 'all', indicatorType = 'all' }: UnifiedInventoryModuleProps) {
   const [dimension, setDimension] = useState<'tickets' | 'pieces'>('tickets');
   const [timeDimension, setTimeDimension] = useState<'monthly' | 'weekly'>('monthly');
 
@@ -24,6 +26,8 @@ export function UnifiedInventoryModule({ selectedCategories, businessSegment = '
         setDimension={setDimension}
         setTimeDimension={setTimeDimension}
         selectedCategories={selectedCategories}
+        startDate={startDate}
+        endDate={endDate}
         businessSegment={businessSegment}
         indicatorType={indicatorType}
       />

@@ -22,11 +22,13 @@ interface UnifiedInventoryMetricsProps {
   setDimension: (dimension: Dimension) => void;
   setTimeDimension: (timeDimension: TimeDimension) => void;
   selectedCategories: string[];
+  startDate: Date;
+  endDate: Date;
   businessSegment?: 'all' | 'ordering' | 'distribution' | 'store' | 'other';
   indicatorType?: 'all' | 'timeliness' | 'quality' | 'efficiency' | 'cost' | 'planning';
 }
 
-export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension, setTimeDimension, selectedCategories, businessSegment = 'all', indicatorType = 'all' }: UnifiedInventoryMetricsProps) {
+export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension, setTimeDimension, selectedCategories, startDate, endDate, businessSegment = 'all', indicatorType = 'all' }: UnifiedInventoryMetricsProps) {
   const [deliveryTab, setDeliveryTab] = useState<'timeliness' | 'stores'>('timeliness');
   const [storeSegmentTab, setStoreSegmentTab] = useState<'transfer' | 'fullChain' | 'inOut'>('transfer');
   const [highlightChartArea, setHighlightChartArea] = useState(false);
@@ -64,12 +66,28 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
     return selectedCategories.includes(categoryKey);
   };
 
-  // 获取时间标签
+  // 月度列与销售日期联动：同年显示月份，跨年显示完整年月。
   const getTimeLabels = () => {
-    if (timeDimension === 'monthly') {
-      return ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月', '12月'];
+    if (timeDimension === 'weekly') {
+      return ['第1周', '第2周', '第3周', '第4周', '第5周', '第6周', '第7周', '第8周'];
     }
-    return ['第1周', '第2周', '第3周', '第4周', '第5周', '第6周', '第7周', '第8周'];
+
+    const rangeStart = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+    const rangeEnd = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+    const isCrossYear = rangeStart.getFullYear() !== rangeEnd.getFullYear();
+    const labels: string[] = [];
+    const cursor = new Date(rangeStart);
+
+    while (cursor <= rangeEnd) {
+      labels.push(
+        isCrossYear
+          ? `${cursor.getFullYear()}年${cursor.getMonth() + 1}月`
+          : `${cursor.getMonth() + 1}月`
+      );
+      cursor.setMonth(cursor.getMonth() + 1);
+    }
+
+    return labels;
   };
 
   // 导出数据为CSV
@@ -100,7 +118,6 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
     
     // 添加时间列标签（跳过12月）
     timeLabels.forEach((label, index) => {
-      if (timeDimension === 'monthly' && index === 11) return;
       headers.push(label);
     });
     
@@ -595,12 +612,12 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
         {
           warehouse: '',
           stores: [
-            { name: '【6868】三亚海棠湾店', data: [85, 87, 86, 88, 90, 89, 91, 88, 87, 89, 90, 0, 88] },
-            { name: '【7048】新海港店', data: [82, 84, 83, 85, 87, 86, 88, 85, 84, 86, 87, 0, 85] },
-            { name: '【7016】三亚凤凰机场店', data: [88, 90, 89, 91, 93, 92, 94, 91, 90, 92, 93, 0, 91] },
-            { name: '【6132】海口美兰机场店', data: [90, 92, 91, 93, 95, 94, 96, 93, 92, 94, 95, 0, 93] },
-            { name: '【6922】海口日月店', data: [87, 89, 88, 90, 92, 91, 93, 90, 89, 91, 92, 0, 90] },
-            { name: '【6921】博鳌店', data: [93, 95, 94, 96, 98, 97, 99, 96, 95, 97, 98, 0, 96] },
+            { name: '三亚海棠湾店', data: [85, 87, 86, 88, 90, 89, 91, 88, 87, 89, 90, 0, 88] },
+            { name: '新海港店', data: [82, 84, 83, 85, 87, 86, 88, 85, 84, 86, 87, 0, 85] },
+            { name: '三亚凤凰机场店', data: [88, 90, 89, 91, 93, 92, 94, 91, 90, 92, 93, 0, 91] },
+            { name: '海口美兰机场店', data: [90, 92, 91, 93, 95, 94, 96, 93, 92, 94, 95, 0, 93] },
+            { name: '海口日月店', data: [87, 89, 88, 90, 92, 91, 93, 90, 89, 91, 92, 0, 90] },
+            { name: '博鳌店', data: [93, 95, 94, 96, 98, 97, 99, 96, 95, 97, 98, 0, 96] },
           ],
         },
       ],
@@ -608,12 +625,12 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
         {
           warehouse: '',
           stores: [
-            { name: '【6868】三亚海棠湾店', data: [83, 85, 84, 86, 88, 87, 89, 86, 85, 87, 88, 0, 86] },
-            { name: '【7048】新海港店', data: [80, 82, 81, 83, 85, 84, 86, 83, 82, 84, 85, 0, 83] },
-            { name: '【7016】三亚凤凰机场店', data: [86, 88, 87, 89, 91, 90, 92, 89, 88, 90, 91, 0, 89] },
-            { name: '【6132】海口美兰机场店', data: [88, 90, 89, 91, 93, 92, 94, 91, 90, 92, 93, 0, 91] },
-            { name: '【6922】海口日月店', data: [85, 87, 86, 88, 90, 89, 91, 88, 87, 89, 90, 0, 88] },
-            { name: '【6921】博鳌店', data: [91, 93, 92, 94, 96, 95, 97, 94, 93, 95, 96, 0, 94] },
+            { name: '三亚海棠湾店', data: [83, 85, 84, 86, 88, 87, 89, 86, 85, 87, 88, 0, 86] },
+            { name: '新海港店', data: [80, 82, 81, 83, 85, 84, 86, 83, 82, 84, 85, 0, 83] },
+            { name: '三亚凤凰机场店', data: [86, 88, 87, 89, 91, 90, 92, 89, 88, 90, 91, 0, 89] },
+            { name: '海口美兰机场店', data: [88, 90, 89, 91, 93, 92, 94, 91, 90, 92, 93, 0, 91] },
+            { name: '海口日月店', data: [85, 87, 86, 88, 90, 89, 91, 88, 87, 89, 90, 0, 88] },
+            { name: '博鳌店', data: [91, 93, 92, 94, 96, 95, 97, 94, 93, 95, 96, 0, 94] },
           ],
         },
       ],
@@ -623,12 +640,12 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
         {
           warehouse: '',
           stores: [
-            { name: '【6868】三亚海棠湾店', data: [87, 89, 88, 90, 92, 91, 93, 90, 89, 91, 92, 0, 90] },
-            { name: '【7048】新海港店', data: [84, 86, 85, 87, 89, 88, 90, 87, 86, 88, 89, 0, 87] },
+            { name: '三亚海棠湾店', data: [87, 89, 88, 90, 92, 91, 93, 90, 89, 91, 92, 0, 90] },
+            { name: '新海港店', data: [84, 86, 85, 87, 89, 88, 90, 87, 86, 88, 89, 0, 87] },
             { name: '【7016】三亚��凰机场店', data: [90, 92, 91, 93, 95, 94, 96, 93, 92, 94, 95, 0, 93] },
-            { name: '【6132】海口美兰机场店', data: [92, 94, 93, 95, 97, 96, 98, 95, 94, 96, 97, 0, 95] },
-            { name: '【6922】海口日月店', data: [89, 91, 90, 92, 94, 93, 95, 92, 91, 93, 94, 0, 92] },
-            { name: '【6921】博鳌店', data: [95, 97, 96, 98, 100, 99, 100, 98, 97, 99, 100, 0, 98] },
+            { name: '海口美兰机场店', data: [92, 94, 93, 95, 97, 96, 98, 95, 94, 96, 97, 0, 95] },
+            { name: '海口日月店', data: [89, 91, 90, 92, 94, 93, 95, 92, 91, 93, 94, 0, 92] },
+            { name: '博鳌店', data: [95, 97, 96, 98, 100, 99, 100, 98, 97, 99, 100, 0, 98] },
           ],
         },
       ],
@@ -636,12 +653,12 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
         {
           warehouse: '',
           stores: [
-            { name: '【6868】三亚海棠湾店', data: [85, 87, 86, 88, 90, 89, 91, 88, 87, 89, 90, 0, 88] },
-            { name: '【7048】新海港店', data: [82, 84, 83, 85, 87, 86, 88, 85, 84, 86, 87, 0, 85] },
-            { name: '【7016】三亚凤凰机场店', data: [88, 90, 89, 91, 93, 92, 94, 91, 90, 92, 93, 0, 91] },
-            { name: '【6132】海口美兰机场店', data: [90, 92, 91, 93, 95, 94, 96, 93, 92, 94, 95, 0, 93] },
-            { name: '【6922】海口日月店', data: [87, 89, 88, 90, 92, 91, 93, 90, 89, 91, 92, 0, 90] },
-            { name: '【6921】博鳌店', data: [93, 95, 94, 96, 98, 97, 99, 96, 95, 97, 98, 0, 96] },
+            { name: '三亚海棠湾店', data: [85, 87, 86, 88, 90, 89, 91, 88, 87, 89, 90, 0, 88] },
+            { name: '新海港店', data: [82, 84, 83, 85, 87, 86, 88, 85, 84, 86, 87, 0, 85] },
+            { name: '三亚凤凰机场店', data: [88, 90, 89, 91, 93, 92, 94, 91, 90, 92, 93, 0, 91] },
+            { name: '海口美兰机场店', data: [90, 92, 91, 93, 95, 94, 96, 93, 92, 94, 95, 0, 93] },
+            { name: '海口日月店', data: [87, 89, 88, 90, 92, 91, 93, 90, 89, 91, 92, 0, 90] },
+            { name: '博鳌店', data: [93, 95, 94, 96, 98, 97, 99, 96, 95, 97, 98, 0, 96] },
           ],
         },
       ],
@@ -681,149 +698,155 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
     data: number[];
   }
 
-  const deliveryStoreMetrics: {
+  const deliveryStoreMetricsBase: {
     [key: string]: StoreMetricData[];
   } = {
     pickupToShelf: [
-      { name: '【6868】三亚海棠湾店', data: [2.3, 2.1, 2.4, 2.2, 2.0, 2.1, 1.9, 2.2, 2.3, 2.1, 2.0, 0, 2.1] },
-      { name: '【7048】新海港店', data: [2.5, 2.4, 2.6, 2.5, 2.3, 2.4, 2.2, 2.5, 2.6, 2.4, 2.3, 0, 2.4] },
-      { name: '【7016】三亚凤凰机场店', data: [2.4, 2.3, 2.5, 2.4, 2.2, 2.3, 2.1, 2.4, 2.5, 2.3, 2.2, 0, 2.3] },
-      { name: '【6132】海口美兰机场店', data: [1.8, 1.9, 1.7, 1.8, 1.6, 1.7, 1.5, 1.8, 1.9, 1.7, 1.6, 0, 1.7] },
-      { name: '【6922】海口日月店', data: [2.0, 2.1, 1.9, 2.0, 1.8, 1.9, 1.7, 2.0, 2.1, 1.9, 1.8, 0, 1.9] },
-      { name: '【6921】博鳌店', data: [2.2, 2.0, 2.3, 2.1, 1.9, 2.0, 1.8, 2.1, 2.2, 2.0, 1.9, 0, 2.0] },
+      { name: '三亚海棠湾店', data: [2.3, 2.1, 2.4, 2.2, 2.0, 2.1, 1.9, 2.2, 2.3, 2.1, 2.0, 0, 2.1] },
+      { name: '新海港店', data: [2.5, 2.4, 2.6, 2.5, 2.3, 2.4, 2.2, 2.5, 2.6, 2.4, 2.3, 0, 2.4] },
+      { name: '三亚凤凰机场店', data: [2.4, 2.3, 2.5, 2.4, 2.2, 2.3, 2.1, 2.4, 2.5, 2.3, 2.2, 0, 2.3] },
+      { name: '海口美兰机场店', data: [1.8, 1.9, 1.7, 1.8, 1.6, 1.7, 1.5, 1.8, 1.9, 1.7, 1.6, 0, 1.7] },
+      { name: '海口日月店', data: [2.0, 2.1, 1.9, 2.0, 1.8, 1.9, 1.7, 2.0, 2.1, 1.9, 1.8, 0, 1.9] },
+      { name: '博鳌店', data: [2.2, 2.0, 2.3, 2.1, 1.9, 2.0, 1.8, 2.1, 2.2, 2.0, 1.9, 0, 2.0] },
     ],
     averagePickup: [
-      { name: '【6868】三亚海棠湾店', data: [1.5, 1.4, 1.6, 1.5, 1.3, 1.4, 1.2, 1.5, 1.6, 1.4, 1.3, 0, 1.4] },
-      { name: '【7048】新海港店', data: [1.8, 1.7, 1.9, 1.8, 1.6, 1.7, 1.5, 1.8, 1.9, 1.7, 1.6, 0, 1.7] },
-      { name: '【7016】三亚凤凰机场店', data: [1.7, 1.6, 1.8, 1.7, 1.5, 1.6, 1.4, 1.7, 1.8, 1.6, 1.5, 0, 1.6] },
-      { name: '【6132】海口美兰机场店', data: [1.2, 1.1, 1.3, 1.2, 1.0, 1.1, 0.9, 1.2, 1.3, 1.1, 1.0, 0, 1.1] },
-      { name: '【6922】海口日月店', data: [1.3, 1.4, 1.2, 1.3, 1.1, 1.2, 1.0, 1.3, 1.4, 1.2, 1.1, 0, 1.2] },
-      { name: '【6921】博鳌店', data: [1.6, 1.5, 1.7, 1.6, 1.4, 1.5, 1.3, 1.6, 1.7, 1.5, 1.4, 0, 1.5] },
+      { name: '三亚海棠湾店', data: [1.5, 1.4, 1.6, 1.5, 1.3, 1.4, 1.2, 1.5, 1.6, 1.4, 1.3, 0, 1.4] },
+      { name: '新海港店', data: [1.8, 1.7, 1.9, 1.8, 1.6, 1.7, 1.5, 1.8, 1.9, 1.7, 1.6, 0, 1.7] },
+      { name: '三亚凤凰机场店', data: [1.7, 1.6, 1.8, 1.7, 1.5, 1.6, 1.4, 1.7, 1.8, 1.6, 1.5, 0, 1.6] },
+      { name: '海口美兰机场店', data: [1.2, 1.1, 1.3, 1.2, 1.0, 1.1, 0.9, 1.2, 1.3, 1.1, 1.0, 0, 1.1] },
+      { name: '海口日月店', data: [1.3, 1.4, 1.2, 1.3, 1.1, 1.2, 1.0, 1.3, 1.4, 1.2, 1.1, 0, 1.2] },
+      { name: '博鳌店', data: [1.6, 1.5, 1.7, 1.6, 1.4, 1.5, 1.3, 1.6, 1.7, 1.5, 1.4, 0, 1.5] },
     ],
     vehicleQualificationRate: [
-      { name: '【6868】三亚海棠湾店', data: [95, 96, 94, 95, 97, 96, 98, 95, 94, 96, 97, 0, 96] },
-      { name: '【7048】新海港店', data: [92, 93, 91, 92, 94, 93, 95, 92, 91, 93, 94, 0, 93] },
-      { name: '【7016】三亚凤凰机场店', data: [93, 94, 92, 93, 95, 94, 96, 93, 92, 94, 95, 0, 94] },
-      { name: '【6132】海口美兰机场店', data: [98, 99, 97, 98, 100, 99, 100, 98, 97, 99, 100, 0, 99] },
-      { name: '【6922】海口日月店', data: [96, 97, 95, 96, 98, 97, 99, 96, 95, 97, 98, 0, 97] },
-      { name: '【6921】博鳌店', data: [94, 95, 93, 94, 96, 95, 97, 94, 93, 95, 96, 0, 95] },
+      { name: '三亚海棠湾店', data: [95, 96, 94, 95, 97, 96, 98, 95, 94, 96, 97, 0, 96] },
+      { name: '新海港店', data: [92, 93, 91, 92, 94, 93, 95, 92, 91, 93, 94, 0, 93] },
+      { name: '三亚凤凰机场店', data: [93, 94, 92, 93, 95, 94, 96, 93, 92, 94, 95, 0, 94] },
+      { name: '海口美兰机场店', data: [98, 99, 97, 98, 100, 99, 100, 98, 97, 99, 100, 0, 99] },
+      { name: '海口日月店', data: [96, 97, 95, 96, 98, 97, 99, 96, 95, 97, 98, 0, 97] },
+      { name: '博鳌店', data: [94, 95, 93, 94, 96, 95, 97, 94, 93, 95, 96, 0, 95] },
     ],
     dailyTransferQualificationRate: [
-      { name: '【6868】三亚海棠湾店', data: [89, 90, 88, 89, 91, 90, 92, 89, 88, 90, 91, 0, 90] },
-      { name: '【7048】新海港店', data: [86, 87, 85, 86, 88, 87, 89, 86, 85, 87, 88, 0, 87] },
-      { name: '【7016】三亚凤凰机场店', data: [87, 88, 86, 87, 89, 88, 90, 87, 86, 88, 89, 0, 88] },
-      { name: '【6132】海口美兰机场店', data: [93, 94, 92, 93, 95, 94, 96, 93, 92, 94, 95, 0, 94] },
-      { name: '【6922】海口日月店', data: [91, 92, 90, 91, 93, 92, 94, 91, 90, 92, 93, 0, 92] },
-      { name: '【6921】博鳌店', data: [88, 89, 87, 88, 90, 89, 91, 88, 87, 89, 90, 0, 89] },
+      { name: '三亚海棠湾店', data: [89, 90, 88, 89, 91, 90, 92, 89, 88, 90, 91, 0, 90] },
+      { name: '新海港店', data: [86, 87, 85, 86, 88, 87, 89, 86, 85, 87, 88, 0, 87] },
+      { name: '三亚凤凰机场店', data: [87, 88, 86, 87, 89, 88, 90, 87, 86, 88, 89, 0, 88] },
+      { name: '海口美兰机场店', data: [93, 94, 92, 93, 95, 94, 96, 93, 92, 94, 95, 0, 94] },
+      { name: '海口日月店', data: [91, 92, 90, 91, 93, 92, 94, 91, 90, 92, 93, 0, 92] },
+      { name: '博鳌店', data: [88, 89, 87, 88, 90, 89, 91, 88, 87, 89, 90, 0, 89] },
     ],
     expressDeliveryRate: [
-      { name: '��6868】三亚海棠湾店', data: [92, 93, 91, 92, 94, 93, 95, 92, 91, 93, 94, 0, 93] },
-      { name: '【7048】新海港店', data: [89, 90, 88, 89, 91, 90, 92, 89, 88, 90, 91, 0, 90] },
-      { name: '【7016】三亚凤凰机场店', data: [90, 91, 89, 90, 92, 91, 93, 90, 89, 91, 92, 0, 91] },
-      { name: '【6132】海口美兰机场店', data: [95, 96, 94, 95, 97, 96, 98, 95, 94, 96, 97, 0, 96] },
-      { name: '【6922】海口日月店', data: [94, 95, 93, 94, 96, 95, 97, 94, 93, 95, 96, 0, 95] },
-      { name: '【6921】博鳌店', data: [91, 92, 90, 91, 93, 92, 94, 91, 90, 92, 93, 0, 92] },
+      { name: '三亚海棠湾店', data: [92, 93, 91, 92, 94, 93, 95, 92, 91, 93, 94, 0, 93] },
+      { name: '新海港店', data: [89, 90, 88, 89, 91, 90, 92, 89, 88, 90, 91, 0, 90] },
+      { name: '三亚凤凰机场店', data: [90, 91, 89, 90, 92, 91, 93, 90, 89, 91, 92, 0, 91] },
+      { name: '海口美兰机场店', data: [95, 96, 94, 95, 97, 96, 98, 95, 94, 96, 97, 0, 96] },
+      { name: '海口日月店', data: [94, 95, 93, 94, 96, 95, 97, 94, 93, 95, 96, 0, 95] },
+      { name: '博鳌店', data: [91, 92, 90, 91, 93, 92, 94, 91, 90, 92, 93, 0, 92] },
     ],
     transferFulfillmentRate: [
-      { name: '【6868������亚海棠湾店', data: [87, 88, 86, 87, 89, 88, 90, 87, 86, 88, 89, 0, 88] },
-      { name: '【7048】新海港店', data: [84, 85, 83, 84, 86, 85, 87, 84, 83, 85, 86, 0, 85] },
-      { name: '【7016】三亚凤凰机场店', data: [85, 86, 84, 85, 87, 86, 88, 85, 84, 86, 87, 0, 86] },
-      { name: '【6132】海口美兰机场店', data: [91, 92, 90, 91, 93, 92, 94, 91, 90, 92, 93, 0, 92] },
-      { name: '【6922】海口日月店', data: [89, 90, 88, 89, 91, 90, 92, 89, 88, 90, 91, 0, 90] },
-      { name: '【6921】博鳌店', data: [86, 87, 85, 86, 88, 87, 89, 86, 85, 87, 88, 0, 87] },
+      { name: '三亚海棠湾店', data: [87, 88, 86, 87, 89, 88, 90, 87, 86, 88, 89, 0, 88] },
+      { name: '新海港店', data: [84, 85, 83, 84, 86, 85, 87, 84, 83, 85, 86, 0, 85] },
+      { name: '三亚凤凰机场店', data: [85, 86, 84, 85, 87, 86, 88, 85, 84, 86, 87, 0, 86] },
+      { name: '海口美兰机场店', data: [91, 92, 90, 91, 93, 92, 94, 91, 90, 92, 93, 0, 92] },
+      { name: '海口日月店', data: [89, 90, 88, 89, 91, 90, 92, 89, 88, 90, 91, 0, 90] },
+      { name: '博鳌店', data: [86, 87, 85, 86, 88, 87, 89, 86, 85, 87, 88, 0, 87] },
     ],
   };
 
+  const unifiedInventoryStore: StoreMetricData = { name: '一盘货', data: [2.1, 2.0, 2.2, 2.1, 1.9, 2.0, 1.8, 2.1, 2.2, 2.0, 1.9, 0, 2.0] };
+  const withUnifiedInventory = (metrics: { [key: string]: StoreMetricData[] }) => Object.fromEntries(
+    Object.entries(metrics).map(([key, values]) => [key, [unifiedInventoryStore, ...values]])
+  );
+
   // 门店段新指标数据
-  const storeSegmentMetrics: {
+  const storeSegmentMetricsBase: {
     [key: string]: StoreMetricData[];
   } = {
     // Tab 1 - 调拨时效
     supervisoryToTransit: [
-      { name: '【6868】三亚海棠湾店', data: [3.2, 3.1, 3.3, 3.2, 3.0, 3.1, 2.9, 3.2, 3.3, 3.1, 3.0, 0, 3.1] },
-      { name: '【7048】新海港店', data: [3.5, 3.4, 3.6, 3.5, 3.3, 3.4, 3.2, 3.5, 3.6, 3.4, 3.3, 0, 3.4] },
-      { name: '【7016】三亚凤凰机场店', data: [3.4, 3.3, 3.5, 3.4, 3.2, 3.3, 3.1, 3.4, 3.5, 3.3, 3.2, 0, 3.3] },
-      { name: '【6132】海口美兰机场店', data: [2.8, 2.9, 2.7, 2.8, 2.6, 2.7, 2.5, 2.8, 2.9, 2.7, 2.6, 0, 2.7] },
-      { name: '【6922】海口日月店', data: [3.0, 3.1, 2.9, 3.0, 2.8, 2.9, 2.7, 3.0, 3.1, 2.9, 2.8, 0, 2.9] },
-      { name: '【6921】博鳌店', data: [3.3, 3.2, 3.4, 3.3, 3.1, 3.2, 3.0, 3.3, 3.4, 3.2, 3.1, 0, 3.2] },
+      { name: '三亚海棠湾店', data: [3.2, 3.1, 3.3, 3.2, 3.0, 3.1, 2.9, 3.2, 3.3, 3.1, 3.0, 0, 3.1] },
+      { name: '新海港店', data: [3.5, 3.4, 3.6, 3.5, 3.3, 3.4, 3.2, 3.5, 3.6, 3.4, 3.3, 0, 3.4] },
+      { name: '三亚凤凰机场店', data: [3.4, 3.3, 3.5, 3.4, 3.2, 3.3, 3.1, 3.4, 3.5, 3.3, 3.2, 0, 3.3] },
+      { name: '海口美兰机场店', data: [2.8, 2.9, 2.7, 2.8, 2.6, 2.7, 2.5, 2.8, 2.9, 2.7, 2.6, 0, 2.7] },
+      { name: '海口日月店', data: [3.0, 3.1, 2.9, 3.0, 2.8, 2.9, 2.7, 3.0, 3.1, 2.9, 2.8, 0, 2.9] },
+      { name: '博鳌店', data: [3.3, 3.2, 3.4, 3.3, 3.1, 3.2, 3.0, 3.3, 3.4, 3.2, 3.1, 0, 3.2] },
     ],
     transitToStore: [
-      { name: '【6868】三亚海棠湾店', data: [2.5, 2.4, 2.6, 2.5, 2.3, 2.4, 2.2, 2.5, 2.6, 2.4, 2.3, 0, 2.4] },
-      { name: '【7048】新海港店', data: [2.8, 2.7, 2.9, 2.8, 2.6, 2.7, 2.5, 2.8, 2.9, 2.7, 2.6, 0, 2.7] },
-      { name: '【7016】三亚凤凰机场店', data: [2.7, 2.6, 2.8, 2.7, 2.5, 2.6, 2.4, 2.7, 2.8, 2.6, 2.5, 0, 2.6] },
-      { name: '【6132】海口美兰机场店', data: [2.2, 2.1, 2.3, 2.2, 2.0, 2.1, 1.9, 2.2, 2.3, 2.1, 2.0, 0, 2.1] },
-      { name: '【6922】海口日月店', data: [2.4, 2.3, 2.5, 2.4, 2.2, 2.3, 2.1, 2.4, 2.5, 2.3, 2.2, 0, 2.3] },
-      { name: '【6921】博鳌店', data: [2.6, 2.5, 2.7, 2.6, 2.4, 2.5, 2.3, 2.6, 2.7, 2.5, 2.4, 0, 2.5] },
+      { name: '三亚海棠湾店', data: [2.5, 2.4, 2.6, 2.5, 2.3, 2.4, 2.2, 2.5, 2.6, 2.4, 2.3, 0, 2.4] },
+      { name: '新海港店', data: [2.8, 2.7, 2.9, 2.8, 2.6, 2.7, 2.5, 2.8, 2.9, 2.7, 2.6, 0, 2.7] },
+      { name: '三亚凤凰机场店', data: [2.7, 2.6, 2.8, 2.7, 2.5, 2.6, 2.4, 2.7, 2.8, 2.6, 2.5, 0, 2.6] },
+      { name: '海口美兰机场店', data: [2.2, 2.1, 2.3, 2.2, 2.0, 2.1, 1.9, 2.2, 2.3, 2.1, 2.0, 0, 2.1] },
+      { name: '海口日月店', data: [2.4, 2.3, 2.5, 2.4, 2.2, 2.3, 2.1, 2.4, 2.5, 2.3, 2.2, 0, 2.3] },
+      { name: '博鳌店', data: [2.6, 2.5, 2.7, 2.6, 2.4, 2.5, 2.3, 2.6, 2.7, 2.5, 2.4, 0, 2.5] },
     ],
     // Tab 2 - 全链路时效
     directFullChain: [
-      { name: '【6868】三亚海棠湾店', data: [5.8, 5.6, 6.0, 5.8, 5.4, 5.6, 5.2, 5.8, 6.0, 5.6, 5.4, 0, 5.6] },
-      { name: '【7048】新海港店', data: [6.2, 6.0, 6.4, 6.2, 5.8, 6.0, 5.6, 6.2, 6.4, 6.0, 5.8, 0, 6.0] },
-      { name: '【7016】三亚凤凰机场店', data: [6.0, 5.8, 6.2, 6.0, 5.6, 5.8, 5.4, 6.0, 6.2, 5.8, 5.6, 0, 5.8] },
-      { name: '【6132】海口美兰机场店', data: [5.2, 5.0, 5.4, 5.2, 4.8, 5.0, 4.6, 5.2, 5.4, 5.0, 4.8, 0, 5.0] },
-      { name: '【6922】海口日月店', data: [5.5, 5.3, 5.7, 5.5, 5.1, 5.3, 4.9, 5.5, 5.7, 5.3, 5.1, 0, 5.3] },
-      { name: '【6921】博鳌店', data: [5.9, 5.7, 6.1, 5.9, 5.5, 5.7, 5.3, 5.9, 6.1, 5.7, 5.5, 0, 5.7] },
+      { name: '三亚海棠湾店', data: [5.8, 5.6, 6.0, 5.8, 5.4, 5.6, 5.2, 5.8, 6.0, 5.6, 5.4, 0, 5.6] },
+      { name: '新海港店', data: [6.2, 6.0, 6.4, 6.2, 5.8, 6.0, 5.6, 6.2, 6.4, 6.0, 5.8, 0, 6.0] },
+      { name: '三亚凤凰机场店', data: [6.0, 5.8, 6.2, 6.0, 5.6, 5.8, 5.4, 6.0, 6.2, 5.8, 5.6, 0, 5.8] },
+      { name: '海口美兰机场店', data: [5.2, 5.0, 5.4, 5.2, 4.8, 5.0, 4.6, 5.2, 5.4, 5.0, 4.8, 0, 5.0] },
+      { name: '海口日月店', data: [5.5, 5.3, 5.7, 5.5, 5.1, 5.3, 4.9, 5.5, 5.7, 5.3, 5.1, 0, 5.3] },
+      { name: '博鳌店', data: [5.9, 5.7, 6.1, 5.9, 5.5, 5.7, 5.3, 5.9, 6.1, 5.7, 5.5, 0, 5.7] },
     ],
     mailFullChain: [
-      { name: '【6868】三亚海棠湾店', data: [4.5, 4.3, 4.7, 4.5, 4.1, 4.3, 3.9, 4.5, 4.7, 4.3, 4.1, 0, 4.3] },
-      { name: '【7048】新海港店', data: [4.8, 4.6, 5.0, 4.8, 4.4, 4.6, 4.2, 4.8, 5.0, 4.6, 4.4, 0, 4.6] },
-      { name: '【7016】三亚凤凰机场店', data: [4.7, 4.5, 4.9, 4.7, 4.3, 4.5, 4.1, 4.7, 4.9, 4.5, 4.3, 0, 4.5] },
-      { name: '【6132】海口美兰机场店', data: [4.0, 3.8, 4.2, 4.0, 3.6, 3.8, 3.4, 4.0, 4.2, 3.8, 3.6, 0, 3.8] },
-      { name: '【6922】海口日月店', data: [4.2, 4.0, 4.4, 4.2, 3.8, 4.0, 3.6, 4.2, 4.4, 4.0, 3.8, 0, 4.0] },
-      { name: '【6921】博鳌店', data: [4.6, 4.4, 4.8, 4.6, 4.2, 4.4, 4.0, 4.6, 4.8, 4.4, 4.2, 0, 4.4] },
+      { name: '三亚海棠湾店', data: [4.5, 4.3, 4.7, 4.5, 4.1, 4.3, 3.9, 4.5, 4.7, 4.3, 4.1, 0, 4.3] },
+      { name: '新海港店', data: [4.8, 4.6, 5.0, 4.8, 4.4, 4.6, 4.2, 4.8, 5.0, 4.6, 4.4, 0, 4.6] },
+      { name: '三亚凤凰机场店', data: [4.7, 4.5, 4.9, 4.7, 4.3, 4.5, 4.1, 4.7, 4.9, 4.5, 4.3, 0, 4.5] },
+      { name: '海口美兰机场店', data: [4.0, 3.8, 4.2, 4.0, 3.6, 3.8, 3.4, 4.0, 4.2, 3.8, 3.6, 0, 3.8] },
+      { name: '海口日月店', data: [4.2, 4.0, 4.4, 4.2, 3.8, 4.0, 3.6, 4.2, 4.4, 4.0, 3.8, 0, 4.0] },
+      { name: '博鳌店', data: [4.6, 4.4, 4.8, 4.6, 4.2, 4.4, 4.0, 4.6, 4.8, 4.4, 4.2, 0, 4.4] },
     ],
     pickupPointFullChain: [
-      { name: '【6868】三亚海棠湾店', data: [3.8, 3.6, 4.0, 3.8, 3.4, 3.6, 3.2, 3.8, 4.0, 3.6, 3.4, 0, 3.6] },
-      { name: '【7048】新海港店', data: [4.2, 4.0, 4.4, 4.2, 3.8, 4.0, 3.6, 4.2, 4.4, 4.0, 3.8, 0, 4.0] },
-      { name: '【7016】三亚凤凰机场店', data: [4.0, 3.8, 4.2, 4.0, 3.6, 3.8, 3.4, 4.0, 4.2, 3.8, 3.6, 0, 3.8] },
-      { name: '【6132】海口美兰机场店', data: [3.2, 3.0, 3.4, 3.2, 2.8, 3.0, 2.6, 3.2, 3.4, 3.0, 2.8, 0, 3.0] },
-      { name: '【6922】海口日月店', data: [3.5, 3.3, 3.7, 3.5, 3.1, 3.3, 2.9, 3.5, 3.7, 3.3, 3.1, 0, 3.3] },
-      { name: '【6921】博鳌店', data: [3.9, 3.7, 4.1, 3.9, 3.5, 3.7, 3.3, 3.9, 4.1, 3.7, 3.5, 0, 3.7] },
+      { name: '三亚海棠湾店', data: [3.8, 3.6, 4.0, 3.8, 3.4, 3.6, 3.2, 3.8, 4.0, 3.6, 3.4, 0, 3.6] },
+      { name: '新海港店', data: [4.2, 4.0, 4.4, 4.2, 3.8, 4.0, 3.6, 4.2, 4.4, 4.0, 3.8, 0, 4.0] },
+      { name: '三亚凤凰机场店', data: [4.0, 3.8, 4.2, 4.0, 3.6, 3.8, 3.4, 4.0, 4.2, 3.8, 3.6, 0, 3.8] },
+      { name: '海口美兰机场店', data: [3.2, 3.0, 3.4, 3.2, 2.8, 3.0, 2.6, 3.2, 3.4, 3.0, 2.8, 0, 3.0] },
+      { name: '海口日月店', data: [3.5, 3.3, 3.7, 3.5, 3.1, 3.3, 2.9, 3.5, 3.7, 3.3, 3.1, 0, 3.3] },
+      { name: '博鳌店', data: [3.9, 3.7, 4.1, 3.9, 3.5, 3.7, 3.3, 3.9, 4.1, 3.7, 3.5, 0, 3.7] },
     ],
     toReservedFullChain: [
-      { name: '【6868】三亚海棠湾店', data: [6.5, 6.3, 6.7, 6.5, 6.1, 6.3, 5.9, 6.5, 6.7, 6.3, 6.1, 0, 6.3] },
-      { name: '【7048】新海港店', data: [7.0, 6.8, 7.2, 7.0, 6.6, 6.8, 6.4, 7.0, 7.2, 6.8, 6.6, 0, 6.8] },
-      { name: '【7016】三亚凤凰机场店', data: [6.8, 6.6, 7.0, 6.8, 6.4, 6.6, 6.2, 6.8, 7.0, 6.6, 6.4, 0, 6.6] },
-      { name: '【6132】海口美兰机场店', data: [5.8, 5.6, 6.0, 5.8, 5.4, 5.6, 5.2, 5.8, 6.0, 5.6, 5.4, 0, 5.6] },
-      { name: '【6922】海口日月店', data: [6.2, 6.0, 6.4, 6.2, 5.8, 6.0, 5.6, 6.2, 6.4, 6.0, 5.8, 0, 6.0] },
-      { name: '【6921��博鳌店', data: [6.7, 6.5, 6.9, 6.7, 6.3, 6.5, 6.1, 6.7, 6.9, 6.5, 6.3, 0, 6.5] },
+      { name: '三亚海棠湾店', data: [6.5, 6.3, 6.7, 6.5, 6.1, 6.3, 5.9, 6.5, 6.7, 6.3, 6.1, 0, 6.3] },
+      { name: '新海港店', data: [7.0, 6.8, 7.2, 7.0, 6.6, 6.8, 6.4, 7.0, 7.2, 6.8, 6.6, 0, 6.8] },
+      { name: '三亚凤凰机场店', data: [6.8, 6.6, 7.0, 6.8, 6.4, 6.6, 6.2, 6.8, 7.0, 6.6, 6.4, 0, 6.6] },
+      { name: '海口美兰机场店', data: [5.8, 5.6, 6.0, 5.8, 5.4, 5.6, 5.2, 5.8, 6.0, 5.6, 5.4, 0, 5.6] },
+      { name: '海口日月店', data: [6.2, 6.0, 6.4, 6.2, 5.8, 6.0, 5.6, 6.2, 6.4, 6.0, 5.8, 0, 6.0] },
+      { name: '博鳌店', data: [6.7, 6.5, 6.9, 6.7, 6.3, 6.5, 6.1, 6.7, 6.9, 6.5, 6.3, 0, 6.5] },
     ],
     reservedMailFullChain: [
-      { name: '【6868】三亚海棠湾店', data: [5.2, 5.0, 5.4, 5.2, 4.8, 5.0, 4.6, 5.2, 5.4, 5.0, 4.8, 0, 5.0] },
-      { name: '【7048】新海港店', data: [5.6, 5.4, 5.8, 5.6, 5.2, 5.4, 5.0, 5.6, 5.8, 5.4, 5.2, 0, 5.4] },
-      { name: '【7016】三亚凤凰机场店', data: [5.4, 5.2, 5.6, 5.4, 5.0, 5.2, 4.8, 5.4, 5.6, 5.2, 5.0, 0, 5.2] },
-      { name: '【6132】海口美兰机场店', data: [4.5, 4.3, 4.7, 4.5, 4.1, 4.3, 3.9, 4.5, 4.7, 4.3, 4.1, 0, 4.3] },
-      { name: '【6922】海口日月店', data: [4.8, 4.6, 5.0, 4.8, 4.4, 4.6, 4.2, 4.8, 5.0, 4.6, 4.4, 0, 4.6] },
-      { name: '【6921】博鳌店', data: [5.3, 5.1, 5.5, 5.3, 4.9, 5.1, 4.7, 5.3, 5.5, 5.1, 4.9, 0, 5.1] },
+      { name: '三亚海棠湾店', data: [5.2, 5.0, 5.4, 5.2, 4.8, 5.0, 4.6, 5.2, 5.4, 5.0, 4.8, 0, 5.0] },
+      { name: '新海港店', data: [5.6, 5.4, 5.8, 5.6, 5.2, 5.4, 5.0, 5.6, 5.8, 5.4, 5.2, 0, 5.4] },
+      { name: '三亚凤凰机场店', data: [5.4, 5.2, 5.6, 5.4, 5.0, 5.2, 4.8, 5.4, 5.6, 5.2, 5.0, 0, 5.2] },
+      { name: '海口美兰机场店', data: [4.5, 4.3, 4.7, 4.5, 4.1, 4.3, 3.9, 4.5, 4.7, 4.3, 4.1, 0, 4.3] },
+      { name: '海口日月店', data: [4.8, 4.6, 5.0, 4.8, 4.4, 4.6, 4.2, 4.8, 5.0, 4.6, 4.4, 0, 4.6] },
+      { name: '博鳌店', data: [5.3, 5.1, 5.5, 5.3, 4.9, 5.1, 4.7, 5.3, 5.5, 5.1, 4.9, 0, 5.1] },
     ],
     reservedDeliveryFullChain: [
-      { name: '【6868】三亚海棠湾店', data: [4.8, 4.6, 5.0, 4.8, 4.4, 4.6, 4.2, 4.8, 5.0, 4.6, 4.4, 0, 4.6] },
-      { name: '【7048】新海港店', data: [5.2, 5.0, 5.4, 5.2, 4.8, 5.0, 4.6, 5.2, 5.4, 5.0, 4.8, 0, 5.0] },
-      { name: '【7016】三亚凤凰机场店', data: [5.0, 4.8, 5.2, 5.0, 4.6, 4.8, 4.4, 5.0, 5.2, 4.8, 4.6, 0, 4.8] },
-      { name: '【6132】海口美兰机场店', data: [4.2, 4.0, 4.4, 4.2, 3.8, 4.0, 3.6, 4.2, 4.4, 4.0, 3.8, 0, 4.0] },
-      { name: '【6922】海口日月店', data: [4.5, 4.3, 4.7, 4.5, 4.1, 4.3, 3.9, 4.5, 4.7, 4.3, 4.1, 0, 4.3] },
-      { name: '【6921】博鳌店', data: [4.9, 4.7, 5.1, 4.9, 4.5, 4.7, 4.3, 4.9, 5.1, 4.7, 4.5, 0, 4.7] },
+      { name: '三亚海棠湾店', data: [4.8, 4.6, 5.0, 4.8, 4.4, 4.6, 4.2, 4.8, 5.0, 4.6, 4.4, 0, 4.6] },
+      { name: '新海港店', data: [5.2, 5.0, 5.4, 5.2, 4.8, 5.0, 4.6, 5.2, 5.4, 5.0, 4.8, 0, 5.0] },
+      { name: '三亚凤凰机场店', data: [5.0, 4.8, 5.2, 5.0, 4.6, 4.8, 4.4, 5.0, 5.2, 4.8, 4.6, 0, 4.8] },
+      { name: '海口美兰机场店', data: [4.2, 4.0, 4.4, 4.2, 3.8, 4.0, 3.6, 4.2, 4.4, 4.0, 3.8, 0, 4.0] },
+      { name: '海口日月店', data: [4.5, 4.3, 4.7, 4.5, 4.1, 4.3, 3.9, 4.5, 4.7, 4.3, 4.1, 0, 4.3] },
+      { name: '博鳌店', data: [4.9, 4.7, 5.1, 4.9, 4.5, 4.7, 4.3, 4.9, 5.1, 4.7, 4.5, 0, 4.7] },
     ],
     // Tab 3 - 出入库时效
     storeToSortingInbound: [
-      { name: '【6868】三亚海棠湾店', data: [1.8, 1.7, 1.9, 1.8, 1.6, 1.7, 1.5, 1.8, 1.9, 1.7, 1.6, 0, 1.7] },
-      { name: '【7048】新海港店', data: [2.0, 1.9, 2.1, 2.0, 1.8, 1.9, 1.7, 2.0, 2.1, 1.9, 1.8, 0, 1.9] },
-      { name: '【7016】三亚凤凰机场店', data: [1.9, 1.8, 2.0, 1.9, 1.7, 1.8, 1.6, 1.9, 2.0, 1.8, 1.7, 0, 1.8] },
-      { name: '【6132】海口美兰机场店', data: [1.5, 1.4, 1.6, 1.5, 1.3, 1.4, 1.2, 1.5, 1.6, 1.4, 1.3, 0, 1.4] },
-      { name: '【6922】海口日月店', data: [1.6, 1.5, 1.7, 1.6, 1.4, 1.5, 1.3, 1.6, 1.7, 1.5, 1.4, 0, 1.5] },
-      { name: '【6921】博鳌店', data: [1.8, 1.7, 1.9, 1.8, 1.6, 1.7, 1.5, 1.8, 1.9, 1.7, 1.6, 0, 1.7] },
+      { name: '三亚海棠湾店', data: [1.8, 1.7, 1.9, 1.8, 1.6, 1.7, 1.5, 1.8, 1.9, 1.7, 1.6, 0, 1.7] },
+      { name: '新海港店', data: [2.0, 1.9, 2.1, 2.0, 1.8, 1.9, 1.7, 2.0, 2.1, 1.9, 1.8, 0, 1.9] },
+      { name: '三亚凤凰机场店', data: [1.9, 1.8, 2.0, 1.9, 1.7, 1.8, 1.6, 1.9, 2.0, 1.8, 1.7, 0, 1.8] },
+      { name: '海口美兰机场店', data: [1.5, 1.4, 1.6, 1.5, 1.3, 1.4, 1.2, 1.5, 1.6, 1.4, 1.3, 0, 1.4] },
+      { name: '海口日月店', data: [1.6, 1.5, 1.7, 1.6, 1.4, 1.5, 1.3, 1.6, 1.7, 1.5, 1.4, 0, 1.5] },
+      { name: '博鳌店', data: [1.8, 1.7, 1.9, 1.8, 1.6, 1.7, 1.5, 1.8, 1.9, 1.7, 1.6, 0, 1.7] },
     ],
     deliveryOutbound: [
-      { name: '【6868】三亚海棠湾店', data: [1.2, 1.1, 1.3, 1.2, 1.0, 1.1, 0.9, 1.2, 1.3, 1.1, 1.0, 0, 1.1] },
-      { name: '【7048】新海港店', data: [1.4, 1.3, 1.5, 1.4, 1.2, 1.3, 1.1, 1.4, 1.5, 1.3, 1.2, 0, 1.3] },
-      { name: '【7016】三亚凤凰机场店', data: [1.3, 1.2, 1.4, 1.3, 1.1, 1.2, 1.0, 1.3, 1.4, 1.2, 1.1, 0, 1.2] },
-      { name: '【6132】海口美兰机场店', data: [1.0, 0.9, 1.1, 1.0, 0.8, 0.9, 0.7, 1.0, 1.1, 0.9, 0.8, 0, 0.9] },
-      { name: '【6922】海口日月店', data: [1.1, 1.0, 1.2, 1.1, 0.9, 1.0, 0.8, 1.1, 1.2, 1.0, 0.9, 0, 1.0] },
-      { name: '【6921】博鳌店', data: [1.3, 1.2, 1.4, 1.3, 1.1, 1.2, 1.0, 1.3, 1.4, 1.2, 1.1, 0, 1.2] },
+      { name: '三亚海棠湾店', data: [1.2, 1.1, 1.3, 1.2, 1.0, 1.1, 0.9, 1.2, 1.3, 1.1, 1.0, 0, 1.1] },
+      { name: '新海港店', data: [1.4, 1.3, 1.5, 1.4, 1.2, 1.3, 1.1, 1.4, 1.5, 1.3, 1.2, 0, 1.3] },
+      { name: '三亚凤凰机场店', data: [1.3, 1.2, 1.4, 1.3, 1.1, 1.2, 1.0, 1.3, 1.4, 1.2, 1.1, 0, 1.2] },
+      { name: '海口美兰机场店', data: [1.0, 0.9, 1.1, 1.0, 0.8, 0.9, 0.7, 1.0, 1.1, 0.9, 0.8, 0, 0.9] },
+      { name: '海口日月店', data: [1.1, 1.0, 1.2, 1.1, 0.9, 1.0, 0.8, 1.1, 1.2, 1.0, 0.9, 0, 1.0] },
+      { name: '博鳌店', data: [1.3, 1.2, 1.4, 1.3, 1.1, 1.2, 1.0, 1.3, 1.4, 1.2, 1.1, 0, 1.2] },
     ],
   };
 
-  const monthLabels = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月', '12月平均'];
+  const deliveryStoreMetrics = withUnifiedInventory(deliveryStoreMetricsBase);
+  const storeSegmentMetrics = withUnifiedInventory(storeSegmentMetricsBase);
 
   const currentInbound = inboundData[dimension];
   const currentOutbound = outboundData[dimension];
@@ -840,15 +863,15 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
 
   const renderMetricTable = (metric: MetricData, subItems?: { name: string; data: number[] }[], customTimeDimension?: TimeDimension) => {
     const activeTimeDimension = customTimeDimension || timeDimension;
-    const labels = activeTimeDimension === 'monthly' 
-      ? ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月', '12月']
+    const labels = activeTimeDimension === 'monthly'
+      ? getTimeLabels()
       : ['第1周', '第2周', '第3周', '第4周', '第5周', '第6周', '第7周', '第8周'];
     const displayData = activeTimeDimension === 'monthly' ? metric.monthlyData : metric.monthlyData.slice(0, 8);
     
     // 计算月度均值（仅针对月度数据，跳过索引11）
     const calculateMonthlyAverage = (data: number[]) => {
       if (activeTimeDimension === 'weekly') return '-';
-      const validData = data.filter((_, index) => index !== 11 && data[index] > 0);
+      const validData = data.filter(value => value > 0);
       const sum = validData.reduce((acc, val) => acc + val, 0);
       return validData.length > 0 ? (sum / validData.length).toFixed(2) : '-';
     };
@@ -875,7 +898,6 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                 )}
                 {labels.map((label, index) => {
                   // 跳过"12月"列（索引11）
-                  if (activeTimeDimension === 'monthly' && index === 11) return null;
                   return (
                     <th
                       key={index}
@@ -911,8 +933,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                     )}
                     {(activeTimeDimension === 'monthly' ? item.data : item.data.slice(0, 8)).map((value, index) => {
                       // 跳过"12月"列（索引11）
-                      if (activeTimeDimension === 'monthly' && index === 11) return null;
-                      const currentData = activeTimeDimension === 'monthly' ? item.data : item.data.slice(0, 8);
+                          const currentData = activeTimeDimension === 'monthly' ? item.data : item.data.slice(0, 8);
                       return (
                         <td
                           key={index}
@@ -940,8 +961,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                     )}
                     {(activeTimeDimension === 'monthly' ? item.data : item.data.slice(0, 8)).map((value, index) => {
                       // 跳过\"12月\"列（索引11）
-                      if (activeTimeDimension === 'monthly' && index === 11) return null;
-                      const currentData = activeTimeDimension === 'monthly' ? item.data : item.data.slice(0, 8);
+                          const currentData = activeTimeDimension === 'monthly' ? item.data : item.data.slice(0, 8);
                       return (
                         <td
                           key={index}
@@ -975,8 +995,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   )}
                   {displayData.map((value, index) => {
                     // 跳过"12月"列（索引11）
-                    if (activeTimeDimension === 'monthly' && index === 11) return null;
-                    return (
+                      return (
                       <td
                         key={index}
                         className={`px-2 py-1.5 text-center text-gray-700 ${
@@ -1002,8 +1021,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   )}
                   {displayData.map((value, index) => {
                     // 跳过\"12月\"列（索引11）
-                    if (activeTimeDimension === 'monthly' && index === 11) return null;
-                    return (
+                      return (
                       <td
                         key={index}
                         className={`px-2 py-1.5 text-center text-gray-700 ${
@@ -1049,7 +1067,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
     // 计算月度均值（仅针对月度数据，跳过索引11）
     const calculateMonthlyAverage = (data: number[], isRate: boolean = false) => {
       if (timeDimension === 'weekly') return '-';
-      const validData = data.filter((_, index) => index !== 11 && data[index] > 0);
+      const validData = data.filter(value => value > 0);
       const sum = validData.reduce((acc, val) => acc + val, 0);
       const avg = validData.length > 0 ? sum / validData.length : 0;
       return avg > 0 ? (isRate ? `${avg.toFixed(2)}%` : avg.toFixed(2)) : '-';
@@ -1059,8 +1077,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
       { name: '大于10天的订单数量', key: 'over10Days' },
       { name: '大于14天的订单数量', key: 'over14Days' },
       { name: '订单总数', key: 'totalOrders' },
-      { name: '10天订单达成率', key: 'rate10Days' },
-      { name: '14天订单达成率', key: 'rate14Days' },
+      { name: '10天订单达标率', key: 'rate10Days' },
+      { name: '14天订单达标率', key: 'rate14Days' },
     ];
 
     // 判断是否显示品类列：默认（未选择）或选择两个品类时显示
@@ -1094,8 +1112,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                         <div>需求标注：</div>
                         <div>1、大于10天的订单数量：指的是所选时间范围内，时效大于目标值10天对应的订单总数。</div>
                         <div>2、大于14天的订单总数：指的是所选时间范围内，时效大于目标值14天对应的订单总数。</div>
-                        <div>3、10天订单达成率：指的是所选时间范围内，满足时效目标值为10天的订单数量/所选时间范围内的订单总数。</div>
-                        <div>4、14天订单达成率：指的是所选时间范围内，满足时效目标值为14天的订单数量/所选时间范围内的订单总数。</div>
+                        <div>3、10天订单达标率：指的是所选时间范围内，满足时效目标值为10天的订单数量/所选时间范围内的订单总数。</div>
+                        <div>4、14天订单达标率：指的是所选时间范围内，满足时效目标值为14天的订单数量/所选时间范围内的订单总数。</div>
                       </div>
                     </div>
                   </div>
@@ -1120,7 +1138,6 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                 )}
                 {labels.map((label, index) => {
                   // 跳过"12月"列��索引11）
-                  if (timeDimension === 'monthly' && index === 11) return null;
                   return (
                     <th
                       key={index}
@@ -1164,8 +1181,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                     )}
                     {getDisplayData(data).map((value, index) => {
                       // 跳过"12月"列（索引11）
-                      if (timeDimension === 'monthly' && index === 11) return null;
-                      const displayValue = item.key.includes('rate') ? `${value}%` : value;
+                          const displayValue = item.key.includes('rate') ? `${value}%` : value;
                       return (
                         <td
                           key={index}
@@ -1210,8 +1226,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                     )}
                     {getDisplayData(data).map((value, index) => {
                       // 跳过"12月"列（索引11）
-                      if (timeDimension === 'monthly' && index === 11) return null;
-                      const displayValue = item.key.includes('rate') ? `${value}%` : value;
+                          const displayValue = item.key.includes('rate') ? `${value}%` : value;
                       return (
                         <td
                           key={index}
@@ -1240,7 +1255,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
     // 计算月度均值（仅针对月度数据，跳过索引11）
     const calculateMonthlyAverage = (data: number[]) => {
       if (timeDimension === 'weekly') return '-';
-      const validData = data.filter((_, index) => index !== 11 && data[index] > 0);
+      const validData = data.filter(value => value > 0);
       const sum = validData.reduce((acc, val) => acc + val, 0);
       return validData.length > 0 ? `${(sum / validData.length).toFixed(1)}%` : '-';
     };
@@ -1261,7 +1276,6 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                 )}
                 {labels.map((label, index) => {
                   // 跳过"12月"列（索引11）
-                  if (timeDimension === 'monthly' && index === 11) return null;
                   return (
                     <th
                       key={index}
@@ -1289,8 +1303,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                     )}
                     {getDisplayData(store.data).map((value, index) => {
                       // 跳过"12月"列（索引11）
-                      if (timeDimension === 'monthly' && index === 11) return null;
-                      return (
+                          return (
                         <td
                           key={index}
                           className={`px-3 py-1.5 text-center text-gray-700 ${
@@ -1318,7 +1331,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
     // 计算月度均值（仅针对月度数据，跳过索引11）
     const calculateMonthlyAverage = (data: number[]) => {
       if (timeDimension === 'weekly') return '-';
-      const validData = data.filter((_, index) => index !== 11 && data[index] > 0);
+      const validData = data.filter(value => value > 0);
       const sum = validData.reduce((acc, val) => acc + val, 0);
       return validData.length > 0 ? `${(sum / validData.length).toFixed(1)}%` : '-';
     };
@@ -1349,7 +1362,6 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                 )}
                 {labels.map((label, index) => {
                   // 跳过"12月"列（索引11）
-                  if (timeDimension === 'monthly' && index === 11) return null;
                   return (
                     <th
                       key={index}
@@ -1380,8 +1392,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                     )}
                     {getDisplayData(deliveryTimelinessMetrics[metric.key].tickets).map((value, index) => {
                       // 跳过"12月"列（索引11）
-                      if (timeDimension === 'monthly' && index === 11) return null;
-                      return (
+                          return (
                         <td
                           key={index}
                           className={`px-2 py-1.5 text-center text-gray-700 ${
@@ -1405,8 +1416,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                     )}
                     {getDisplayData(deliveryTimelinessMetrics[metric.key].pieces).map((value, index) => {
                       // 跳过"12月"列（索引11）
-                      if (timeDimension === 'monthly' && index === 11) return null;
-                      return (
+                          return (
                         <td
                           key={index}
                           className={`px-2 py-1.5 text-center text-gray-700 ${
@@ -1433,7 +1443,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
     // 计算月度均值（仅针对月度数据，跳过索引11）
     const calculateMonthlyAverage = (data: number[]) => {
       if (timeDimension === 'weekly') return '-';
-      const validData = data.filter((_, index) => index !== 11 && data[index] > 0);
+      const validData = data.filter(value => value > 0);
       const sum = validData.reduce((acc, val) => acc + val, 0);
       return validData.length > 0 ? `${(sum / validData.length).toFixed(2)}${unit}` : '-';
     };
@@ -1454,7 +1464,6 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                 )}
                 {labels.map((label, index) => {
                   // 跳过"12月"列（索引11）
-                  if (timeDimension === 'monthly' && index === 11) return null;
                   return (
                     <th
                       key={index}
@@ -1481,8 +1490,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   )}
                   {getDisplayData(store.data).map((value, index) => {
                     // 跳过"12月"列（索引11）
-                    if (timeDimension === 'monthly' && index === 11) return null;
-                    return (
+                      return (
                       <td
                         key={index}
                         className={`px-2 py-1.5 text-center text-gray-700 ${
@@ -1564,8 +1572,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                       : [12.8, 12.4, 13.6, 13.1, 12.6, 13.0, 12.5, 12.8];
                     return labels
                       .map((label, index) => {
-                        if (timeDimension === 'monthly' && index === 11) return null;
-                        const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
+                              const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
                         return {
                           name: label,
                           酒水票数: alcoholTicketsData[dataIndex] || 0,
@@ -1780,8 +1787,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                           </th>
                         )}
                         {getTimeLabels().map((label, index) => {
-                          if (timeDimension === 'monthly' && index === 11) return null;
-                          return (
+                                  return (
                             <th key={index} className="px-4 py-3 text-center font-semibold text-gray-900 whitespace-nowrap min-w-[70px]">
                               {label}
                             </th>
@@ -1820,8 +1826,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                                 ? [8.2, 8.9, 10.2, 11.0, 9.5, 9.9, 9.2, 10.5, 11.2, 9.8, 9.4, null, 9.0]
                                 : [9.9, 9.5, 10.8, 10.2, 9.6, 10.0, 9.3, 9.7];
                               return data.map((value, index) => {
-                                if (timeDimension === 'monthly' && index === 11) return null;
-                                return (
+                                              return (
                                   <td key={index} className="px-4 py-3 text-center whitespace-nowrap text-gray-900">
                                     {value ? Number(value).toFixed(2) : '-'}
                                   </td>
@@ -1850,8 +1855,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                                 ? [8.5, 9.2, 10.5, 11.3, 9.8, 10.2, 9.5, 10.8, 11.5, 10.1, 9.7, null, 9.3]
                                 : [10.2, 9.8, 11.1, 10.5, 9.9, 10.3, 9.6, 10.0];
                               return data.map((value, index) => {
-                                if (timeDimension === 'monthly' && index === 11) return null;
-                                return (
+                                              return (
                                   <td key={index} className="px-4 py-3 text-center whitespace-nowrap text-gray-900">
                                     {value ? Number(value).toFixed(2) : '-'}
                                   </td>
@@ -1892,8 +1896,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                                 ? [8.8, 9.5, 10.8, 11.6, 10.1, 10.5, 9.8, 11.1, 11.8, 10.4, 10.0, null, 9.6]
                                 : [10.5, 10.1, 11.4, 10.8, 10.2, 10.6, 9.9, 10.3];
                               return data.map((value, index) => {
-                                if (timeDimension === 'monthly' && index === 11) return null;
-                                return (
+                                              return (
                                   <td key={index} className="px-4 py-3 text-center whitespace-nowrap text-gray-900">
                                     {value ? Number(value).toFixed(2) : '-'}
                                   </td>
@@ -1922,8 +1925,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                                 ? [9.1, 9.8, 11.1, 11.9, 10.4, 10.8, 10.1, 11.4, 12.1, 10.7, 10.3, null, 9.9]
                                 : [10.8, 10.4, 11.7, 11.1, 10.5, 10.9, 10.2, 10.6];
                               return data.map((value, index) => {
-                                if (timeDimension === 'monthly' && index === 11) return null;
-                                return (
+                                              return (
                                   <td key={index} className="px-4 py-3 text-center whitespace-nowrap text-gray-900">
                                     {value ? Number(value).toFixed(2) : '-'}
                                   </td>
@@ -1967,8 +1969,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   : inboundDataByCategory.pieces.cosmetics.weeklyData;
                 return labels
                   .map((label, index) => {
-                    if (timeDimension === 'monthly' && index === 11) return null;
-                    const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
+                      const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
                     return {
                       name: label,
                       酒水票数: alcoholTickets[dataIndex] || 0,
@@ -2148,8 +2149,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   const firstLinePieces = getDisplayData(customsClearanceData.pieces.firstLine.monthlyData);
                   return labels
                     .map((label, index) => {
-                      if (timeDimension === 'monthly' && index === 11) return null;
-                      const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
+                          const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
                       return {
                         name: label,
                         一线票数: firstLineTickets[dataIndex] || 0,
@@ -2269,8 +2269,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   const alcoholPieces = labels.map(() => (Math.random() * 2.5 + 1.8).toFixed(2));
                   return labels
                     .map((label, index) => {
-                      if (timeDimension === 'monthly' && index === 11) return null;
-                      const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
+                          const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
                       return {
                         name: label,
                         香化票数: parseFloat(perfumeTickets[dataIndex]) || 0,
@@ -2406,8 +2405,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                         <th className="px-3 py-2 text-center font-bold text-gray-700 border-r border-gray-200">月度均值</th>
                       )}
                       {getTimeLabels().map((label, index) => {
-                        if (timeDimension === 'monthly' && index === 11) return null;
-                        return (
+                              return (
                           <th key={label} className="px-3 py-2 text-center font-bold text-gray-700 border-r border-gray-200 last:border-r-0">
                             {label}
                           </th>
@@ -2440,8 +2438,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                               <td className="px-3 py-2 text-center text-gray-900 border-r border-gray-200">{alcoholTicketsAvg}</td>
                             )}
                             {labels.map((label, index) => {
-                              if (timeDimension === 'monthly' && index === 11) return null;
-                              const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
+                                          const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
                               return (
                                 <td key={label} className="px-3 py-2 text-center text-gray-900 border-r border-gray-200 last:border-r-0">
                                   {alcoholTickets[dataIndex]}
@@ -2456,8 +2453,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                               <td className="px-3 py-2 text-center text-gray-900 border-r border-gray-200">{alcoholPiecesAvg}</td>
                             )}
                             {labels.map((label, index) => {
-                              if (timeDimension === 'monthly' && index === 11) return null;
-                              const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
+                                          const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
                               return (
                                 <td key={label} className="px-3 py-2 text-center text-gray-900 border-r border-gray-200 last:border-r-0">
                                   {alcoholPieces[dataIndex]}
@@ -2473,8 +2469,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                               <td className="px-3 py-2 text-center text-gray-900 border-r border-gray-200">{perfumeTicketsAvg}</td>
                             )}
                             {labels.map((label, index) => {
-                              if (timeDimension === 'monthly' && index === 11) return null;
-                              const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
+                                          const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
                               return (
                                 <td key={label} className="px-3 py-2 text-center text-gray-900 border-r border-gray-200 last:border-r-0">
                                   {perfumeTickets[dataIndex]}
@@ -2489,8 +2484,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                               <td className="px-3 py-2 text-center text-gray-900 border-r border-gray-200">{perfumePiecesAvg}</td>
                             )}
                             {labels.map((label, index) => {
-                              if (timeDimension === 'monthly' && index === 11) return null;
-                              const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
+                                          const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
                               return (
                                 <td key={label} className="px-3 py-2 text-center text-gray-900 border-r border-gray-200 last:border-r-0">
                                   {perfumePieces[dataIndex]}
@@ -2504,6 +2498,23 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   </tbody>
                 </table>
               </div>
+            </div>
+          </div>
+
+          {/* 与指标总览同步的直发入库指标 */}
+          <div className="mb-6">
+            <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2 ml-3">
+              <div className="w-1 h-4 bg-blue-600 rounded"></div>
+              全链路入库平均时效（直发）
+            </h4>
+            <div className="ml-3">
+              {renderMetricTable({
+                name: '全链路入库平均时效（直发）',
+                avgDays: 4.6,
+                trend: -0.2,
+                monthlyData: [4.8, 4.6, 4.7, 4.5, 4.4, 4.6, 4.3, 4.5, 4.7, 4.4, 4.2, 4.6],
+                weeklyData: [4.6, 4.5, 4.4, 4.7, 4.3, 4.5, 4.2, 4.4],
+              })}
             </div>
           </div>
         </div>
@@ -2544,8 +2555,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   : distributionFullChainDataByCategory.pieces.cosmetics.weeklyData;
                 return labels
                   .map((label, index) => {
-                    if (timeDimension === 'monthly' && index === 11) return null;
-                    const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
+                      const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
                     return {
                       name: label,
                       酒水票数: alcoholTickets[dataIndex] || 0,
@@ -2729,8 +2739,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   : outboundDataByCategory.pieces.cosmetics.weeklyData;
                 return labels
                   .map((label, index) => {
-                    if (timeDimension === 'monthly' && index === 11) return null;
-                    const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
+                      const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
                     return {
                       name: label,
                       '酒水票数': alcoholTickets[dataIndex] || 0,
@@ -2904,8 +2913,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   const secondLinePieces = getDisplayData(customsClearanceData.pieces.secondLine.monthlyData);
                   return labels
                     .map((label, index) => {
-                      if (timeDimension === 'monthly' && index === 11) return null;
-                      const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
+                          const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
                       return {
                         name: label,
                         二线票数: secondLineTickets[dataIndex] || 0,
@@ -3021,8 +3029,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   const storePickupPieces = labels.map(() => (Math.random() * 1.2 + 0.3).toFixed(2));
                   return labels
                     .map((label, index) => {
-                      if (timeDimension === 'monthly' && index === 11) return null;
-                      const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
+                          const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
                       return {
                         name: label,
                         提货至上架票数: parseFloat(storePickupTickets[dataIndex]) || 0,
@@ -3126,8 +3133,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                         <th className="px-3 py-2 text-center font-bold text-gray-700 border-r border-gray-200">月度均值</th>
                       )}
                       {getTimeLabels().map((label, index) => {
-                        if (timeDimension === 'monthly' && index === 11) return null;
-                        return (
+                              return (
                           <th key={label} className="px-3 py-2 text-center font-bold text-gray-700 border-r border-gray-200 last:border-r-0">
                             {label}
                           </th>
@@ -3156,8 +3162,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                               <td className="px-3 py-2 text-center text-gray-900 border-r border-gray-200">{ticketsAvg}</td>
                             )}
                             {labels.map((label, index) => {
-                              if (timeDimension === 'monthly' && index === 11) return null;
-                              const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
+                                          const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
                               return (
                                 <td key={label} className="px-3 py-2 text-center text-gray-900 border-r border-gray-200 last:border-r-0">
                                   {storePickupTickets[dataIndex]}
@@ -3173,8 +3178,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                               <td className="px-3 py-2 text-center text-gray-900 border-r border-gray-200">{piecesAvg}</td>
                             )}
                             {labels.map((label, index) => {
-                              if (timeDimension === 'monthly' && index === 11) return null;
-                              const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
+                                          const dataIndex = timeDimension === 'monthly' && index === 12 ? 12 : index;
                               return (
                                 <td key={label} className="px-3 py-2 text-center text-gray-900 border-r border-gray-200 last:border-r-0">
                                   {storePickupPieces[dataIndex]}

@@ -102,7 +102,7 @@ export function MetricCard({ metric, onClick }: MetricCardProps) {
             </div>
           </div>
           <div className="text-xs text-gray-500">
-            达成率
+            达标率
           </div>
         </div>
 

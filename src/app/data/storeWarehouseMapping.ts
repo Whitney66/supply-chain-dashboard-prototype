@@ -6,6 +6,7 @@ export type WarehouseCategory = '监管仓' | '周转仓' | '分拣仓' | '预�
 export interface Store {
   id: string;
   name: string;
+  sourceStoreIds: string[];
   warehouseIds: string[];
 }
 
@@ -22,105 +23,13 @@ export interface Warehouse {
 }
 
 export const stores: Store[] = [
-  {
-    id: "7063",
-    name: "【7063】海南国际物流中心",
-    warehouseIds: [
-      "7063-706302",
-      "7063-706305"
-    ]
-  },
-  {
-    id: "6867",
-    name: "【6867】三亚海棠湾店",
-    warehouseIds: [
-      "6867-686701"
-    ]
-  },
-  {
-    id: "7018",
-    name: "【7018】三亚海棠湾店",
-    warehouseIds: [
-      "7018-701804",
-      "7018-701802",
-      "7018-704802",
-      "7018-704803"
-    ]
-  },
-  {
-    id: "6868",
-    name: "【6868】三亚海棠湾店",
-    warehouseIds: [
-      "6868-686801",
-      "6868-686802",
-      "6868-686803",
-      "6868-686701",
-      "6868-6868"
-    ]
-  },
-  {
-    id: "7048",
-    name: "【7048】新海港店",
-    warehouseIds: [
-      "7048-704801",
-      "7048-704804",
-      "7048-7048",
-      "7048-704801-2"
-    ]
-  },
-  {
-    id: "7016",
-    name: "【7016】三亚凤凰机场店",
-    warehouseIds: [
-      "7016-701607",
-      "7016-701615",
-      "7016-701608",
-      "7016-701605",
-      "7016-7016",
-      "7016-701607-2",
-      "7016-701615-2"
-    ]
-  },
-  {
-    id: "6132",
-    name: "【6132】海口美兰机场店",
-    warehouseIds: [
-      "6132-613266",
-      "6132-613201",
-      "6132-613217",
-      "6132-6132",
-      "6132-613266-2"
-    ]
-  },
-  {
-    id: "6922",
-    name: "【6922】海口日月店",
-    warehouseIds: [
-      "6922-692267",
-      "6922-692268",
-      "6922-613267",
-      "6922-692206",
-      "6922-692207",
-      "6922-692264",
-      "6922-692265",
-      "6922-692266",
-      "6922-6922",
-      "6922-692267-2",
-      "6922-692268-2",
-      "6922-613267-2"
-    ]
-  },
-  {
-    id: "6921",
-    name: "【6921】博鳌店",
-    warehouseIds: [
-      "6921-692166",
-      "6921-692102",
-      "6921-692103",
-      "6921-6921",
-      "6921-692166-2"
-    ]
-  }
+  { id: "unified-inventory", name: "一盘货：海南国际物流中心【7063】", sourceStoreIds: ["7063"], warehouseIds: ["7063-706302", "7063-706305"] },
+  { id: "boao", name: "博鳌店【6921】", sourceStoreIds: ["6921"], warehouseIds: ["6921-692166", "6921-692102", "6921-692103", "6921-6921", "6921-692166-2"] },
+  { id: "meilan-airport", name: "海口美兰机场店【6132】", sourceStoreIds: ["6132"], warehouseIds: ["6132-613266", "6132-613201", "6132-613217", "6132-6132", "6132-613266-2"] },
+  { id: "riyue", name: "海口日月店【6922】", sourceStoreIds: ["6922"], warehouseIds: ["6922-692267", "6922-692268", "6922-613267", "6922-692206", "6922-692207", "6922-692264", "6922-692265", "6922-692266", "6922-6922", "6922-692267-2", "6922-692268-2", "6922-613267-2"] },
+  { id: "phoenix-airport", name: "三亚凤凰机场店【7016】", sourceStoreIds: ["7016"], warehouseIds: ["7016-701607", "7016-701615", "7016-701608", "7016-701605", "7016-7016", "7016-701607-2", "7016-701615-2"] },
+  { id: "haitang-bay", name: "三亚海棠湾店【6868、6867、7018】", sourceStoreIds: ["6868", "6867", "7018"], warehouseIds: ["6867-686701", "7018-701804", "7018-701802", "7018-704802", "7018-704803", "6868-686801", "6868-686802", "6868-686803", "6868-686701", "6868-6868"] },
+  { id: "xinhai-port", name: "新海港店【7048、7018】", sourceStoreIds: ["7048", "7018"], warehouseIds: ["7048-704801", "7048-704804", "7048-7048", "7048-704801-2", "7018-701804", "7018-701802", "7018-704802", "7018-704803"] }
 ];
 
 export const warehouses: Warehouse[] = [
@@ -625,7 +534,10 @@ export function getFilteredWarehouses(selectedStores: string[]): Warehouse[] {
   if (selectedStores.length === 0) {
     return warehouses;
   }
-  return warehouses.filter(w => selectedStores.includes(w.storeId));
+  const sourceStoreIds = new Set(
+    stores.filter(store => selectedStores.includes(store.id)).flatMap(store => store.sourceStoreIds)
+  );
+  return warehouses.filter(warehouse => sourceStoreIds.has(warehouse.storeId));
 }
 
 export function getFilteredStores(selectedWarehouses: string[]): Store[] {
@@ -637,5 +549,5 @@ export function getFilteredStores(selectedWarehouses: string[]): Store[] {
       .filter(w => selectedWarehouses.includes(w.id))
       .map(w => w.storeId)
   );
-  return stores.filter(s => storeIds.has(s.id));
+  return stores.filter(store => store.sourceStoreIds.some(id => storeIds.has(id)));
 }

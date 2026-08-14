@@ -64,10 +64,10 @@ function IndicatorDetailGuide() {
         <GuideHeading>三、指标表格说明</GuideHeading>
         <ol className="list-decimal space-y-3 pl-5 marker:font-semibold">
           <li>
-            每月为所选时间范围中取连续完整月。
+            每月按销售日期的开始时间至结束时间连续展示。
             <div className="mt-2 border-l-4 border-amber-400 bg-amber-50 px-4 py-2.5">
-              <p><span className="font-semibold text-slate-900">场景一：</span>时间筛选项为 2025年3月12日--2026年2月15日，那么展示2025年3月到2026年2月。</p>
-              <p><span className="font-semibold text-slate-900">场景二：</span>时间筛选项为2025年3月12日--2025年3月13日（至今），但是由于当前的3月份不是完整月，那么展示的是2025年3月到2026年2月。</p>
+              <p><span className="font-semibold text-slate-900">不跨年：</span>列头从销售日期开始月份展示至结束月份，例如“3月、4月、5月”。</p>
+              <p><span className="font-semibold text-slate-900">跨年：</span>列头明确展示年份，例如“2025年11月、2025年12月、2026年1月”。</p>
             </div>
           </li>
           <li>【近八周】以所选时间的开始时间为基准，并往前平移八周的每周数据。</li>

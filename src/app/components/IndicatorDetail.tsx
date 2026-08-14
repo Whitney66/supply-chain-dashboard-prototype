@@ -15,8 +15,10 @@ type TimeDimension = 'monthly' | 'weekly';
 
 export function IndicatorDetail({ filters, businessSegment = 'all', indicatorType = 'all' }: IndicatorDetailProps) {
   return (
-    <UnifiedInventoryModule 
-      selectedCategories={filters.selectedCategories} 
+    <UnifiedInventoryModule
+      selectedCategories={filters.selectedCategories}
+      startDate={filters.startDate}
+      endDate={filters.endDate}
       businessSegment={businessSegment}
       indicatorType={indicatorType}
     />
