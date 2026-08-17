@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TrendingUp, TrendingDown, BarChart3, PieChart, Activity, DollarSign, Info, Download, GitCompareArrows, X } from 'lucide-react';
+import { TrendingUp, TrendingDown, BarChart3, PieChart, Activity, DollarSign, Info, Download, GitCompareArrows } from 'lucide-react';
 import { 
   PieChart as RechartsPieChart, 
   Pie, 
@@ -238,13 +238,60 @@ export function MetricsOverview() {
     }
   ];
 
-  const comparisonData: Record<string, { before: string; after: string; beforeRate: string; afterRate: string }> = {
-    '1.1.3 提货至海综保平均时效': { before: '2.9D', after: '2.6D', beforeRate: '78.6%', afterRate: '82.4%' },
-    '1.1.4 仓库入库平均时效': { before: '2.1D', after: '1.8D', beforeRate: '86.2%', afterRate: '89.5%' },
-    '1.2.2 一线通关平均时效-门店': { before: '4.1D', after: '3.6D', beforeRate: '79.1%', afterRate: '84.6%' },
-    '2.1.4 门店提货至上架平均时效': { before: '2.7D', after: '2.3D', beforeRate: '80.2%', afterRate: '85.5%' },
-    '3.1.1 监管仓-周转仓调拨平均时效': { before: '13.4D', after: '12.5D', beforeRate: '79.8%', afterRate: '83.4%' },
-    '3.2.1 周转仓-卖场调拨平均时效': { before: '3.8D', after: '3.2D', beforeRate: '84.3%', afterRate: '88.9%' },
+  type LinkMetricVersion = {
+    version: string;
+    category: string;
+    target: string;
+    average: string;
+    maximum: string;
+    ticketRate: string;
+    pieceRate: string;
+    amountRate: string;
+  };
+
+  const comparisonData: Record<string, { node: string; before: LinkMetricVersion[]; after: LinkMetricVersion[] }> = {
+    '1.1.3 提货至海综保平均时效': {
+      node: '一盘货',
+      before: [
+        { version: '剔除前', category: '香化', target: '2.5D', average: '2.9D', maximum: '4.4D', ticketRate: '78.6%', pieceRate: '81.4%', amountRate: '83.2%' },
+        { version: '剔除前', category: '酒水', target: '2.5D', average: '3.2D', maximum: '4.6D', ticketRate: '76.9%', pieceRate: '79.8%', amountRate: '81.6%' },
+      ],
+      after: [
+        { version: '剔除后', category: '香化', target: '2.5D', average: '2.6D', maximum: '3.9D', ticketRate: '82.4%', pieceRate: '85.3%', amountRate: '87.1%' },
+        { version: '剔除后', category: '酒水', target: '2.5D', average: '2.9D', maximum: '4.1D', ticketRate: '80.8%', pieceRate: '83.6%', amountRate: '85.4%' },
+      ],
+    },
+    '1.1.4 仓库入库平均时效': {
+      node: '一盘货',
+      before: [
+        { version: '剔除前', category: '香化', target: '0.33D', average: '2.1D', maximum: '3.0D', ticketRate: '86.2%', pieceRate: '87.9%', amountRate: '89.5%' },
+        { version: '剔除前', category: '酒水', target: '0.17D', average: '2.4D', maximum: '3.7D', ticketRate: '84.5%', pieceRate: '86.3%', amountRate: '88.0%' },
+      ],
+      after: [
+        { version: '剔除后', category: '香化', target: '0.33D', average: '1.8D', maximum: '2.5D', ticketRate: '89.5%', pieceRate: '91.2%', amountRate: '92.8%' },
+        { version: '剔除后', category: '酒水', target: '0.17D', average: '2.1D', maximum: '3.2D', ticketRate: '87.8%', pieceRate: '89.6%', amountRate: '91.3%' },
+      ],
+    },
+    '1.2.2 一线通关平均时效-门店': {
+      node: '直发门店监管仓',
+      before: [{ version: '剔除前', category: '-', target: '-', average: '4.1D', maximum: '6.1D', ticketRate: '79.1%', pieceRate: '81.7%', amountRate: '-' }],
+      after: [{ version: '剔除后', category: '-', target: '-', average: '3.6D', maximum: '5.4D', ticketRate: '84.6%', pieceRate: '86.9%', amountRate: '-' }],
+    },
+    '2.1.4 门店提货至上架平均时效': {
+      node: '一盘货-门店监管仓',
+      before: [{ version: '剔除前', category: '-', target: '4D', average: '2.7D', maximum: '4.1D', ticketRate: '80.2%', pieceRate: '82.6%', amountRate: '84.1%' }],
+      after: [{ version: '剔除后', category: '-', target: '4D', average: '2.3D', maximum: '3.5D', ticketRate: '85.5%', pieceRate: '87.3%', amountRate: '88.1%' }],
+    },
+    '3.1.1 监管仓-周转仓调拨平均时效': {
+      node: '监管仓-周转仓',
+      before: [{ version: '剔除前', category: '-', target: '-', average: '13.4D', maximum: '16.9D', ticketRate: '79.8%', pieceRate: '82.1%', amountRate: '-' }],
+      after: [{ version: '剔除后', category: '-', target: '-', average: '12.5D', maximum: '15.8D', ticketRate: '83.4%', pieceRate: '85.7%', amountRate: '-' }],
+    },
+    '3.2.1 周转仓-卖场调拨平均时效': {
+      node: '周转仓-卖场',
+      before: [{ version: '剔除前', category: '-', target: '-', average: '3.8D', maximum: '5.2D', ticketRate: '84.3%', pieceRate: '86.1%', amountRate: '-' }],
+      after: [{ version: '剔除后', category: '-', target: '-', average: '3.2D', maximum: '4.5D', ticketRate: '88.9%', pieceRate: '90.6%', amountRate: '-' }],
+    },
   };
 
   const trendVersionData: Record<string, Record<'before' | 'after', [string, string, string, string, string, string, string]>> = {
@@ -284,18 +331,62 @@ export function MetricsOverview() {
     </span>
   );
 
-  const ComparisonButton = ({ metric }: { metric: string }) => (
-    <button
-      type="button"
-      onClick={() => setComparisonMetric(metric)}
-      className="inline-flex items-center gap-1 rounded border border-violet-300 bg-violet-50 px-1.5 py-0.5 text-[11px] font-medium text-violet-700 hover:bg-violet-100 transition-colors whitespace-nowrap"
-      title="查看剔除前与剔除后的指标数据"
-      aria-label={`查看${metric}剔除前后数据`}
-    >
-      <GitCompareArrows className="w-3 h-3" />
-      前后对比
-    </button>
-  );
+  const downloadComparison = (metric: string) => {
+    const data = comparisonData[metric];
+    if (!data) return;
+    const headers = ['业务节点', '具体指标', '数据口径', '品类', '目标值', '当前平均值', '最大值', '票数达标率', '件数达标率', '金额达标率'];
+    const rows = [...data.before, ...data.after].map((row) => [data.node, metric, row.version, row.category, row.target, row.average, row.maximum, row.ticketRate, row.pieceRate, row.amountRate]);
+    const escapeCell = (value: string) => `"${value.replace(/"/g, '""')}"`;
+    const csv = `﻿${[headers, ...rows].map((row) => row.map(escapeCell).join(',')).join('\r\n')}`;
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `${metric.replace(/[\\/:*?"<>|]/g, '_')}_剔除前后对比.csv`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const ComparisonButton = ({ metric }: { metric: string }) => {
+    const expanded = comparisonMetric === metric;
+    return (
+      <button
+        type="button"
+        onClick={() => setComparisonMetric(expanded ? null : metric)}
+        className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[11px] font-medium transition-colors whitespace-nowrap ${expanded ? 'border-violet-600 bg-violet-600 text-white' : 'border-violet-300 bg-violet-50 text-violet-700 hover:bg-violet-100'}`}
+        title={expanded ? '收起剔除前后数据' : '展开剔除前后全部字段'}
+        aria-expanded={expanded}
+      >
+        <GitCompareArrows className="w-3 h-3" />
+        {expanded ? '收起对比' : '前后对比'}
+      </button>
+    );
+  };
+
+  const ComparisonRows = ({ metric, colSpan, includeAmount = true }: { metric: string; colSpan: number; includeAmount?: boolean }) => {
+    if (comparisonMetric !== metric) return null;
+    const data = comparisonData[metric];
+    const rows = [...data.before, ...data.after];
+    return (
+      <tr className="bg-violet-50/40">
+        <td colSpan={colSpan} className="px-3 py-3">
+          <div className="overflow-hidden rounded-lg border border-violet-200 bg-white shadow-sm">
+            <div className="flex items-center justify-between gap-3 border-b border-violet-100 bg-violet-50 px-3 py-2">
+              <div><span className="text-xs font-semibold text-violet-900">{metric} · 剔除前后全部字段</span><span className="ml-2 text-[11px] text-violet-600">原型演示数据</span></div>
+              <button type="button" onClick={() => downloadComparison(metric)} className="inline-flex items-center gap-1 rounded-md bg-violet-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-violet-700"><Download className="h-3.5 w-3.5" />下载当前指标</button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[760px] text-xs">
+                <thead className="bg-gray-50 text-gray-700"><tr><th className="px-3 py-2 text-left">数据口径</th><th className="px-3 py-2 text-center">品类</th><th className="px-3 py-2 text-center">目标值</th><th className="px-3 py-2 text-center">当前平均值</th><th className="px-3 py-2 text-center">最大值</th><th className="px-3 py-2 text-center">票数达标率</th><th className="px-3 py-2 text-center">件数达标率</th>{includeAmount && <th className="px-3 py-2 text-center">金额达标率</th>}</tr></thead>
+                <tbody className="divide-y divide-gray-100">{rows.map((row, index) => <tr key={`${row.version}-${row.category}-${index}`} className={row.version === '剔除前' ? 'bg-amber-50/60' : 'bg-violet-50/60'}><td className="px-3 py-2"><span className={`rounded px-1.5 py-0.5 font-semibold ${row.version === '剔除前' ? 'bg-amber-200 text-amber-900' : 'bg-violet-200 text-violet-900'}`}>{row.version}</span></td><td className="px-3 py-2 text-center">{row.category}</td><td className="px-3 py-2 text-center">{row.target}</td><td className="px-3 py-2 text-center font-semibold">{row.average}</td><td className="px-3 py-2 text-center">{row.maximum}</td><td className="px-3 py-2 text-center">{row.ticketRate}</td><td className="px-3 py-2 text-center">{row.pieceRate}</td>{includeAmount && <td className="px-3 py-2 text-center">{row.amountRate}</td>}</tr>)}</tbody>
+              </table>
+            </div>
+          </div>
+        </td>
+      </tr>
+    );
+  };
 
   // 渲染时效指标Tab
   const renderTimelinessTab = () => {
@@ -975,7 +1066,8 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">83.6%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">85.4%</td>
               </tr>
-              
+              <ComparisonRows metric="1.1.3 提货至海综保平均时效" colSpan={10} />
+
               <tr className="hover:bg-gray-50">
                 <td rowSpan={2} className="px-3 py-2 text-gray-700 border-l-4 border-violet-500 bg-violet-50/40">
                   <div className="flex flex-wrap items-center gap-1.5">
@@ -1001,7 +1093,8 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">89.6%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">91.3%</td>
               </tr>
-              
+              <ComparisonRows metric="1.1.4 仓库入库平均时效" colSpan={10} />
+
               <tr className="hover:bg-gray-50">
                 <td rowSpan={2} className="px-3 py-2 font-medium text-gray-800 align-top">2.直发门店监管仓</td>
                 <td className="px-3 py-2 text-gray-700">2.1全链路入库平均时效（直发）</td>
@@ -1032,9 +1125,10 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">86.9%</td>
                 <td className="px-3 py-2 text-center text-gray-400">-</td>
               </tr>
+              <ComparisonRows metric="1.2.2 一线通关平均时效-门店" colSpan={10} />
               </>
               )}
-              
+
               {/* 分货段内容 */}
               {orderDeliveryTab === 'delivery' && (
                 <>
@@ -1108,9 +1202,10 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">87.3%</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">88.1%</td>
               </tr>
+              <ComparisonRows metric="2.1.4 门店提货至上架平均时效" colSpan={10} />
               </>
               )}
-              
+
               {/* 门店段内容 */}
               {orderDeliveryTab === 'store' && (
                 <>
@@ -1131,6 +1226,7 @@ export function MetricsOverview() {
                   <img src={store11FlowImage} alt="1.1监管仓-周转仓调拨流程图" className="max-w-xs h-auto" />
                 </td>
               </tr>
+              <ComparisonRows metric="3.1.1 监管仓-周转仓调拨平均时效" colSpan={9} includeAmount={false} />
 
               <tr className="hover:bg-gray-50">
                 <td rowSpan={2} className="px-3 py-2 font-medium text-gray-800 align-top">2.周转仓-卖场</td>
@@ -1148,6 +1244,7 @@ export function MetricsOverview() {
                   <img src={store21FlowImage} alt="2.1周转仓-卖场调拨流程图" className="max-w-xs h-auto" />
                 </td>
               </tr>
+              <ComparisonRows metric="3.2.1 周转仓-卖场调拨平均时效" colSpan={9} includeAmount={false} />
               <tr className="hover:bg-gray-50">
                 <td className="px-3 py-2 text-gray-700">2.2直入直出全链路平均时效（监管仓-卖场）</td>
                 <td className="px-3 py-2 text-center bg-gray-50 text-gray-300 text-xs">—</td>
@@ -2046,35 +2143,6 @@ export function MetricsOverview() {
         {activeTab === 'cost' && renderCostTab()}
         {activeTab === 'efficiency' && renderEfficiencyTab()}
       </div>
-
-      {comparisonMetric && comparisonData[comparisonMetric] && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/45 p-4" role="dialog" aria-modal="true" aria-labelledby="comparison-title" onClick={() => setComparisonMetric(null)}>
-          <div className="w-full max-w-xl rounded-xl border border-slate-200 bg-white p-5 shadow-2xl" onClick={(event) => event.stopPropagation()}>
-            <div className="mb-4 flex items-start justify-between gap-4">
-              <div>
-                <div className="mb-1 flex items-center gap-2"><span className="rounded bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-700">V1.1 数据口径对比</span></div>
-                <h3 id="comparison-title" className="text-base font-semibold text-slate-900">{comparisonMetric}</h3>
-                <p className="mt-1 text-xs text-slate-500">以下为原型演示数据；正式开发时由当前筛选条件实时计算。</p>
-              </div>
-              <button type="button" onClick={() => setComparisonMetric(null)} className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="关闭对比弹窗"><X className="h-4 w-4" /></button>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-                <div className="mb-3 flex items-center justify-between"><span className="text-sm font-semibold text-amber-900">剔除前</span><span className="rounded bg-amber-200 px-1.5 py-0.5 text-[10px] font-semibold text-amber-900">原始口径</span></div>
-                <div className="text-2xl font-bold text-slate-900">{comparisonData[comparisonMetric].before}</div>
-                <div className="mt-1 text-xs text-slate-600">指标平均值</div>
-                <div className="mt-4 border-t border-amber-200 pt-3 text-sm"><span className="text-slate-600">票数达标率</span><span className="float-right font-semibold text-slate-900">{comparisonData[comparisonMetric].beforeRate}</span></div>
-              </div>
-              <div className="rounded-lg border border-violet-200 bg-violet-50 p-4">
-                <div className="mb-3 flex items-center justify-between"><span className="text-sm font-semibold text-violet-900">剔除后</span><span className="rounded bg-violet-200 px-1.5 py-0.5 text-[10px] font-semibold text-violet-900">更新口径</span></div>
-                <div className="text-2xl font-bold text-slate-900">{comparisonData[comparisonMetric].after}</div>
-                <div className="mt-1 text-xs text-slate-600">指标平均值</div>
-                <div className="mt-4 border-t border-violet-200 pt-3 text-sm"><span className="text-slate-600">票数达标率</span><span className="float-right font-semibold text-slate-900">{comparisonData[comparisonMetric].afterRate}</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
