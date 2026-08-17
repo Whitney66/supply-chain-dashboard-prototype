@@ -54,6 +54,8 @@ export function MetricsOverview() {
   const [qualityFilter, setQualityFilter] = useState<QualityFilterKey[]>(['transfer']);
   // 原型演示：当前打开的“剔除前/后”指标对比
   const [comparisonMetric, setComparisonMetric] = useState<string | null>(null);
+  // 时效变化趋势的数据口径版本，默认展示剔除后的当前口径
+  const [trendVersion, setTrendVersion] = useState<'before' | 'after'>('after');
 
   const tabs = [
     { id: 'timeliness' as TabType, label: '时效指标', icon: Activity },
@@ -245,6 +247,43 @@ export function MetricsOverview() {
     '3.2.1 周转仓-卖场调拨平均时效': { before: '3.8D', after: '3.2D', beforeRate: '84.3%', afterRate: '88.9%' },
   };
 
+  const trendVersionData: Record<string, Record<'before' | 'after', [string, string, string, string, string, string, string]>> = {
+    pickupCosmetics: { before: ['1.5D', '2.1D', '78.6%', '2.3D', '-8.7%', '2.6D', '-19.2%'], after: ['1.5D', '1.8D', '83.5%', '1.9D', '-5.3%', '2.1D', '-14.3%'] },
+    pickupAlcohol: { before: ['2.0D', '2.7D', '74.8%', '2.8D', '-3.6%', '3.1D', '-12.9%'], after: ['2.0D', '2.3D', '79.2%', '2.4D', '-4.2%', '2.6D', '-11.5%'] },
+    inboundCosmetics: { before: ['1.0D', '1.5D', '81.2%', '1.6D', '-6.3%', '1.8D', '-16.7%'], after: ['1.0D', '1.2D', '86.4%', '1.3D', '-7.7%', '1.5D', '-20.0%'] },
+    inboundAlcohol: { before: ['1.5D', '2.1D', '77.6%', '2.2D', '-4.5%', '2.4D', '-12.5%'], after: ['1.5D', '1.7D', '82.1%', '1.8D', '-5.6%', '2.0D', '-15.0%'] },
+    pickupToShelf: { before: ['4.0D', '2.7D', '80.2%', '2.9D', '-6.9%', '3.2D', '-15.6%'], after: ['4.0D', '2.1D', '85.7%', '2.3D', '-9.5%', '2.8D', '-23.8%'] },
+    supervisionTransfer: { before: ['-', '4.0D', '78.9%', '4.1D', '-2.4%', '4.5D', '-11.1%'], after: ['-', '3.4D', '82.4%', '3.5D', '-2.9%', '3.9D', '-11.8%'] },
+    turnoverTransfer: { before: ['-', '5.4D', '66.8%', '5.1D', '+5.9%', '5.6D', '-3.6%'], after: ['-', '4.8D', '71.2%', '4.6D', '+4.2%', '4.9D', '-2.1%'] },
+  };
+
+  const TrendCells = ({ metric }: { metric: string }) => {
+    const values = trendVersionData[metric][trendVersion];
+    const trendCell = (value: string) => {
+      const isIncrease = value.startsWith('+');
+      return <span className={`text-xs flex items-center justify-center gap-1 ${isIncrease ? 'text-red-600' : 'text-green-600'}`}>{isIncrease ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}{value}</span>;
+    };
+    return <>
+      <td className="px-3 py-2 text-center font-semibold text-gray-900">{values[0]}</td>
+      <td className="px-3 py-2 text-center font-semibold text-gray-900">{values[1]}</td>
+      <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">{values[2]}</span></td>
+      <td className="px-3 py-2 text-center font-semibold text-gray-900">{values[3]}</td>
+      <td className="px-3 py-2 text-center">{trendCell(values[4])}</td>
+      <td className="px-3 py-2 text-center font-semibold text-gray-900">{values[5]}</td>
+      <td className="px-3 py-2 text-center">{trendCell(values[6])}</td>
+    </>;
+  };
+
+  const LogicInfo = ({ children, width = 'w-96' }: { children: React.ReactNode; width?: string }) => (
+    <span className="relative inline-flex items-center group">
+      <Info className="w-3.5 h-3.5 text-gray-400 cursor-help flex-shrink-0" />
+      <span className={`absolute left-0 top-full mt-1 ${width} bg-gray-900 text-white text-xs rounded-lg p-3 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 whitespace-normal text-left leading-5`}>
+        <span className="block font-semibold text-white mb-1">V1.1 计算逻辑说明</span>
+        <span className="block text-gray-300">{children}</span>
+      </span>
+    </span>
+  );
+
   const ComparisonButton = ({ metric }: { metric: string }) => (
     <button
       type="button"
@@ -264,7 +303,8 @@ export function MetricsOverview() {
     <div className="space-y-6">
       {/* 第一行：时效变化趋势 */}
       <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
           <div className="w-1 h-4 bg-blue-500 rounded"></div>
           <div className="relative inline-flex items-center group">
             时效变化趋势
@@ -296,6 +336,15 @@ export function MetricsOverview() {
             </div>
           </div>
         </h3>
+          <div className="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-1" aria-label="时效变化趋势数据口径">
+            <button type="button" onClick={() => setTrendVersion('before')} className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${trendVersion === 'before' ? 'bg-amber-400 text-amber-950 shadow-sm' : 'text-gray-500 hover:bg-white'}`}>剔除前</button>
+            <button type="button" onClick={() => setTrendVersion('after')} className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${trendVersion === 'after' ? 'bg-violet-600 text-white shadow-sm' : 'text-gray-500 hover:bg-white'}`}>剔除后</button>
+          </div>
+        </div>
+        <div className={`mb-3 flex items-center gap-2 rounded-md border px-3 py-2 text-xs ${trendVersion === 'before' ? 'border-amber-200 bg-amber-50 text-amber-800' : 'border-violet-200 bg-violet-50 text-violet-800'}`}>
+          <span className={`h-2.5 w-2.5 rounded-sm ${trendVersion === 'before' ? 'bg-amber-400' : 'bg-violet-500'}`}></span>
+          当前展示：{trendVersion === 'before' ? 'V1.0 剔除前（原始口径）' : 'V1.1 剔除后（更新口径）'}，表内全部字段随口径同步切换
+        </div>
         <div className="max-h-[640px] overflow-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 sticky top-0 z-20 shadow-sm">
@@ -394,23 +443,11 @@ export function MetricsOverview() {
                   </div>
                 </td>
                 <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-gray-50 text-gray-900 border border-gray-200 rounded text-xs">香化</span></td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">1.5D</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">1.8D</td>
-                <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">83.5%</span></td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">1.9D</td>
-                <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-5.3%</span></td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">2.1D</td>
-                <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-14.3%</span></td>
+                <TrendCells metric="pickupCosmetics" />
               </tr>
               <tr className="hover:bg-gray-50">
                 <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-gray-50 text-gray-900 border border-gray-200 rounded text-xs">酒水</span></td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">2.0D</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">2.3D</td>
-                <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">79.2%</span></td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">2.4D</td>
-                <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-4.2%</span></td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">2.6D</td>
-                <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-11.5%</span></td>
+                <TrendCells metric="pickupAlcohol" />
               </tr>
               {/* 仓库入库平均时效 - 香化/酒水 */}
               <tr className="hover:bg-gray-50">
@@ -427,23 +464,11 @@ export function MetricsOverview() {
                   </div>
                 </td>
                 <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-gray-50 text-gray-900 border border-gray-200 rounded text-xs">香化</span></td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">1.0D</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">1.2D</td>
-                <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">86.4%</span></td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">1.3D</td>
-                <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-7.7%</span></td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">1.5D</td>
-                <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-20.0%</span></td>
+                <TrendCells metric="inboundCosmetics" />
               </tr>
               <tr className="hover:bg-gray-50">
                 <td className="px-3 py-2 text-center"><span className="inline-block px-1.5 py-0.5 bg-gray-50 text-gray-900 border border-gray-200 rounded text-xs">酒水</span></td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">1.5D</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">1.7D</td>
-                <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">82.1%</span></td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">1.8D</td>
-                <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-5.6%</span></td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">2.0D</td>
-                <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-15.0%</span></td>
+                <TrendCells metric="inboundAlcohol" />
               </tr>
               {/* 全链路入库平均时效（直发）- 无品类 */}
               <tr className="hover:bg-gray-50">
@@ -468,6 +493,21 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">9.1D</td>
                 <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-9.9%</span></td>
               </tr>
+              {trendVersion === 'after' && (
+                <tr className="hover:bg-emerald-50/60">
+                  <td className="px-3 py-2 text-gray-700 border-l-4 border-emerald-500 bg-emerald-50/40">
+                    <div className="flex items-center gap-1.5"><span>一线通关平均时效-门店</span><span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">V1.1 新增</span><LogicInfo>来源：物流管理系统－信息填报报表－整体通关时间；负数取 0，正数取原值。票数单位为“提货单”，件数单位为“件数”。</LogicInfo></div>
+                  </td>
+                  <td className="px-3 py-2 text-center text-gray-400 text-xs">-</td>
+                  <td className="px-3 py-2 text-center text-gray-400">-</td>
+                  <td className="px-3 py-2 text-center font-semibold text-gray-900">3.6D</td>
+                  <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">84.6%</span></td>
+                  <td className="px-3 py-2 text-center font-semibold text-gray-900">3.9D</td>
+                  <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-7.7%</span></td>
+                  <td className="px-3 py-2 text-center font-semibold text-gray-900">4.3D</td>
+                  <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-16.3%</span></td>
+                </tr>
+              )}
               {/* 全链路分货平均时效 - 无品类 */}
               <tr className="hover:bg-gray-50">
                 <td className="px-3 py-2 text-gray-700 align-middle"><div className="flex items-center gap-2 group relative"><span>全链路分货平均时效</span><Info className="w-3.5 h-3.5 text-gray-400 cursor-help flex-shrink-0" /></div></td>
@@ -550,13 +590,7 @@ export function MetricsOverview() {
               <tr className="hover:bg-gray-50">
                 <td className="px-3 py-2 text-gray-700 align-middle"><div className="flex items-center gap-2 group relative"><span>门店提货至上架平均时效</span><Info className="w-3.5 h-3.5 text-gray-400 cursor-help flex-shrink-0" /></div></td>
                 <td className="px-3 py-2 text-center text-gray-400 text-xs">-</td>
-                <td className="px-3 py-2 text-center text-gray-400">-</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">2.1D</td>
-                <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">85.7%</span></td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">2.3D</td>
-                <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-9.5%</span></td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">2.8D</td>
-                <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-23.8%</span></td>
+                <TrendCells metric="pickupToShelf" />
               </tr>
               {/* 监管仓-周转仓调拨平均时效 - 无品类 */}
               <tr className="hover:bg-gray-50">
@@ -573,13 +607,7 @@ export function MetricsOverview() {
                   </div>
                 </td>
                 <td className="px-3 py-2 text-center text-gray-400 text-xs">-</td>
-                <td className="px-3 py-2 text-center text-gray-400">-</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">3.4D</td>
-                <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">82.4%</span></td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">3.5D</td>
-                <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-2.9%</span></td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">3.9D</td>
-                <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-11.8%</span></td>
+                <TrendCells metric="supervisionTransfer" />
               </tr>
               {/* 周转仓-卖场调拨平均时效 - 无品类 */}
               <tr className="hover:bg-gray-50">
@@ -596,13 +624,7 @@ export function MetricsOverview() {
                   </div>
                 </td>
                 <td className="px-3 py-2 text-center text-gray-400 text-xs">-</td>
-                <td className="px-3 py-2 text-center text-gray-400">-</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">4.8D</td>
-                <td className="px-3 py-2 text-center border-r-2 border-gray-300"><span className="text-xs text-gray-900 font-semibold">71.2%</span></td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">4.6D</td>
-                <td className="px-3 py-2 text-center"><span className="text-xs text-red-600 flex items-center justify-center gap-1"><TrendingUp className="w-3 h-3" />+4.2%</span></td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-900">4.9D</td>
-                <td className="px-3 py-2 text-center"><span className="text-xs text-green-600 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" />-2.1%</span></td>
+                <TrendCells metric="turnoverTransfer" />
               </tr>
               {/* 直入直出全链路平均时效（监管仓-卖场）- 无品类 */}
               <tr className="hover:bg-gray-50">
@@ -932,9 +954,9 @@ export function MetricsOverview() {
                 <td rowSpan={2} className="px-3 py-2 text-gray-700 border-l-4 border-violet-500 bg-violet-50/40">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span>1.3提货至海综保平均时效</span><span className="rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700">V1.1 调整</span>
+                    <LogicInfo>先入后报：实际到仓日期－货物到港时间；先报后入：实际到仓日期－实际放行时间</LogicInfo>
                     <ComparisonButton metric="1.1.3 提货至海综保平均时效" />
                   </div>
-                  <div className="mt-1 text-[11px] leading-5 text-violet-700">先入后报：实际到仓日期－货物到港时间；先报后入：实际到仓日期－实际放行时间</div>
                 </td>
                 <td className="px-3 py-2 text-center text-gray-700">香化</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">2.5D</td>
@@ -958,10 +980,9 @@ export function MetricsOverview() {
                 <td rowSpan={2} className="px-3 py-2 text-gray-700 border-l-4 border-violet-500 bg-violet-50/40">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span>1.4仓库入库平均时效</span><span className="rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700">V1.1 调整</span>
+                    <LogicInfo width="w-[520px]">先报后入：上架时间－实际到仓日期；先入后报：（反馈电子理货报告－实际到仓日期）＋（上架时间－仓库填写理货结果时间）。WMS“收到入库单日期”对应 CIBO“仓库填写理货结果时间”。</LogicInfo>
                     <ComparisonButton metric="1.1.4 仓库入库平均时效" />
                   </div>
-                  <div className="mt-1 text-[11px] leading-5 text-violet-700">先报后入：上架时间－实际到仓日期；先入后报：（反馈电子理货报告－实际到仓日期）＋（上架时间－仓库填写理货结果时间）</div>
-                  <div className="text-[11px] text-slate-500">WMS“收到入库单日期”对应 CIBO“仓库填写理货结果时间”</div>
                 </td>
                 <td className="px-3 py-2 text-center text-gray-700">香化</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">0.33D</td>
@@ -999,9 +1020,9 @@ export function MetricsOverview() {
                 <td className="px-3 py-2 text-gray-700 border-l-4 border-emerald-500 bg-emerald-50/40">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span>2.2一线通关平均时效-门店</span><span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">V1.1 新增</span>
+                    <LogicInfo>来源：物流管理系统－信息填报报表－整体通关时间；负数取 0，正数取原值。票数单位为“提货单”，件数单位为“件数”。</LogicInfo>
                     <ComparisonButton metric="1.2.2 一线通关平均时效-门店" />
                   </div>
-                  <div className="mt-1 text-[11px] leading-5 text-emerald-700">来源：物流管理系统－信息填报报表－整体通关时间；负数取 0，正数取原值</div>
                 </td>
                 <td className="px-3 py-2 text-center text-gray-400">-</td>
                 <td className="px-3 py-2 text-center text-gray-400">-</td>
@@ -1077,8 +1098,7 @@ export function MetricsOverview() {
 
               <tr className="hover:bg-gray-50">
                 <td className="px-3 py-2 text-gray-700 border-l-4 border-violet-500 bg-violet-50/40">
-                  <div className="flex flex-wrap items-center gap-1.5"><span>1.4门店提货至上架平均时效</span><span className="rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700">V1.1 调整</span><ComparisonButton metric="2.1.4 门店提货至上架平均时效" /></div>
-                  <div className="mt-1 text-[11px] leading-5 text-violet-700">提货到店时长＝（门店上架完成日期－通知门店提货日期）－（报文审核放行时间－报文提交时间）；4天内订单数／总单数，目标 4D</div>
+                  <div className="flex flex-wrap items-center gap-1.5"><span>1.4门店提货至上架平均时效</span><span className="rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700">V1.1 调整</span><LogicInfo width="w-[520px]">提货到店时长＝（门店上架完成日期－通知门店提货日期）－（报文审核放行时间－报文提交时间）；达标率＝4天内订单数／总单数，目标 4D。</LogicInfo><ComparisonButton metric="2.1.4 门店提货至上架平均时效" /></div>
                 </td>
                 <td className="px-3 py-2 text-center text-gray-400">-</td>
                 <td className="px-3 py-2 text-center font-semibold text-gray-900">0.17D</td>
@@ -1098,9 +1118,7 @@ export function MetricsOverview() {
               <tr className="hover:bg-gray-50">
                 <td className="px-3 py-2 font-medium text-gray-800">1.监管仓-周转仓</td>
                 <td className="px-3 py-2 text-gray-700 border-l-4 border-violet-500 bg-violet-50/40">
-                  <div className="flex flex-wrap items-center gap-1.5"><span>1.1监管仓-周转仓调拨平均时效</span><span className="rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700">V1.1 调整</span><ComparisonButton metric="3.1.1 监管仓-周转仓调拨平均时效" /></div>
-                  <div className="mt-1 text-[11px] leading-5 text-violet-700">非整单＝（入库上架完成－出库订货）×24；整单＝（入库收货完成－出库订货）×24。剔除同仓柜间调拨，仅含到周转仓订单</div>
-                  <div className="text-[11px] text-slate-500">下班后下单的订货时间顺延至次日最早上班时间（下班后预留1小时）</div>
+                  <div className="flex flex-wrap items-center gap-1.5"><span>1.1监管仓-周转仓调拨平均时效</span><span className="rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700">V1.1 调整</span><LogicInfo width="w-[560px]">非整单＝（入库上架完成－出库订货）×24；整单＝（入库收货完成－出库订货）×24。剔除同仓柜间调拨，仅含到周转仓订单。下班后下单的订货时间顺延至次日最早上班时间（下班后预留1小时）。</LogicInfo><ComparisonButton metric="3.1.1 监管仓-周转仓调拨平均时效" /></div>
                 </td>
                 <td className="px-3 py-2 text-center bg-gray-50 text-gray-300 text-xs">—</td>
                 <td className="px-3 py-2 text-center text-gray-400">-</td>
@@ -1117,9 +1135,7 @@ export function MetricsOverview() {
               <tr className="hover:bg-gray-50">
                 <td rowSpan={2} className="px-3 py-2 font-medium text-gray-800 align-top">2.周转仓-卖场</td>
                 <td className="px-3 py-2 text-gray-700 border-l-4 border-violet-500 bg-violet-50/40">
-                  <div className="flex flex-wrap items-center gap-1.5"><span>2.1周转仓-卖场调拨平均时效</span><span className="rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700">V1.1 调整</span><ComparisonButton metric="3.2.1 周转仓-卖场调拨平均时效" /></div>
-                  <div className="mt-1 text-[11px] leading-5 text-violet-700">门店要货出库单；出库时长＝（复核／拣货完成时间－订货时间）×24，有复核取复核，无复核取拣货</div>
-                  <div className="text-[11px] text-slate-500">提前作业：同日上班前分配且复核完成，取复核－分配；下班后分配且次日完成记 0</div>
+                  <div className="flex flex-wrap items-center gap-1.5"><span>2.1周转仓-卖场调拨平均时效</span><span className="rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700">V1.1 调整</span><LogicInfo width="w-[560px]">门店要货出库单；出库时长＝（复核／拣货完成时间－订货时间）×24，有复核取复核，无复核取拣货。提前作业：同日上班前分配且复核完成，取复核－分配；下班后分配且次日完成记 0。</LogicInfo><ComparisonButton metric="3.2.1 周转仓-卖场调拨平均时效" /></div>
                 </td>
                 <td className="px-3 py-2 text-center bg-gray-50 text-gray-300 text-xs">—</td>
                 <td className="px-3 py-2 text-center text-gray-700">-</td>
