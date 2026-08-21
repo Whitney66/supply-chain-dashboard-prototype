@@ -119,7 +119,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
       headers.push('品类');
     }
     headers.push('指标');
-    headers.push('均值天数');
+    headers.push('日度均值');
     headers.push('月度均值');
     
     // 添加时间列标签（跳过12月）
@@ -893,7 +893,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   维度
                 </th>
                 <th className="px-2 py-1.5 text-center font-bold text-gray-700 border-r border-gray-200 min-w-[70px] whitespace-nowrap">
-                  均值天数
+                  日度均值
                 </th>
                 {activeTimeDimension === 'monthly' && (
                   <th className="px-2 py-1.5 text-center font-bold text-gray-700 border-r border-gray-200 min-w-[70px] whitespace-nowrap">
@@ -1120,14 +1120,14 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                 </th>}
                 <th className="px-2 py-1.5 text-center font-bold text-gray-700 border-r border-gray-200 min-w-[65px] whitespace-nowrap">
                   <div className="flex items-center justify-center gap-1.5 relative group">
-                    <span>均值天数</span>
+                    <span>日度均值</span>
                     <div className="relative cursor-help">
                       <Info className="w-3.5 h-3.5 text-gray-400" />
                       <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-blue-600 text-white text-[8px] font-bold rounded-full flex items-center justify-center">5</span>
                     </div>
                     <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-72 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 whitespace-normal">
                       <div className="font-semibold mb-1">批注⑤</div>
-                      <div className="text-gray-300">需求标注：均值天数对应为所选的时间范围内，对应指标的总和/时间范围内对应的天数</div>
+                      <div className="text-gray-300">需求标注：日度均值对应为所选的时间范围内，对应指标的总和/时间范围内对应的天数</div>
                     </div>
                   </div>
                 </th>
@@ -3165,7 +3165,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                     <tr className="bg-gray-50 border-b border-gray-200">
                       <th className="px-3 py-2 text-center font-bold text-gray-700 border-r border-gray-200">指标</th>
                       <th className="px-3 py-2 text-center font-bold text-gray-700 border-r border-gray-200">维度</th>
-                      <th className="px-3 py-2 text-center font-bold text-gray-700 border-r border-gray-200">均值天数</th>
+                      <th className="px-3 py-2 text-center font-bold text-gray-700 border-r border-gray-200">日度均值</th>
                       {timeDimension === 'monthly' && (
                         <th className="px-3 py-2 text-center font-bold text-gray-700 border-r border-gray-200">月度均值</th>
                       )}
