@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, Calendar, Package, FileText, Maximize2, Download } from 'lucide-react';
+import { TrendingUp, TrendingDown, Calendar, Package, FileText, Maximize2, Download, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { OtherMetricsModule } from './OtherMetricsModule';
@@ -35,6 +35,10 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
   const [storeSegmentTab, setStoreSegmentTab] = useState<'transfer' | 'fullChain' | 'inOut'>('transfer');
   const [highlightChartArea, setHighlightChartArea] = useState(false);
   const [firstLineTimeDimension, setFirstLineTimeDimension] = useState<TimeDimension>('monthly');
+  const [expandedStoreIds, setExpandedStoreIds] = useState<string[]>([]);
+  const toggleStoreExpanded = (storeId: string) => setExpandedStoreIds(current =>
+    current.includes(storeId) ? current.filter(id => id !== storeId) : [...current, storeId]
+  );
   const activeStores = selectedStores.length > 0
     ? stores.filter(store => selectedStores.includes(store.id))
     : stores;
@@ -45,8 +49,9 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
   const selectedAverageFactor = activeStores.length > 0
     ? activeStores.reduce((sum, store) => sum + storeFactor(store.id), 0) / activeStores.length
     : 1;
+  const isMultiStoreView = activeStores.length > 1;
   const tableStores = [
-    ...(selectedStores.length > 1 ? [{ id: 'overall', name: '整体', factor: selectedAverageFactor }] : []),
+    ...(isMultiStoreView ? [{ id: 'overall', name: '整体', factor: selectedAverageFactor }] : []),
     ...activeStores.map(store => ({ ...store, factor: storeFactor(store.id) })),
   ];
   const scaleStoreValues = (values: number[], factor: number, isRate = false) => values.map(value => {
@@ -1067,6 +1072,16 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
     );
   };
 
+  const renderDimensionToggle = (metricName: string) => (
+    <div className="flex items-center justify-between gap-3 px-3 py-2.5 border-b border-gray-200 bg-gray-50">
+      <span className="text-sm font-medium text-gray-700">{metricName}</span>
+      <div className="flex bg-gray-100 rounded-lg p-1" role="group" aria-label={`${metricName}维度`}>
+        <button type="button" className={`px-3 py-1 text-sm rounded-md flex items-center gap-1.5 ${dimension === 'tickets' ? 'bg-white text-blue-600 shadow-sm font-medium' : 'text-gray-600'}`} onClick={() => setDimension('tickets')}><FileText className="w-4 h-4" />票数</button>
+        <button type="button" className={`px-3 py-1 text-sm rounded-md flex items-center gap-1.5 ${dimension === 'pieces' ? 'bg-white text-blue-600 shadow-sm font-medium' : 'text-gray-600'}`} onClick={() => setDimension('pieces')}><Package className="w-4 h-4" />件数</button>
+      </div>
+    </div>
+  );
+
   const renderUnifiedDurationTable = (
     metricName: string,
     categories: Array<{ name: string; tickets: number[]; pieces: number[]; target?: string }>,
@@ -1084,6 +1099,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
 
     return (
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-4">
+        {renderDimensionToggle(metricName)}
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full min-w-[1180px] text-xs">
             <thead>
@@ -1094,24 +1110,41 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
               </tr>
             </thead>
             <tbody>
-              {tableStores.flatMap(store => visibleCategories.map((category, categoryIndex) => {
-                const storeData = scaleStoreValues(category[selectedDataKey], store.factor);
-                const values = activeTimeDimension === 'monthly'
-                  ? getDataForDimension(storeData, 'monthly')
-                  : storeData.slice(0, 8);
-                const mean = average(storeData);
-                return (
-                  <tr key={`${store.id}-${category.name}`} className={`border-t border-gray-200 hover:bg-gray-50 ${store.id === 'overall' ? 'bg-blue-50/60 font-medium' : ''}`}>
-                    {categoryIndex === 0 && <td rowSpan={visibleCategories.length} className="px-3 py-2 text-gray-700 border-r border-gray-200 bg-gray-50 align-middle min-w-[160px]">{store.name}</td>}
-                    <td className={`px-3 py-2 text-gray-700 border-r border-gray-200 font-medium ${category.name === '酒水' ? 'bg-blue-50' : 'bg-green-50'}`}>{category.name}</td>
-                    <td className="px-3 py-2 text-gray-700 border-r border-gray-200">{metricName}</td>
-                    <td className="px-3 py-2 text-center text-amber-700 bg-amber-50 border-r border-gray-200">{category.target || '-'}</td>
-                    <td className="px-3 py-2 text-center text-gray-700 border-r border-gray-200">{mean === '-' ? '-' : `${mean}天`}</td>
-                    {activeTimeDimension === 'monthly' && <td className="px-3 py-2 text-center text-gray-700 border-r border-gray-200">{mean === '-' ? '-' : `${mean}天`}</td>}
-                    {values.map((value, valueIndex) => <td key={valueIndex} className={`px-3 py-2 text-center text-gray-700 ${valueIndex < values.length - 1 ? 'border-r border-gray-200' : ''} ${valueIndex >= values.length - 2 ? 'bg-blue-50' : ''}`}>{value > 0 ? `${value.toFixed(2)}天` : '-'}</td>)}
-                  </tr>
-                );
-              }))}
+              {tableStores.flatMap(store => {
+                const showDetails = store.id === 'overall' || !isMultiStoreView || expandedStoreIds.includes(store.id);
+                if (!showDetails) {
+                  return [(
+                    <tr key={store.id} className="border-t border-gray-200 hover:bg-blue-50/40">
+                      <td className="px-3 py-2 border-r border-gray-200" colSpan={2}>
+                        <button type="button" onClick={() => toggleStoreExpanded(store.id)} className="flex items-center gap-2 text-left font-medium text-gray-700">
+                          <ChevronRight className="w-4 h-4 text-gray-400" />{store.name}
+                        </button>
+                      </td>
+                      <td className="px-3 py-2 text-gray-500" colSpan={4 + labels.length}>点击查看该门店指标明细</td>
+                    </tr>
+                  )];
+                }
+                return visibleCategories.map((category, categoryIndex) => {
+                  const storeData = scaleStoreValues(category[selectedDataKey], store.factor);
+                  const values = activeTimeDimension === 'monthly' ? getDataForDimension(storeData, 'monthly') : storeData.slice(0, 8);
+                  const mean = average(storeData);
+                  return (
+                    <tr key={`${store.id}-${category.name}`} className={`border-t border-gray-200 hover:bg-gray-50 ${store.id === 'overall' ? 'bg-blue-50/60 font-medium' : ''}`}>
+                      {categoryIndex === 0 && (
+                        <td rowSpan={visibleCategories.length} className="px-3 py-2 text-gray-700 border-r border-gray-200 bg-gray-50 align-middle min-w-[160px]">
+                          {store.id === 'overall' || !isMultiStoreView ? store.name : <button type="button" onClick={() => toggleStoreExpanded(store.id)} className="flex items-center gap-2 text-left"><ChevronRight className="w-4 h-4 rotate-90 text-blue-500" />{store.name}</button>}
+                        </td>
+                      )}
+                      <td className={`px-3 py-2 text-gray-700 border-r border-gray-200 font-medium ${category.name === '酒水' ? 'bg-blue-50' : category.name === '香化' ? 'bg-green-50' : 'bg-gray-50'}`}>{category.name || '-'}</td>
+                      <td className="px-3 py-2 text-gray-700 border-r border-gray-200">{metricName}</td>
+                      <td className="px-3 py-2 text-center text-amber-700 bg-amber-50 border-r border-gray-200">{category.target || '-'}</td>
+                      <td className="px-3 py-2 text-center text-gray-700 border-r border-gray-200">{mean === '-' ? '-' : `${mean}天`}</td>
+                      {activeTimeDimension === 'monthly' && <td className="px-3 py-2 text-center text-gray-700 border-r border-gray-200">{mean === '-' ? '-' : `${mean}天`}</td>}
+                      {values.map((value, valueIndex) => <td key={valueIndex} className={`px-3 py-2 text-center text-gray-700 ${valueIndex < values.length - 1 ? 'border-r border-gray-200' : ''} ${valueIndex >= values.length - 2 ? 'bg-blue-50' : ''}`}>{value > 0 ? `${value.toFixed(2)}天` : '-'}</td>)}
+                    </tr>
+                  );
+                });
+              })}
             </tbody>
           </table>
         </div>
@@ -1146,24 +1179,33 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
       storeContext?: { id: string; name: string; factor: number };
     }
   ) => {
+    const scaleCategory = (category: typeof categoryData.alcohol, factor: number) => ({
+      over10Days: { monthlyData: scaleStoreValues(category.over10Days.monthlyData, factor), weeklyData: scaleStoreValues(category.over10Days.weeklyData, factor) },
+      over14Days: { monthlyData: scaleStoreValues(category.over14Days.monthlyData, factor), weeklyData: scaleStoreValues(category.over14Days.weeklyData, factor) },
+      totalOrders: { monthlyData: scaleStoreValues(category.totalOrders.monthlyData, factor), weeklyData: scaleStoreValues(category.totalOrders.weeklyData, factor) },
+      rate10Days: { monthlyData: scaleStoreValues(category.rate10Days.monthlyData, factor, true), weeklyData: scaleStoreValues(category.rate10Days.weeklyData, factor, true) },
+      rate14Days: { monthlyData: scaleStoreValues(category.rate14Days.monthlyData, factor, true), weeklyData: scaleStoreValues(category.rate14Days.weeklyData, factor, true) },
+    });
     if (!options?.storeContext) {
-      const scaleCategory = (category: typeof categoryData.alcohol, factor: number) => ({
-        over10Days: { monthlyData: scaleStoreValues(category.over10Days.monthlyData, factor), weeklyData: scaleStoreValues(category.over10Days.weeklyData, factor) },
-        over14Days: { monthlyData: scaleStoreValues(category.over14Days.monthlyData, factor), weeklyData: scaleStoreValues(category.over14Days.weeklyData, factor) },
-        totalOrders: { monthlyData: scaleStoreValues(category.totalOrders.monthlyData, factor), weeklyData: scaleStoreValues(category.totalOrders.weeklyData, factor) },
-        rate10Days: { monthlyData: scaleStoreValues(category.rate10Days.monthlyData, factor, true), weeklyData: scaleStoreValues(category.rate10Days.weeklyData, factor, true) },
-        rate14Days: { monthlyData: scaleStoreValues(category.rate14Days.monthlyData, factor, true), weeklyData: scaleStoreValues(category.rate14Days.weeklyData, factor, true) },
-      });
+      const visibleStores = tableStores.filter(store => store.id === 'overall' || !isMultiStoreView || expandedStoreIds.includes(store.id));
       return (
-        <div className="space-y-3">
-          {tableStores.map(store => (
-            <div key={store.id} className={store.id === 'overall' ? 'rounded-lg ring-2 ring-blue-200' : ''}>
-              {renderMetricTableWithCategory(metricName, {
-                alcohol: scaleCategory(categoryData.alcohol, store.factor),
-                cosmetics: scaleCategory(categoryData.cosmetics, store.factor),
-              }, { ...options, storeContext: store })}
-            </div>
-          ))}
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-4">
+          {renderDimensionToggle(metricName)}
+          <div className="overflow-x-auto custom-scrollbar">
+            <table className="w-full min-w-[1180px] text-xs">
+              <thead><tr className="bg-red-50"><th className="px-2 py-2 text-left border-r">门店</th><th className="px-2 py-2 text-left border-r">品类</th><th className="px-2 py-2 text-left border-r">指标</th><th className="px-2 py-2 text-center border-r text-amber-700 bg-amber-50">目标值</th><th className="px-2 py-2 text-center border-r">日度均值</th>{timeDimension === 'monthly' && <th className="px-2 py-2 text-center border-r">月度均值</th>}{getTimeLabels().map(label => <th key={label} className="px-2 py-2 text-center border-r">{label}</th>)}</tr></thead>
+              <tbody>
+                {visibleStores.map(store => renderMetricTableWithCategory(metricName, {
+                  alcohol: scaleCategory(categoryData.alcohol, store.factor),
+                  cosmetics: scaleCategory(categoryData.cosmetics, store.factor),
+                }, { ...options, storeContext: store }))}
+                {isMultiStoreView && tableStores.filter(store => store.id !== 'overall' && !expandedStoreIds.includes(store.id)).map(store => (
+                  <tr key={store.id} className="border-t hover:bg-blue-50/40"><td className="px-3 py-2" colSpan={2}><button type="button" onClick={() => toggleStoreExpanded(store.id)} className="flex items-center gap-2 font-medium"><ChevronRight className="w-4 h-4" />{store.name}</button></td><td className="px-3 py-2 text-gray-500" colSpan={4 + getTimeLabels().length}>点击展开该门店指标明细</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="px-3 py-2.5 border-t border-blue-100 bg-blue-50 text-[11px] text-blue-800">日度均值 = 每个月的时效指标汇总值 / 每个月天数的汇总值；月度均值 = 各月日度均值的平均值。目标值与指标总览一致，未配置时展示“-”。</div>
         </div>
       );
     }
@@ -1178,10 +1220,11 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
       return avg > 0 ? (isRate ? `${avg.toFixed(2)}%` : avg.toFixed(2)) : '-';
     };
     
+    const countLabel = dimension === 'tickets' ? '票数' : '件数';
     const defaultSubItems = [
       { name: '平均时效', key: 'averageDuration' },
-      { name: '大于目标值的票数', key: 'over10Days' },
-      { name: '总票数', key: 'totalOrders' },
+      { name: `大于目标值的${countLabel}`, key: 'over10Days' },
+      { name: `总${countLabel}`, key: 'totalOrders' },
       { name: '达标率', key: 'rate10Days' },
     ];
     const getSubItems = (_threshold?: string) => defaultSubItems;
@@ -1217,58 +1260,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
     const shouldShowCosmetics = !selectedCategories || selectedCategories.length === 0 || selectedCategories.includes('香化');
 
     return (
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-4">
-        <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="bg-red-50">
-                <th className="px-2 py-1.5 text-left font-bold text-gray-700 border-r border-gray-200 min-w-[100px] whitespace-nowrap">
-                  门店
-                </th>
-                {showCategoryColumn && (
-                  <th className="px-2 py-1.5 text-left font-bold text-gray-700 border-r border-gray-200 min-w-[70px] whitespace-nowrap">
-                    品类
-                  </th>
-                )}
-                <th className="px-2 py-1.5 text-left font-bold text-gray-700 border-r border-gray-200 min-w-[140px] whitespace-nowrap">
-                  指标
-                </th>
-                <th className="px-2 py-1.5 text-center font-bold text-amber-700 bg-amber-50 border-r border-gray-200 min-w-[70px] whitespace-nowrap">
-                  目标值
-                </th>
-                <th className="px-2 py-1.5 text-center font-bold text-gray-700 border-r border-gray-200 min-w-[65px] whitespace-nowrap">
-                  <div className="flex items-center justify-center gap-1.5 relative group">
-                    <span>日度均值</span>
-                    <div className="relative cursor-help">
-                      <Info className="w-3.5 h-3.5 text-gray-400" />
-                      <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-blue-600 text-white text-[8px] font-bold rounded-full flex items-center justify-center">5</span>
-                    </div>
-                    <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-72 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 whitespace-normal">
-                      <div className="font-semibold mb-1">批注⑤</div>
-                      <div className="text-gray-300">需求标注：日度均值对应为所选的时间范围内，对应指标的总和/时间范围内对应的天数</div>
-                    </div>
-                  </div>
-                </th>
-                {timeDimension === 'monthly' && (
-                  <th className="px-2 py-1.5 text-center font-bold text-gray-700 border-r border-gray-200 min-w-[70px] whitespace-nowrap">
-                    月度均值
-                  </th>
-                )}
-                {labels.map((label, index) => {
-                  // 跳过"12月"列��索引11）
-                  return (
-                    <th
-                      key={index}
-                      className={`px-2 py-1.5 text-center font-bold text-gray-700 min-w-[55px] whitespace-nowrap ${
-                        index < labels.length - 1 ? 'border-r border-gray-200' : ''
-                      } ${index >= labels.length - 2 ? 'bg-blue-50' : ''}`}
-                    >
-                      {label}
-                    </th>
-                  );
-                })}</tr>
-            </thead>
-            <tbody>
+      <>
               {/* 酒水品类 */}
               {shouldShowAlcohol && alcoholSubItems.map((item, rowIndex) => {
                 const metricData = getMetricData(categoryData.alcohol, item.key, options?.alcoholThreshold);
@@ -1367,13 +1359,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   </tr>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
-        <div className="px-3 py-2.5 border-t border-blue-100 bg-blue-50 text-[11px] text-blue-800">
-          日度均值 = 每个月的时效指标汇总值 / 每个月天数的汇总值；月度均值 = 各月日度均值的平均值。目标值与指标总览一致，未配置时展示“-”。
-        </div>
-      </div>
+      </>
     );
   };
 
@@ -1641,28 +1627,6 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
 
   return (
     <div className="space-y-4 max-w-full">
-      {(shouldShowModule('ordering') || shouldShowModule('distribution')) && (
-        <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center justify-between gap-3">
-          <span className="text-sm font-medium text-gray-700">图表及表格维度</span>
-          <div className="flex bg-gray-100 rounded-lg p-1" role="group" aria-label="图表及表格维度">
-            <button
-              type="button"
-              className={`px-4 py-1.5 text-sm rounded-md transition-all flex items-center gap-1.5 ${dimension === 'tickets' ? 'bg-white text-blue-600 shadow-sm font-medium' : 'text-gray-600 hover:text-gray-900'}`}
-              onClick={() => setDimension('tickets')}
-            >
-              <FileText className="w-4 h-4" />票数
-            </button>
-            <button
-              type="button"
-              className={`px-4 py-1.5 text-sm rounded-md transition-all flex items-center gap-1.5 ${dimension === 'pieces' ? 'bg-white text-blue-600 shadow-sm font-medium' : 'text-gray-600 hover:text-gray-900'}`}
-              onClick={() => setDimension('pieces')}
-            >
-              <Package className="w-4 h-4" />件数
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* 一盘货时效模块 */}
       <div className={`bg-white rounded-lg border border-gray-200 p-4 transition-all ${highlightChartArea ? 'border-2 border-blue-500 bg-blue-50 shadow-lg' : ''}`}>
         <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
