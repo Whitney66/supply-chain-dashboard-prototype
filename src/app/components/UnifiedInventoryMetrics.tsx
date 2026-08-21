@@ -49,6 +49,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
   const selectedAverageFactor = activeStores.length > 0
     ? activeStores.reduce((sum, store) => sum + storeFactor(store.id), 0) / activeStores.length
     : 1;
+  const getStoreDisplayName = (name: string) => name.replace(/【[^】]*】/g, '').replace(/^一盘货：/, '').trim();
   const isMultiStoreView = activeStores.length > 1;
   const tableStores = [
     ...(isMultiStoreView ? [{ id: 'overall', name: '整体', factor: selectedAverageFactor }] : []),
@@ -1130,7 +1131,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                     <tr key={`${store.id}-${category.name}`} className={`border-t border-gray-200 hover:bg-gray-50 ${store.id === 'overall' ? 'bg-blue-50/60 font-medium' : ''}`}>
                       {categoryIndex === 0 && (
                         <td rowSpan={visibleCategories.length} className="px-3 py-2 text-gray-700 border-r border-gray-200 bg-gray-50 align-middle min-w-[160px]">
-                          {store.id === 'overall' || !isMultiStoreView ? store.name : <button type="button" onClick={() => toggleStoreExpanded(store.id)} className="flex items-center gap-2 text-left"><ChevronRight className="w-4 h-4 rotate-90 text-blue-500" />{store.name}</button>}
+                          {store.id === 'overall' || !isMultiStoreView ? store.name : <button type="button" onClick={() => toggleStoreExpanded(store.id)} className="flex items-center gap-2 text-left"><ChevronRight className="w-4 h-4 rotate-90 text-blue-500" />{getStoreDisplayName(store.name)}</button>}
                         </td>
                       )}
                       <td className={`px-3 py-2 text-gray-700 border-r border-gray-200 font-medium ${category.name === '酒水' ? 'bg-blue-50' : category.name === '香化' ? 'bg-green-50' : 'bg-gray-50'}`}>{category.name || '-'}</td>
@@ -1150,12 +1151,12 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
         {isMultiStoreView && (
           <div className="border-t border-gray-200 p-3">
             <div className="text-xs font-medium text-gray-600 mb-2">门店下钻</div>
-            <div className="flex flex-wrap gap-2">{activeStores.map(store => <button key={store.id} type="button" onClick={() => toggleStoreExpanded(store.id)} className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded border ${expandedStoreIds.includes(store.id) ? 'border-blue-300 bg-blue-50 text-blue-700' : 'border-gray-300 bg-white text-gray-700'}`}><ChevronRight className={`w-3.5 h-3.5 ${expandedStoreIds.includes(store.id) ? 'rotate-90' : ''}`} />{store.name}</button>)}</div>
+            <div className="flex flex-wrap gap-2">{activeStores.map(store => <button key={store.id} type="button" onClick={() => toggleStoreExpanded(store.id)} className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded border ${expandedStoreIds.includes(store.id) ? 'border-blue-300 bg-blue-50 text-blue-700' : 'border-gray-300 bg-white text-gray-700'}`}><ChevronRight className={`w-3.5 h-3.5 ${expandedStoreIds.includes(store.id) ? 'rotate-90' : ''}`} />{getStoreDisplayName(store.name)}</button>)}</div>
           </div>
         )}
         {activeStores.filter(store => expandedStoreIds.includes(store.id)).map(store => {
           const storeCategories = visibleCategories.map(category => ({ ...category, tickets: scaleStoreValues(category.tickets, storeFactor(store.id)), pieces: scaleStoreValues(category.pieces, storeFactor(store.id)) }));
-          return <div key={store.id} className="mt-4 border-t-4 border-blue-200"><div className="px-3 py-2 bg-blue-50 font-medium text-sm text-blue-900">{store.name} - 指标明细</div>{renderUnifiedStoreDurationTable(metricName, store.name, storeCategories, activeTimeDimension)}</div>;
+          return <div key={store.id} className="mt-4 border-t-4 border-blue-200"><div className="px-3 py-2 bg-blue-50 font-medium text-sm text-blue-900">{getStoreDisplayName(store.name)} - 指标明细</div>{renderUnifiedStoreDurationTable(metricName, getStoreDisplayName(store.name), storeCategories, activeTimeDimension)}</div>;
         })}
       </div>
     );
@@ -1210,8 +1211,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
             </table>
           </div>
           <div className="px-3 py-2.5 border-t border-blue-100 bg-blue-50 text-[11px] text-blue-800">日度均值 = 每个月的时效指标汇总值 / 每个月天数的汇总值；月度均值 = 各月日度均值的平均值。目标值与指标总览一致，未配置时展示“-”。</div>
-          {isMultiStoreView && <div className="border-t p-3"><div className="text-xs font-medium text-gray-600 mb-2">门店下钻</div><div className="flex flex-wrap gap-2">{activeStores.map(store => <button key={store.id} type="button" onClick={() => toggleStoreExpanded(store.id)} className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded border ${expandedStoreIds.includes(store.id) ? 'border-blue-300 bg-blue-50 text-blue-700' : 'border-gray-300'}`}><ChevronRight className={`w-3.5 h-3.5 ${expandedStoreIds.includes(store.id) ? 'rotate-90' : ''}`} />{store.name}</button>)}</div></div>}
-          {activeStores.filter(store => expandedStoreIds.includes(store.id)).map(store => <div key={store.id} className="mt-4 border-t-4 border-blue-200"><div className="px-3 py-2 bg-blue-50 font-medium text-sm text-blue-900">{store.name} - 指标明细</div><div className="overflow-x-auto"><table className="w-full min-w-[1180px] text-xs"><thead><tr className="bg-red-50"><th className="px-2 py-2 border-r">门店</th><th className="px-2 py-2 border-r">品类</th><th className="px-2 py-2 border-r">指标</th><th className="px-2 py-2 border-r text-amber-700 bg-amber-50">目标值</th><th className="px-2 py-2 border-r">日度均值</th>{timeDimension === 'monthly' && <th className="px-2 py-2 border-r">月度均值</th>}{getTimeLabels().map(label => <th key={label} className="px-2 py-2 border-r">{label}</th>)}</tr></thead><tbody>{renderMetricTableWithCategory(metricName, { alcohol: scaleCategory(categoryData.alcohol, storeFactor(store.id)), cosmetics: scaleCategory(categoryData.cosmetics, storeFactor(store.id)) }, { ...options, storeContext: { ...store, factor: storeFactor(store.id) } })}</tbody></table></div></div>)}
+          {isMultiStoreView && <div className="border-t p-3"><div className="text-xs font-medium text-gray-600 mb-2">门店下钻</div><div className="flex flex-wrap gap-2">{activeStores.map(store => <button key={store.id} type="button" onClick={() => toggleStoreExpanded(store.id)} className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded border ${expandedStoreIds.includes(store.id) ? 'border-blue-300 bg-blue-50 text-blue-700' : 'border-gray-300'}`}><ChevronRight className={`w-3.5 h-3.5 ${expandedStoreIds.includes(store.id) ? 'rotate-90' : ''}`} />{getStoreDisplayName(store.name)}</button>)}</div></div>}
+          {activeStores.filter(store => expandedStoreIds.includes(store.id)).map(store => <div key={store.id} className="mt-4 border-t-4 border-blue-200"><div className="px-3 py-2 bg-blue-50 font-medium text-sm text-blue-900">{getStoreDisplayName(store.name)} - 指标明细</div><div className="overflow-x-auto"><table className="w-full min-w-[1180px] text-xs"><thead><tr className="bg-red-50"><th className="px-2 py-2 border-r">门店</th><th className="px-2 py-2 border-r">品类</th><th className="px-2 py-2 border-r">指标</th><th className="px-2 py-2 border-r text-amber-700 bg-amber-50">目标值</th><th className="px-2 py-2 border-r">日度均值</th>{timeDimension === 'monthly' && <th className="px-2 py-2 border-r">月度均值</th>}{getTimeLabels().map(label => <th key={label} className="px-2 py-2 border-r">{label}</th>)}</tr></thead><tbody>{renderMetricTableWithCategory(metricName, { alcohol: scaleCategory(categoryData.alcohol, storeFactor(store.id)), cosmetics: scaleCategory(categoryData.cosmetics, storeFactor(store.id)) }, { ...options, storeContext: { ...store, name: getStoreDisplayName(store.name), factor: storeFactor(store.id) } })}</tbody></table></div></div>)}
         </div>
       );
     }
@@ -1415,7 +1416,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                 warehouse.stores.map((store, storeIndex) => (
                   <tr key={`${warehouseIndex}-${storeIndex}`} className="border-t border-gray-200 hover:bg-gray-50">
                     <td className="px-2 py-1.5 text-gray-700 border-r border-gray-200">
-                      {store.name}
+                      {getStoreDisplayName(store.name)}
                     </td>
                     {timeDimension === 'monthly' && (
                       <td className="px-2 py-1.5 text-center text-gray-700 border-r border-gray-200">
@@ -1602,7 +1603,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
               {storeData.map((store, storeIndex) => (
                 <tr key={storeIndex} className="border-t border-gray-200 hover:bg-gray-50">
                   <td className="px-2 py-1.5 text-gray-700 border-r border-gray-200">
-                    {store.name}
+                    {getStoreDisplayName(store.name)}
                   </td>
                   {timeDimension === 'monthly' && (
                     <td className="px-2 py-1.5 text-center text-gray-700 border-r border-gray-200">
