@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { OtherMetricsModule } from './OtherMetricsModule';
 import { Info } from 'lucide-react';
+import { stores } from '../data/storeWarehouseMapping';
 
 type Dimension = 'tickets' | 'pieces';
 type TimeDimension = 'monthly' | 'weekly';
@@ -22,17 +23,22 @@ interface UnifiedInventoryMetricsProps {
   setDimension: (dimension: Dimension) => void;
   setTimeDimension: (timeDimension: TimeDimension) => void;
   selectedCategories: string[];
+  selectedStores: string[];
   startDate: Date;
   endDate: Date;
   businessSegment?: 'all' | 'ordering' | 'distribution' | 'store' | 'other';
   indicatorType?: 'all' | 'timeliness' | 'quality' | 'efficiency' | 'cost' | 'planning';
 }
 
-export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension, setTimeDimension, selectedCategories, startDate, endDate, businessSegment = 'all', indicatorType = 'all' }: UnifiedInventoryMetricsProps) {
+export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension, setTimeDimension, selectedCategories, selectedStores, startDate, endDate, businessSegment = 'all', indicatorType = 'all' }: UnifiedInventoryMetricsProps) {
   const [deliveryTab, setDeliveryTab] = useState<'timeliness' | 'stores'>('timeliness');
   const [storeSegmentTab, setStoreSegmentTab] = useState<'transfer' | 'fullChain' | 'inOut'>('transfer');
   const [highlightChartArea, setHighlightChartArea] = useState(false);
   const [firstLineTimeDimension, setFirstLineTimeDimension] = useState<TimeDimension>('monthly');
+  const selectedStoreNames = selectedStores
+    .map(storeId => stores.find(store => store.id === storeId)?.name)
+    .filter((name): name is string => Boolean(name));
+  const storeDisplay = selectedStoreNames.length > 0 ? selectedStoreNames.join('、') : '全部门店';
   
   // 判断是否显示某个业务模块
   const shouldShowModule = (segment: 'ordering' | 'distribution' | 'store' | 'other'): boolean => {
@@ -1046,6 +1052,58 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
     );
   };
 
+  const renderUnifiedDurationTable = (
+    metricName: string,
+    categories: Array<{ name: string; tickets: number[]; pieces: number[]; target?: string }>,
+    activeTimeDimension: TimeDimension = timeDimension,
+  ) => {
+    const labels = activeTimeDimension === 'monthly'
+      ? getTimeLabels()
+      : ['第1周', '第2周', '第3周', '第4周', '第5周', '第6周', '第7周', '第8周'];
+    const selectedDataKey = dimension === 'tickets' ? 'tickets' : 'pieces';
+    const visibleCategories = categories.filter(category => shouldShowCategory(category.name));
+    const average = (values: number[]) => {
+      const validValues = values.filter(value => value > 0);
+      return validValues.length ? (validValues.reduce((sum, value) => sum + value, 0) / validValues.length).toFixed(2) : '-';
+    };
+
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-4">
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full min-w-[1180px] text-xs">
+            <thead>
+              <tr className="bg-red-50 border-b border-gray-200">
+                {['门店', '品类', '指标', '目标值', '日度均值', ...(activeTimeDimension === 'monthly' ? ['月度均值'] : []), ...labels].map((label, index) => (
+                  <th key={`${label}-${index}`} className={`px-3 py-2 text-${index < 3 ? 'left' : 'center'} font-bold border-r border-gray-200 whitespace-nowrap ${label === '目标值' ? 'text-amber-700 bg-amber-50' : 'text-gray-700'}`}>{label}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {visibleCategories.map((category, index) => {
+                const values = activeTimeDimension === 'monthly'
+                  ? getDataForDimension(category[selectedDataKey], 'monthly')
+                  : category[selectedDataKey].slice(0, 8);
+                const mean = average(category[selectedDataKey]);
+                return (
+                  <tr key={category.name} className="border-t border-gray-200 hover:bg-gray-50">
+                    {index === 0 && <td rowSpan={visibleCategories.length} className="px-3 py-2 text-gray-700 border-r border-gray-200 bg-gray-50 align-middle min-w-[120px]">{storeDisplay}</td>}
+                    <td className={`px-3 py-2 text-gray-700 border-r border-gray-200 font-medium ${category.name === '酒水' ? 'bg-blue-50' : 'bg-green-50'}`}>{category.name}</td>
+                    <td className="px-3 py-2 text-gray-700 border-r border-gray-200">{metricName}</td>
+                    <td className="px-3 py-2 text-center text-amber-700 bg-amber-50 border-r border-gray-200">{category.target || '-'}</td>
+                    <td className="px-3 py-2 text-center text-gray-700 border-r border-gray-200">{mean === '-' ? '-' : `${mean}天`}</td>
+                    {activeTimeDimension === 'monthly' && <td className="px-3 py-2 text-center text-gray-700 border-r border-gray-200">{mean === '-' ? '-' : `${mean}天`}</td>}
+                    {values.map((value, valueIndex) => <td key={valueIndex} className={`px-3 py-2 text-center text-gray-700 ${valueIndex < values.length - 1 ? 'border-r border-gray-200' : ''} ${valueIndex >= values.length - 2 ? 'bg-blue-50' : ''}`}>{value > 0 ? `${value.toFixed(2)}天` : '-'}</td>)}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <div className="px-3 py-2.5 border-t border-blue-100 bg-blue-50 text-[11px] text-blue-800">日度均值 = 每个月的时效指标汇总值 / 每个月天数的汇总值；月度均值 = 各月日度均值的平均值。目标值与指标总览一致，未配置时展示“-”。</div>
+      </div>
+    );
+  };
+
   // 渲染带品类的指标表格（入库和出库时效专用）
   const renderMetricTableWithCategory = (
     metricName: string, 
@@ -1185,7 +1243,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <tr key={`liquor-${rowIndex}`} className="border-t border-gray-200 hover:bg-gray-50">
                     {rowIndex === 0 && (
                       <td rowSpan={alcoholSubItems.length + (shouldShowCosmetics ? cosmeticsSubItems.length : 0)} className="px-2 py-1.5 text-gray-700 border-r border-gray-200 align-middle font-medium bg-gray-50">
-                        全部门店
+                        {storeDisplay}
                       </td>
                     )}
                     {showCategoryColumn && rowIndex === 0 && (
@@ -1234,7 +1292,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <tr key={`cosmetics-${rowIndex}`} className="border-t border-gray-200 hover:bg-gray-50">
                     {!shouldShowAlcohol && rowIndex === 0 && (
                       <td rowSpan={cosmeticsSubItems.length} className="px-2 py-1.5 text-gray-700 border-r border-gray-200 align-middle font-medium bg-gray-50">
-                        全部门店
+                        {storeDisplay}
                       </td>
                     )}
                     {showCategoryColumn && rowIndex === 0 && (
@@ -1811,7 +1869,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                 </button>
               </div>
               
-              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <div className="hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -1993,6 +2051,10 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   </table>
                 </div>
               </div>
+              {renderUnifiedDurationTable('全链路订货平均时效（一盘货）', [
+                { name: '酒水', tickets: [8.2, 8.9, 10.2, 11.0, 9.5, 9.9, 9.2, 10.5, 11.2, 9.8, 9.4, 0, 9.0], pieces: [8.5, 9.2, 10.5, 11.3, 9.8, 10.2, 9.5, 10.8, 11.5, 10.1, 9.7, 0, 9.3], target: '10D' },
+                { name: '香化', tickets: [8.8, 9.5, 10.8, 11.6, 10.1, 10.5, 9.8, 11.1, 11.8, 10.4, 10.0, 0, 9.6], pieces: [9.1, 9.8, 11.1, 11.9, 10.4, 10.8, 10.1, 11.4, 12.1, 10.7, 10.3, 0, 9.9], target: '14D' },
+              ])}
             </div>
           </div>
 
@@ -2298,8 +2360,9 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
             </div>
 
             <div className="ml-3">
-              {renderMetricTable(currentCustoms.firstLine, [
-                { name: '一线通关平均时效', data: currentCustoms.firstLine.monthlyData },
+              {renderUnifiedDurationTable('一线通关平均时效', [
+                { name: '酒水', tickets: customsClearanceData.tickets.firstLine.monthlyData, pieces: customsClearanceData.pieces.firstLine.monthlyData, target: '3D' },
+                { name: '香化', tickets: customsClearanceData.tickets.firstLine.monthlyData, pieces: customsClearanceData.pieces.firstLine.monthlyData, target: '3D' },
               ], firstLineTimeDimension)}
             </div>
           </div>
@@ -2449,7 +2512,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                 </button>
               </div>
               
-              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <div className="hidden">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-200">
@@ -2553,6 +2616,10 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   </tbody>
                 </table>
               </div>
+              {renderUnifiedDurationTable('提货至海综保平均时效', [
+                { name: '酒水', tickets: [2.4, 2.8, 3.1, 2.7, 2.6, 2.9, 2.5, 3.0, 2.8, 2.7, 2.6, 2.8], pieces: [2.2, 2.6, 2.9, 2.5, 2.4, 2.7, 2.3, 2.8, 2.6, 2.5, 2.4, 2.6], target: '2.5D' },
+                { name: '香化', tickets: [1.8, 2.1, 2.4, 2.0, 1.9, 2.2, 1.8, 2.3, 2.1, 2.0, 1.9, 2.1], pieces: [1.6, 1.9, 2.2, 1.8, 1.7, 2.0, 1.6, 2.1, 1.9, 1.8, 1.7, 1.9], target: '2.5D' },
+              ])}
             </div>
           </div>
 
@@ -2597,9 +2664,9 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                     </ResponsiveContainer>
                   </div>
                   <div className="ml-3">
-                    {renderMetricTable({ name: '全链路入库平均时效（直发）', avgDays: 4.6, trend: -0.2, monthlyData: alcohol, weeklyData: alcohol.slice(0, 8) }, [
-                      ...(shouldShowCategory('酒水') ? [{ name: '酒水', data: alcohol }] : []),
-                      ...(shouldShowCategory('香化') ? [{ name: '香化', data: cosmetics }] : []),
+                    {renderUnifiedDurationTable('全链路入库平均时效（直发）', [
+                      { name: '酒水', tickets: alcohol, pieces: alcohol.map(value => value + 0.3), target: '-' },
+                      { name: '香化', tickets: cosmetics, pieces: cosmetics.map(value => value + 0.3), target: '3.88D' },
                     ])}
                   </div>
                 </>
@@ -3096,8 +3163,9 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                 </button>
               </div>
               
-              {renderMetricTable(currentCustoms.secondLine, [
-                { name: '二线通关平均时效', data: currentCustoms.secondLine.monthlyData },
+              {renderUnifiedDurationTable('二线通关平均时效', [
+                { name: '酒水', tickets: customsClearanceData.tickets.secondLine.monthlyData, pieces: customsClearanceData.pieces.secondLine.monthlyData },
+                { name: '香化', tickets: customsClearanceData.tickets.secondLine.monthlyData, pieces: customsClearanceData.pieces.secondLine.monthlyData },
               ])}
             </div>
           </div>
@@ -3213,7 +3281,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                 </button>
               </div>
               
-              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <div className="hidden">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-200">
@@ -3283,6 +3351,10 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   </tbody>
                 </table>
               </div>
+              {renderUnifiedDurationTable('门店提货至上架平均时效', [
+                { name: '酒水', tickets: [1.2, 1.1, 1.3, 1.0, 1.2, 1.1, 1.0, 1.3, 1.2, 1.1, 1.0, 1.2], pieces: [0.8, 0.7, 0.9, 0.7, 0.8, 0.8, 0.7, 0.9, 0.8, 0.7, 0.8, 0.8], target: '-' },
+                { name: '香化', tickets: [1.3, 1.2, 1.4, 1.1, 1.3, 1.2, 1.1, 1.4, 1.3, 1.2, 1.1, 1.3], pieces: [0.9, 0.8, 1.0, 0.8, 0.9, 0.9, 0.8, 1.0, 0.9, 0.8, 0.9, 0.9], target: '0.17D' },
+              ])}
             </div>
           </div>
         </div>

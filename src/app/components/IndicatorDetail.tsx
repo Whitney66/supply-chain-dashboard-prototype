@@ -17,6 +17,7 @@ export function IndicatorDetail({ filters, businessSegment = 'all', indicatorTyp
   return (
     <UnifiedInventoryModule
       selectedCategories={filters.selectedCategories}
+      selectedStores={filters.selectedStores}
       startDate={filters.startDate}
       endDate={filters.endDate}
       businessSegment={businessSegment}
