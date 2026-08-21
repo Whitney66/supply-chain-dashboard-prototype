@@ -1073,6 +1073,21 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
     );
   };
 
+  const renderCurrentDimensionLegend = ({ payload = [] }: { payload?: any[] }) => {
+    const dimensionLabel = dimension === 'tickets' ? '票数' : '件数';
+    const visiblePayload = payload.filter(item => String(item.value || '').includes(dimensionLabel));
+    return (
+      <div className="flex flex-wrap justify-center gap-4 pt-2 text-xs text-gray-700">
+        {visiblePayload.map((item, index) => (
+          <span key={`${item.value}-${index}`} className="inline-flex items-center gap-1.5">
+            <span className="h-0.5 w-5" style={{ backgroundColor: item.color }} />
+            {item.value}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
   const renderDimensionToggle = (metricName: string) => (
     <div className="flex bg-gray-100 rounded-lg p-1" role="group" aria-label={`${metricName}维度`}>
         <button type="button" className={`px-3 py-1 text-sm rounded-md flex items-center gap-1.5 ${dimension === 'tickets' ? 'bg-white text-blue-600 shadow-sm font-medium' : 'text-gray-600'}`} onClick={() => setDimension('tickets')}><FileText className="w-4 h-4" />票数</button>
@@ -1222,7 +1237,6 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
             </table>
           </div>
           <div className="px-3 py-2.5 border-t border-blue-100 bg-blue-50 text-[11px] text-blue-800">日度均值 = 每个月的时效指标汇总值 / 每个月天数的汇总值；月度均值 = 各月日度均值的平均值。目标值与指标总览一致，未配置时展示“-”。</div>
-          {isMultiStoreView && <div className="border-t p-3"><div className="text-xs font-medium text-gray-600 mb-2">门店下钻</div><div className="flex flex-wrap gap-2">{activeStores.map(store => <button key={store.id} type="button" onClick={() => toggleStoreExpanded(store.id)} className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded border ${expandedStoreIds.includes(store.id) ? 'border-blue-300 bg-blue-50 text-blue-700' : 'border-gray-300'}`}><ChevronRight className={`w-3.5 h-3.5 ${expandedStoreIds.includes(store.id) ? 'rotate-90' : ''}`} />{getStoreDisplayName(store.name)}</button>)}</div></div>}
           {activeStores.filter(store => expandedStoreIds.includes(store.id)).map(store => <div key={store.id} className="mt-4 border-t-4 border-blue-200"><div className="px-3 py-2 bg-blue-50 font-medium text-sm text-blue-900">{getStoreDisplayName(store.name)} - 指标明细</div><div className="overflow-x-auto"><table className="w-full min-w-[1180px] text-xs"><thead><tr className="bg-red-50"><th className="px-2 py-2 border-r">门店</th><th className="px-2 py-2 border-r">品类</th><th className="px-2 py-2 border-r">指标</th><th className="px-2 py-2 border-r text-amber-700 bg-amber-50">目标值</th><th className="px-2 py-2 border-r">日度均值</th>{timeDimension === 'monthly' && <th className="px-2 py-2 border-r">月度均值</th>}{getTimeLabels().map(label => <th key={label} className="px-2 py-2 border-r">{label}</th>)}</tr></thead><tbody>{renderMetricTableWithCategory(metricName, { alcohol: scaleCategory(categoryData.alcohol, storeFactor(store.id)), cosmetics: scaleCategory(categoryData.cosmetics, storeFactor(store.id)) }, { ...options, storeContext: { ...store, name: getStoreDisplayName(store.name), factor: storeFactor(store.id) } })}</tbody></table></div></div>)}
         </div>
       );
@@ -1748,10 +1762,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                     }}
                     formatter={(value: any) => [`${Number(value).toFixed(2)}天`, '']}
                   />
-                  <Legend 
-                    wrapperStyle={{ fontSize: '12px' }}
-                    iconType="line"
-                  />
+                  <Legend content={renderCurrentDimensionLegend} />
                   {/* 目标值虚线 - 10D */}
                   <ReferenceLine 
                     yAxisId="left"
@@ -2150,10 +2161,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   }}
                   formatter={(value: any) => [`${value}天`, '']}
                 />
-                <Legend 
-                  wrapperStyle={{ fontSize: '12px' }}
-                  iconType="line"
-                />
+                <Legend content={renderCurrentDimensionLegend} />
                 {shouldShowCategory('酒水') && (
                   <Line 
                     yAxisId="left"
@@ -2322,10 +2330,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                       fontSize: '12px'
                     }}
                   />
-                  <Legend 
-                    wrapperStyle={{ fontSize: '12px' }}
-                    iconType="line"
-                  />
+                  <Legend content={renderCurrentDimensionLegend} />
                   <Line 
                     type="monotone" 
                     dataKey="一线票数"
@@ -2454,10 +2459,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                       fontSize: '12px'
                     }}
                   />
-                  <Legend 
-                    wrapperStyle={{ fontSize: '12px' }}
-                    iconType="line"
-                  />
+                  <Legend content={renderCurrentDimensionLegend} />
                   <Line 
                     yAxisId="left"
                     type="monotone" 
@@ -2687,7 +2689,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                         <YAxis yAxisId="left" tick={{ fontSize: 11 }} stroke="#6b7280" domain={[0, 8]} />
                         <YAxis yAxisId="left" hide domain={[0, 8]} />
                         <Tooltip formatter={(value: any) => [`${Number(value).toFixed(2)}天`, '']} />
-                        <Legend wrapperStyle={{ fontSize: '12px' }} iconType="line" />
+                        <Legend content={renderCurrentDimensionLegend} />
                         <ReferenceLine yAxisId="left" y={5} stroke="#f59e0b" strokeDasharray="5 5" label={{ value: '5D', fill: '#f59e0b', fontSize: 10 }} />
                         {shouldShowCategory('酒水') && <Line yAxisId="left" type="linear" dataKey="酒水票数"
                       hide={dimension !== 'tickets'} stroke="#3b82f6" strokeWidth={2} dot={{ r: 4 }} />}
@@ -2788,10 +2790,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   }}
                   formatter={(value: any) => [`${value}天`, '']}
                 />
-                <Legend 
-                  wrapperStyle={{ fontSize: '12px' }}
-                  iconType="line"
-                />
+                <Legend content={renderCurrentDimensionLegend} />
                 {/* 目标值虚线 - 8天 */}
                 <ReferenceLine 
                   yAxisId="left"
@@ -2977,10 +2976,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   }}
                   formatter={(value: any) => [`${value}天`, '']}
                 />
-                <Legend 
-                  wrapperStyle={{ fontSize: '12px' }}
-                  iconType="line"
-                />
+                <Legend content={renderCurrentDimensionLegend} />
                 {/* 目标值虚线 - 10天 */}
                 <ReferenceLine 
                   yAxisId="left"
@@ -3143,10 +3139,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                       fontSize: '12px'
                     }}
                   />
-                  <Legend 
-                    wrapperStyle={{ fontSize: '12px' }}
-                    iconType="line"
-                  />
+                  <Legend content={renderCurrentDimensionLegend} />
                   <Line 
                     type="monotone" 
                     dataKey="二线票数"
@@ -3261,10 +3254,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                       fontSize: '12px'
                     }}
                   />
-                  <Legend 
-                    wrapperStyle={{ fontSize: '12px' }}
-                    iconType="line"
-                  />
+                  <Legend content={renderCurrentDimensionLegend} />
                   <Line 
                     type="monotone" 
                     dataKey="提货至上架票数"

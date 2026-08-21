@@ -6,7 +6,7 @@ type PageGuideCardProps = {
 };
 
 export function PageGuideCard({ page }: PageGuideCardProps) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const title = page === 'detail' ? '指标明细说明' : '异常明细说明';
 
   return (
