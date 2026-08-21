@@ -35,10 +35,25 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
   const [storeSegmentTab, setStoreSegmentTab] = useState<'transfer' | 'fullChain' | 'inOut'>('transfer');
   const [highlightChartArea, setHighlightChartArea] = useState(false);
   const [firstLineTimeDimension, setFirstLineTimeDimension] = useState<TimeDimension>('monthly');
-  const selectedStoreNames = selectedStores
-    .map(storeId => stores.find(store => store.id === storeId)?.name)
-    .filter((name): name is string => Boolean(name));
-  const storeDisplay = selectedStoreNames.length > 0 ? selectedStoreNames.join('、') : '全部门店';
+  const activeStores = selectedStores.length > 0
+    ? stores.filter(store => selectedStores.includes(store.id))
+    : stores;
+  const storeFactor = (storeId: string) => {
+    const storeIndex = stores.findIndex(store => store.id === storeId);
+    return 0.94 + Math.max(storeIndex, 0) * 0.02;
+  };
+  const selectedAverageFactor = activeStores.length > 0
+    ? activeStores.reduce((sum, store) => sum + storeFactor(store.id), 0) / activeStores.length
+    : 1;
+  const tableStores = [
+    ...(selectedStores.length > 1 ? [{ id: 'overall', name: '整体', factor: selectedAverageFactor }] : []),
+    ...activeStores.map(store => ({ ...store, factor: storeFactor(store.id) })),
+  ];
+  const scaleStoreValues = (values: number[], factor: number, isRate = false) => values.map(value => {
+    if (value <= 0) return value;
+    const scaled = isRate ? 100 - (100 - value) * factor : value * factor;
+    return Number(scaled.toFixed(2));
+  });
   
   // 判断是否显示某个业务模块
   const shouldShowModule = (segment: 'ordering' | 'distribution' | 'store' | 'other'): boolean => {
@@ -1079,14 +1094,15 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
               </tr>
             </thead>
             <tbody>
-              {visibleCategories.map((category, index) => {
+              {tableStores.flatMap(store => visibleCategories.map((category, categoryIndex) => {
+                const storeData = scaleStoreValues(category[selectedDataKey], store.factor);
                 const values = activeTimeDimension === 'monthly'
-                  ? getDataForDimension(category[selectedDataKey], 'monthly')
-                  : category[selectedDataKey].slice(0, 8);
-                const mean = average(category[selectedDataKey]);
+                  ? getDataForDimension(storeData, 'monthly')
+                  : storeData.slice(0, 8);
+                const mean = average(storeData);
                 return (
-                  <tr key={category.name} className="border-t border-gray-200 hover:bg-gray-50">
-                    {index === 0 && <td rowSpan={visibleCategories.length} className="px-3 py-2 text-gray-700 border-r border-gray-200 bg-gray-50 align-middle min-w-[120px]">{storeDisplay}</td>}
+                  <tr key={`${store.id}-${category.name}`} className={`border-t border-gray-200 hover:bg-gray-50 ${store.id === 'overall' ? 'bg-blue-50/60 font-medium' : ''}`}>
+                    {categoryIndex === 0 && <td rowSpan={visibleCategories.length} className="px-3 py-2 text-gray-700 border-r border-gray-200 bg-gray-50 align-middle min-w-[160px]">{store.name}</td>}
                     <td className={`px-3 py-2 text-gray-700 border-r border-gray-200 font-medium ${category.name === '酒水' ? 'bg-blue-50' : 'bg-green-50'}`}>{category.name}</td>
                     <td className="px-3 py-2 text-gray-700 border-r border-gray-200">{metricName}</td>
                     <td className="px-3 py-2 text-center text-amber-700 bg-amber-50 border-r border-gray-200">{category.target || '-'}</td>
@@ -1095,7 +1111,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                     {values.map((value, valueIndex) => <td key={valueIndex} className={`px-3 py-2 text-center text-gray-700 ${valueIndex < values.length - 1 ? 'border-r border-gray-200' : ''} ${valueIndex >= values.length - 2 ? 'bg-blue-50' : ''}`}>{value > 0 ? `${value.toFixed(2)}天` : '-'}</td>)}
                   </tr>
                 );
-              })}
+              }))}
             </tbody>
           </table>
         </div>
@@ -1127,8 +1143,30 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
       alcoholThreshold?: string;
       cosmeticsThreshold?: string;
       hideIndicatorColumn?: boolean;
+      storeContext?: { id: string; name: string; factor: number };
     }
   ) => {
+    if (!options?.storeContext) {
+      const scaleCategory = (category: typeof categoryData.alcohol, factor: number) => ({
+        over10Days: { monthlyData: scaleStoreValues(category.over10Days.monthlyData, factor), weeklyData: scaleStoreValues(category.over10Days.weeklyData, factor) },
+        over14Days: { monthlyData: scaleStoreValues(category.over14Days.monthlyData, factor), weeklyData: scaleStoreValues(category.over14Days.weeklyData, factor) },
+        totalOrders: { monthlyData: scaleStoreValues(category.totalOrders.monthlyData, factor), weeklyData: scaleStoreValues(category.totalOrders.weeklyData, factor) },
+        rate10Days: { monthlyData: scaleStoreValues(category.rate10Days.monthlyData, factor, true), weeklyData: scaleStoreValues(category.rate10Days.weeklyData, factor, true) },
+        rate14Days: { monthlyData: scaleStoreValues(category.rate14Days.monthlyData, factor, true), weeklyData: scaleStoreValues(category.rate14Days.weeklyData, factor, true) },
+      });
+      return (
+        <div className="space-y-3">
+          {tableStores.map(store => (
+            <div key={store.id} className={store.id === 'overall' ? 'rounded-lg ring-2 ring-blue-200' : ''}>
+              {renderMetricTableWithCategory(metricName, {
+                alcohol: scaleCategory(categoryData.alcohol, store.factor),
+                cosmetics: scaleCategory(categoryData.cosmetics, store.factor),
+              }, { ...options, storeContext: store })}
+            </div>
+          ))}
+        </div>
+      );
+    }
     const labels = getTimeLabels();
     
     // 计算月度均值（仅针对月度数据，跳过索引11）
@@ -1243,7 +1281,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <tr key={`liquor-${rowIndex}`} className="border-t border-gray-200 hover:bg-gray-50">
                     {rowIndex === 0 && (
                       <td rowSpan={alcoholSubItems.length + (shouldShowCosmetics ? cosmeticsSubItems.length : 0)} className="px-2 py-1.5 text-gray-700 border-r border-gray-200 align-middle font-medium bg-gray-50">
-                        {storeDisplay}
+                        {options.storeContext.name}
                       </td>
                     )}
                     {showCategoryColumn && rowIndex === 0 && (
@@ -1292,7 +1330,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <tr key={`cosmetics-${rowIndex}`} className="border-t border-gray-200 hover:bg-gray-50">
                     {!shouldShowAlcohol && rowIndex === 0 && (
                       <td rowSpan={cosmeticsSubItems.length} className="px-2 py-1.5 text-gray-700 border-r border-gray-200 align-middle font-medium bg-gray-50">
-                        {storeDisplay}
+                        {options.storeContext.name}
                       </td>
                     )}
                     {showCategoryColumn && rowIndex === 0 && (
@@ -1754,7 +1792,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                     <Line 
                       yAxisId="left"
                       type="linear" 
-                      dataKey="酒水票数" 
+                      dataKey="酒水票数"
+                      hide={dimension !== 'tickets'} 
                       stroke="#3b82f6" 
                       strokeWidth={2}
                       dot={{ fill: '#3b82f6', r: 4 }}
@@ -1766,7 +1805,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                     <Line 
                       yAxisId="left"
                       type="linear" 
-                      dataKey="香化票数" 
+                      dataKey="香化票数"
+                      hide={dimension !== 'tickets'} 
                       stroke="#10b981" 
                       strokeWidth={2}
                       dot={{ fill: '#10b981', r: 4 }}
@@ -1778,7 +1818,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                     <Line 
                       yAxisId="right"
                       type="linear" 
-                      dataKey="酒水件数" 
+                      dataKey="酒水件数"
+                      hide={dimension !== 'pieces'} 
                       stroke="#f59e0b" 
                       strokeWidth={2}
                       dot={{ fill: '#f59e0b', r: 4 }}
@@ -1790,7 +1831,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                     <Line 
                       yAxisId="right"
                       type="linear" 
-                      dataKey="香化件数" 
+                      dataKey="香化件数"
+                      hide={dimension !== 'pieces'} 
                       stroke="#8b5cf6" 
                       strokeWidth={2}
                       dot={{ fill: '#8b5cf6', r: 4 }}
@@ -2134,7 +2176,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <Line 
                     yAxisId="left"
                     type="linear" 
-                    dataKey="酒水票数" 
+                    dataKey="酒水票数"
+                      hide={dimension !== 'tickets'} 
                     stroke="#3b82f6" 
                     strokeWidth={2}
                     dot={{ fill: '#3b82f6', r: 3 }}
@@ -2146,7 +2189,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <Line 
                     yAxisId="left"
                     type="linear" 
-                    dataKey="香化票数" 
+                    dataKey="香化票数"
+                      hide={dimension !== 'tickets'} 
                     stroke="#10b981" 
                     strokeWidth={2}
                     dot={{ fill: '#10b981', r: 3 }}
@@ -2158,7 +2202,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <Line 
                     yAxisId="right"
                     type="linear" 
-                    dataKey="酒水件数" 
+                    dataKey="酒水件数"
+                      hide={dimension !== 'pieces'} 
                     stroke="#f59e0b" 
                     strokeWidth={2}
                     dot={{ fill: '#f59e0b', r: 3 }}
@@ -2170,7 +2215,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <Line 
                     yAxisId="right"
                     type="linear" 
-                    dataKey="香化件数" 
+                    dataKey="香化件数"
+                      hide={dimension !== 'pieces'} 
                     stroke="#8b5cf6" 
                     strokeWidth={2}
                     dot={{ fill: '#8b5cf6', r: 3 }}
@@ -2300,7 +2346,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   />
                   <Line 
                     type="monotone" 
-                    dataKey="一线票数" 
+                    dataKey="一线票数"
+                    hide={dimension !== 'tickets'} 
                     stroke="#3b82f6" 
                     strokeWidth={2}
                     dot={{ fill: '#3b82f6', r: 3 }}
@@ -2309,7 +2356,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   />
                   <Line 
                     type="monotone" 
-                    dataKey="一线件数" 
+                    dataKey="一线件数"
+                    hide={dimension !== 'pieces'} 
                     stroke="#f59e0b" 
                     strokeWidth={2}
                     dot={{ fill: '#f59e0b', r: 3 }}
@@ -2432,7 +2480,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <Line 
                     yAxisId="left"
                     type="monotone" 
-                    dataKey="香化票数" 
+                    dataKey="香化票数"
+                      hide={dimension !== 'tickets'} 
                     stroke="#8b5cf6" 
                     strokeWidth={2}
                     dot={{ fill: '#8b5cf6', r: 3 }}
@@ -2442,7 +2491,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <Line 
                     yAxisId="left"
                     type="monotone" 
-                    dataKey="香化件数" 
+                    dataKey="香化件数"
+                      hide={dimension !== 'pieces'} 
                     stroke="#c084fc" 
                     strokeWidth={2}
                     dot={{ fill: '#c084fc', r: 3 }}
@@ -2452,7 +2502,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <Line 
                     yAxisId="right"
                     type="monotone" 
-                    dataKey="酒水票数" 
+                    dataKey="酒水票数"
+                      hide={dimension !== 'tickets'} 
                     stroke="#10b981" 
                     strokeWidth={2}
                     dot={{ fill: '#10b981', r: 3 }}
@@ -2462,7 +2513,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <Line 
                     yAxisId="right"
                     type="monotone" 
-                    dataKey="酒水件数" 
+                    dataKey="酒水件数"
+                      hide={dimension !== 'pieces'} 
                     stroke="#34d399" 
                     strokeWidth={2}
                     dot={{ fill: '#34d399', r: 3 }}
@@ -2656,10 +2708,14 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                         <Tooltip formatter={(value: any) => [`${Number(value).toFixed(2)}天`, '']} />
                         <Legend wrapperStyle={{ fontSize: '12px' }} iconType="line" />
                         <ReferenceLine yAxisId="left" y={5} stroke="#f59e0b" strokeDasharray="5 5" label={{ value: '5D', fill: '#f59e0b', fontSize: 10 }} />
-                        {shouldShowCategory('酒水') && <Line yAxisId="left" type="linear" dataKey="酒水票数" stroke="#3b82f6" strokeWidth={2} dot={{ r: 4 }} />}
-                        {shouldShowCategory('香化') && <Line yAxisId="left" type="linear" dataKey="香化票数" stroke="#10b981" strokeWidth={2} dot={{ r: 4 }} />}
-                        {shouldShowCategory('酒水') && <Line yAxisId="right" type="linear" dataKey="酒水件数" stroke="#f59e0b" strokeWidth={2} dot={{ r: 4 }} />}
-                        {shouldShowCategory('香化') && <Line yAxisId="right" type="linear" dataKey="香化件数" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 4 }} />}
+                        {shouldShowCategory('酒水') && <Line yAxisId="left" type="linear" dataKey="酒水票数"
+                      hide={dimension !== 'tickets'} stroke="#3b82f6" strokeWidth={2} dot={{ r: 4 }} />}
+                        {shouldShowCategory('香化') && <Line yAxisId="left" type="linear" dataKey="香化票数"
+                      hide={dimension !== 'tickets'} stroke="#10b981" strokeWidth={2} dot={{ r: 4 }} />}
+                        {shouldShowCategory('酒水') && <Line yAxisId="right" type="linear" dataKey="酒水件数"
+                      hide={dimension !== 'pieces'} stroke="#f59e0b" strokeWidth={2} dot={{ r: 4 }} />}
+                        {shouldShowCategory('香化') && <Line yAxisId="right" type="linear" dataKey="香化件数"
+                      hide={dimension !== 'pieces'} stroke="#8b5cf6" strokeWidth={2} dot={{ r: 4 }} />}
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
@@ -2769,7 +2825,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <Line 
                     yAxisId="left"
                     type="monotone" 
-                    dataKey="酒水票数" 
+                    dataKey="酒水票数"
+                      hide={dimension !== 'tickets'} 
                     stroke="#3b82f6" 
                     strokeWidth={2}
                     dot={{ fill: '#3b82f6', r: 3 }}
@@ -2781,7 +2838,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <Line 
                     yAxisId="left"
                     type="monotone" 
-                    dataKey="香化票数" 
+                    dataKey="香化票数"
+                      hide={dimension !== 'tickets'} 
                     stroke="#10b981" 
                     strokeWidth={2}
                     dot={{ fill: '#10b981', r: 3 }}
@@ -2793,7 +2851,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <Line 
                     yAxisId="right"
                     type="monotone" 
-                    dataKey="酒水件数" 
+                    dataKey="酒水件数"
+                      hide={dimension !== 'pieces'} 
                     stroke="#f59e0b" 
                     strokeWidth={2}
                     dot={{ fill: '#f59e0b', r: 3 }}
@@ -2805,7 +2864,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <Line 
                     yAxisId="right"
                     type="monotone" 
-                    dataKey="香化件数" 
+                    dataKey="香化件数"
+                      hide={dimension !== 'pieces'} 
                     stroke="#8b5cf6" 
                     strokeWidth={2}
                     dot={{ fill: '#8b5cf6', r: 3 }}
@@ -2954,7 +3014,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <Line 
                     yAxisId="left"
                     type="monotone" 
-                    dataKey="酒水票数" 
+                    dataKey="酒水票数"
+                      hide={dimension !== 'tickets'} 
                     stroke="#3b82f6" 
                     strokeWidth={2}
                     dot={{ fill: '#3b82f6', r: 3 }}
@@ -2966,7 +3027,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <Line 
                     yAxisId="left"
                     type="monotone" 
-                    dataKey="香化票数" 
+                    dataKey="香化票数"
+                      hide={dimension !== 'tickets'} 
                     stroke="#10b981" 
                     strokeWidth={2}
                     dot={{ fill: '#10b981', r: 3 }}
@@ -2978,7 +3040,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <Line 
                     yAxisId="right"
                     type="monotone" 
-                    dataKey="酒水件数" 
+                    dataKey="酒水件数"
+                      hide={dimension !== 'pieces'} 
                     stroke="#f59e0b" 
                     strokeWidth={2}
                     dot={{ fill: '#f59e0b', r: 3 }}
@@ -2990,7 +3053,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   <Line 
                     yAxisId="right"
                     type="monotone" 
-                    dataKey="香化件数" 
+                    dataKey="香化件数"
+                      hide={dimension !== 'pieces'} 
                     stroke="#8b5cf6" 
                     strokeWidth={2}
                     dot={{ fill: '#8b5cf6', r: 3 }}
@@ -3105,7 +3169,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   />
                   <Line 
                     type="monotone" 
-                    dataKey="二线票数" 
+                    dataKey="二线票数"
+                    hide={dimension !== 'tickets'} 
                     stroke="#10b981" 
                     strokeWidth={2}
                     dot={{ fill: '#10b981', r: 3 }}
@@ -3114,7 +3179,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   />
                   <Line 
                     type="monotone" 
-                    dataKey="二线件数" 
+                    dataKey="二线件数"
+                    hide={dimension !== 'pieces'} 
                     stroke="#8b5cf6" 
                     strokeWidth={2}
                     dot={{ fill: '#8b5cf6', r: 3 }}
@@ -3222,7 +3288,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   />
                   <Line 
                     type="monotone" 
-                    dataKey="提货至上架票数" 
+                    dataKey="提货至上架票数"
+                    hide={dimension !== 'tickets'} 
                     stroke="#10b981" 
                     strokeWidth={2}
                     dot={{ fill: '#10b981', r: 3 }}
@@ -3231,7 +3298,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   />
                   <Line 
                     type="monotone" 
-                    dataKey="提货至上架件数" 
+                    dataKey="提货至上架件数"
+                    hide={dimension !== 'pieces'} 
                     stroke="#3b82f6" 
                     strokeWidth={2}
                     dot={{ fill: '#3b82f6', r: 3 }}
