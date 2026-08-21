@@ -1083,17 +1083,33 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
     };
     
     const defaultSubItems = [
-      { name: '大于10天的订单数量', key: 'over10Days' },
-      { name: '大于14天的订单数量', key: 'over14Days' },
-      { name: '订单总数', key: 'totalOrders' },
-      { name: '10天订单达标率', key: 'rate10Days' },
-      { name: '14天订单达标率', key: 'rate14Days' },
-    ];
-    const getSubItems = (threshold?: string) => threshold ? [
-      { name: `大于${threshold}D的订单数量`, key: 'over10Days' },
-      { name: '订单总数', key: 'totalOrders' },
+      { name: '平均时效', key: 'averageDuration' },
+      { name: '大于目标值的票数', key: 'over10Days' },
+      { name: '总票数', key: 'totalOrders' },
       { name: '达标率', key: 'rate10Days' },
-    ] : defaultSubItems;
+    ];
+    const getSubItems = (_threshold?: string) => defaultSubItems;
+    const getMetricData = (
+      category: typeof categoryData.alcohol,
+      key: string,
+      threshold?: string,
+    ) => {
+      if (key !== 'averageDuration') {
+        return category[key as keyof typeof category];
+      }
+      const target = Number(threshold || 0);
+      const monthlyData = category.rate10Days.monthlyData.map((rate, index) =>
+        rate > 0 ? Number((target * (1.18 - rate / 500) + (index % 3) * 0.01).toFixed(2)) : 0
+      );
+      return {
+        monthlyData,
+        weeklyData: monthlyData.filter(value => value > 0).slice(-8),
+      };
+    };
+    const getTargetDisplay = (itemKey: string, threshold?: string) =>
+      itemKey === 'averageDuration' || itemKey === 'over10Days'
+        ? (threshold ? `${threshold}D` : '-')
+        : '-';
     const alcoholSubItems = getSubItems(options?.alcoholThreshold);
     const cosmeticsSubItems = getSubItems(options?.cosmeticsThreshold);
 
@@ -1110,14 +1126,20 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-red-50">
+                <th className="px-2 py-1.5 text-left font-bold text-gray-700 border-r border-gray-200 min-w-[100px] whitespace-nowrap">
+                  门店
+                </th>
                 {showCategoryColumn && (
                   <th className="px-2 py-1.5 text-left font-bold text-gray-700 border-r border-gray-200 min-w-[70px] whitespace-nowrap">
                     品类
                   </th>
                 )}
-                {!options?.hideIndicatorColumn && <th className="px-2 py-1.5 text-left font-bold text-gray-700 border-r border-gray-200 min-w-[140px] whitespace-nowrap">
+                <th className="px-2 py-1.5 text-left font-bold text-gray-700 border-r border-gray-200 min-w-[140px] whitespace-nowrap">
                   指标
-                </th>}
+                </th>
+                <th className="px-2 py-1.5 text-center font-bold text-amber-700 bg-amber-50 border-r border-gray-200 min-w-[70px] whitespace-nowrap">
+                  目标值
+                </th>
                 <th className="px-2 py-1.5 text-center font-bold text-gray-700 border-r border-gray-200 min-w-[65px] whitespace-nowrap">
                   <div className="flex items-center justify-center gap-1.5 relative group">
                     <span>日度均值</span>
@@ -1153,35 +1175,39 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
             <tbody>
               {/* 酒水品类 */}
               {shouldShowAlcohol && alcoholSubItems.map((item, rowIndex) => {
-                const dataKey = item.key as keyof typeof categoryData.alcohol;
-                const data = timeDimension === 'monthly' 
-                  ? categoryData.alcohol[dataKey].monthlyData 
-                  : categoryData.alcohol[dataKey].weeklyData;
-                
+                const metricData = getMetricData(categoryData.alcohol, item.key, options?.alcoholThreshold);
+                const data = timeDimension === 'monthly' ? metricData.monthlyData : metricData.weeklyData;
+                const isRate = item.key.includes('rate');
+                const isDuration = item.key === 'averageDuration';
+                const dailyMean = calculateMonthlyAverage(metricData.monthlyData, isRate);
+
                 return (
                   <tr key={`liquor-${rowIndex}`} className="border-t border-gray-200 hover:bg-gray-50">
+                    {rowIndex === 0 && (
+                      <td rowSpan={alcoholSubItems.length + (shouldShowCosmetics ? cosmeticsSubItems.length : 0)} className="px-2 py-1.5 text-gray-700 border-r border-gray-200 align-middle font-medium bg-gray-50">
+                        全部门店
+                      </td>
+                    )}
                     {showCategoryColumn && rowIndex === 0 && (
-                      <td 
-                        rowSpan={alcoholSubItems.length} 
-                        className="px-2 py-1.5 text-gray-700 border-r border-gray-200 align-middle font-medium bg-blue-50"
-                      >
+                      <td rowSpan={alcoholSubItems.length} className="px-2 py-1.5 text-gray-700 border-r border-gray-200 align-middle font-medium bg-blue-50">
                         酒水
                       </td>
                     )}
-                    {!options?.hideIndicatorColumn && (
-                      <td className="px-2 py-1.5 text-gray-700 border-r border-gray-200">{item.name}</td>
-                    )}
+                    <td className="px-2 py-1.5 text-gray-700 border-r border-gray-200">{item.name}</td>
+                    <td className="px-2 py-1.5 text-center text-amber-700 bg-amber-50 border-r border-gray-200">
+                      {getTargetDisplay(item.key, options?.alcoholThreshold)}
+                    </td>
                     <td className="px-2 py-1.5 text-center text-gray-700 border-r border-gray-200">
-                      -
+                      {isDuration && dailyMean !== '-' ? `${dailyMean}天` : dailyMean}
                     </td>
                     {timeDimension === 'monthly' && (
                       <td className="px-2 py-1.5 text-center text-gray-700 border-r border-gray-200">
-                        {calculateMonthlyAverage(categoryData.alcohol[dataKey].monthlyData, item.key.includes('rate'))}
+                        {isDuration && dailyMean !== '-' ? `${dailyMean}天` : dailyMean}
                       </td>
                     )}
                     {getDisplayData(data).map((value, index) => {
                       // 跳过"12月"列（索引11）
-                          const displayValue = item.key.includes('rate') ? `${value}%` : value;
+                          const displayValue = isRate ? `${value}%` : isDuration ? `${value}天` : value;
                       return (
                         <td
                           key={index}
@@ -1198,35 +1224,39 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
               })}
               {/* 香化品类 */}
               {shouldShowCosmetics && cosmeticsSubItems.map((item, rowIndex) => {
-                const dataKey = item.key as keyof typeof categoryData.cosmetics;
-                const data = timeDimension === 'monthly' 
-                  ? categoryData.cosmetics[dataKey].monthlyData 
-                  : categoryData.cosmetics[dataKey].weeklyData;
-                
+                const metricData = getMetricData(categoryData.cosmetics, item.key, options?.cosmeticsThreshold);
+                const data = timeDimension === 'monthly' ? metricData.monthlyData : metricData.weeklyData;
+                const isRate = item.key.includes('rate');
+                const isDuration = item.key === 'averageDuration';
+                const dailyMean = calculateMonthlyAverage(metricData.monthlyData, isRate);
+
                 return (
                   <tr key={`cosmetics-${rowIndex}`} className="border-t border-gray-200 hover:bg-gray-50">
+                    {!shouldShowAlcohol && rowIndex === 0 && (
+                      <td rowSpan={cosmeticsSubItems.length} className="px-2 py-1.5 text-gray-700 border-r border-gray-200 align-middle font-medium bg-gray-50">
+                        全部门店
+                      </td>
+                    )}
                     {showCategoryColumn && rowIndex === 0 && (
-                      <td 
-                        rowSpan={cosmeticsSubItems.length} 
-                        className="px-2 py-1.5 text-gray-700 border-r border-gray-200 align-middle font-medium bg-green-50"
-                      >
+                      <td rowSpan={cosmeticsSubItems.length} className="px-2 py-1.5 text-gray-700 border-r border-gray-200 align-middle font-medium bg-green-50">
                         香化
                       </td>
                     )}
-                    {!options?.hideIndicatorColumn && (
-                      <td className="px-2 py-1.5 text-gray-700 border-r border-gray-200">{item.name}</td>
-                    )}
+                    <td className="px-2 py-1.5 text-gray-700 border-r border-gray-200">{item.name}</td>
+                    <td className="px-2 py-1.5 text-center text-amber-700 bg-amber-50 border-r border-gray-200">
+                      {getTargetDisplay(item.key, options?.cosmeticsThreshold)}
+                    </td>
                     <td className="px-2 py-1.5 text-center text-gray-700 border-r border-gray-200">
-                      -
+                      {isDuration && dailyMean !== '-' ? `${dailyMean}天` : dailyMean}
                     </td>
                     {timeDimension === 'monthly' && (
                       <td className="px-2 py-1.5 text-center text-gray-700 border-r border-gray-200">
-                        {calculateMonthlyAverage(categoryData.cosmetics[dataKey].monthlyData, item.key.includes('rate'))}
+                        {isDuration && dailyMean !== '-' ? `${dailyMean}天` : dailyMean}
                       </td>
                     )}
                     {getDisplayData(data).map((value, index) => {
                       // 跳过"12月"列（索引11）
-                          const displayValue = item.key.includes('rate') ? `${value}%` : value;
+                          const displayValue = isRate ? `${value}%` : isDuration ? `${value}天` : value;
                       return (
                         <td
                           key={index}
@@ -1243,6 +1273,9 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
               })}
             </tbody>
           </table>
+        </div>
+        <div className="px-3 py-2.5 border-t border-blue-100 bg-blue-50 text-[11px] text-blue-800">
+          日度均值 = 每个月的时效指标汇总值 / 每个月天数的汇总值；月度均值 = 各月日度均值的平均值。目标值与指标总览一致，未配置时展示“-”。
         </div>
       </div>
     );
@@ -1512,7 +1545,28 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
 
   return (
     <div className="space-y-4 max-w-full">
-      
+      {(shouldShowModule('ordering') || shouldShowModule('distribution')) && (
+        <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center justify-between gap-3">
+          <span className="text-sm font-medium text-gray-700">图表及表格维度</span>
+          <div className="flex bg-gray-100 rounded-lg p-1" role="group" aria-label="图表及表格维度">
+            <button
+              type="button"
+              className={`px-4 py-1.5 text-sm rounded-md transition-all flex items-center gap-1.5 ${dimension === 'tickets' ? 'bg-white text-blue-600 shadow-sm font-medium' : 'text-gray-600 hover:text-gray-900'}`}
+              onClick={() => setDimension('tickets')}
+            >
+              <FileText className="w-4 h-4" />票数
+            </button>
+            <button
+              type="button"
+              className={`px-4 py-1.5 text-sm rounded-md transition-all flex items-center gap-1.5 ${dimension === 'pieces' ? 'bg-white text-blue-600 shadow-sm font-medium' : 'text-gray-600 hover:text-gray-900'}`}
+              onClick={() => setDimension('pieces')}
+            >
+              <Package className="w-4 h-4" />件数
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 一盘货时效模块 */}
       <div className={`bg-white rounded-lg border border-gray-200 p-4 transition-all ${highlightChartArea ? 'border-2 border-blue-500 bg-blue-50 shadow-lg' : ''}`}>
         <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
