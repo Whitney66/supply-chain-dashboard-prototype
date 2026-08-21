@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
 import {
   getDetailTableData,
@@ -7,7 +7,9 @@ import {
 } from '../data/detailTableData';
 
 interface MetricDetailTableProps {
-  metricId: string;
+  metricId?: string;
+  dimension: DetailDimension;
+  segment?: '订货段' | '分货段';
 }
 
 const MONTHS = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
@@ -25,78 +27,48 @@ function Trend({ trend }: { trend: DetailRow['trend'] }) {
   return <Minus className="w-4 h-4 text-gray-400" aria-label="稳定" />;
 }
 
-export function MetricDetailTable({ metricId }: MetricDetailTableProps) {
-  const [dimension, setDimension] = useState<DetailDimension>('票数');
-  const rows = useMemo(() => getDetailTableData(metricId, dimension), [metricId, dimension]);
-  const segment = rows[0]?.segment ?? '订货段';
+export function MetricDetailTable({ metricId = 'inventory-inbound-rate', dimension, segment }: MetricDetailTableProps) {
+  const rows = useMemo(() => {
+    const data = getDetailTableData(metricId, dimension);
+    return segment ? data.filter(row => row.segment === segment) : data;
+  }, [metricId, dimension, segment]);
 
   return (
-    <div className="bg-white rounded-lg shadow h-full flex flex-col">
-      <div className="p-4 border-b border-gray-200 flex flex-wrap gap-3 justify-between items-center">
-        <div>
-          <h3 className="text-lg text-gray-900">{segment}指标明细</h3>
-          <p className="text-xs text-gray-500 mt-1">按门店、品类查看指标月度表现</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex rounded-md border border-gray-300 p-0.5 bg-gray-50" role="group" aria-label="数据维度">
-            {(['票数', '件数'] as DetailDimension[]).map(item => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => setDimension(item)}
-                className={`px-3 py-1.5 text-sm rounded transition-colors ${
-                  dimension === item ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-white'
-                }`}
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-          <button type="button" className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
-            导出 Excel
-          </button>
-        </div>
-      </div>
-
-      <div className="px-4 py-3 bg-blue-50 border-b border-blue-100 text-xs text-blue-800">
-        日度均值 = 每个月的时效指标汇总值 ÷ 每个月天数的汇总值；月度均值 = 各月日度均值的平均值。
-      </div>
-
-      <div className="overflow-auto flex-1">
-        <table className="min-w-[1450px] w-full text-sm border-collapse">
-          <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-20">
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="overflow-x-auto custom-scrollbar">
+        <table className="min-w-[1520px] w-full text-sm border-collapse">
+          <thead className="bg-blue-50 border-b border-blue-200">
             <tr>
-              <th className="px-3 py-3 text-left sticky left-0 bg-gray-50 z-30">门店</th>
-              <th className="px-3 py-3 text-left sticky left-[110px] bg-gray-50 z-30">品类</th>
-              <th className="px-3 py-3 text-left min-w-[190px]">指标</th>
-              <th className="px-3 py-3 text-center bg-amber-50 text-amber-700">目标值</th>
-              <th className="px-3 py-3 text-center bg-blue-50">日度均值</th>
-              <th className="px-3 py-3 text-center bg-blue-50">月度均值</th>
-              {MONTHS.map(month => <th key={month} className="px-3 py-3 text-center">{month}</th>)}
-              <th className="px-3 py-3 text-center">月趋势</th>
+              <th className="px-3 py-3 text-left min-w-[110px]">门店</th>
+              <th className="px-3 py-3 text-left min-w-[80px]">品类</th>
+              <th className="px-3 py-3 text-left min-w-[180px]">指标</th>
+              <th className="px-3 py-3 text-center min-w-[80px]">目标值</th>
+              <th className="px-3 py-3 text-center min-w-[90px] bg-cyan-50">日度均值</th>
+              <th className="px-3 py-3 text-center min-w-[90px] bg-cyan-50">月度均值</th>
+              {MONTHS.map(month => <th key={month} className="px-3 py-3 text-center min-w-[72px]">{month}</th>)}
+              <th className="px-3 py-3 text-center min-w-[70px]">月趋势</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row, index) => (
-              <tr key={`${row.store}-${row.metric}-${index}`} className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="px-3 py-2.5 sticky left-0 bg-white z-10 font-medium text-gray-800">{row.store}</td>
-                <td className="px-3 py-2.5 sticky left-[110px] bg-white z-10 text-gray-600">{row.category}</td>
-                <td className="px-3 py-2.5 text-gray-700">{row.metric}</td>
-                <td className="px-3 py-2.5 text-center bg-amber-50 text-amber-700 font-medium">{row.targetDisplay}</td>
-                <td className="px-3 py-2.5 text-center bg-blue-50 font-medium">{formatValue(row.dailyMean, row.kind)}</td>
-                <td className="px-3 py-2.5 text-center bg-blue-50 font-medium">{formatValue(row.monthlyMean, row.kind)}</td>
+              <tr key={`${row.segment}-${row.store}-${row.metric}`} className="border-b border-gray-100 hover:bg-blue-50/30">
+                {index === 0 && <td rowSpan={rows.length} className="px-3 py-3 align-middle font-medium text-gray-900 border-r border-gray-200 bg-blue-50/30">{row.store}</td>}
+                {index === 0 && <td rowSpan={rows.length} className="px-3 py-3 align-middle text-gray-700 border-r border-gray-200 bg-blue-50/20">{row.category}</td>}
+                <td className="px-3 py-3 text-gray-700">{row.metric}</td>
+                <td className="px-3 py-3 text-center text-amber-700 bg-amber-50 font-medium">{row.targetDisplay}</td>
+                <td className="px-3 py-3 text-center bg-cyan-50 font-medium">{formatValue(row.dailyMean, row.kind)}</td>
+                <td className="px-3 py-3 text-center bg-cyan-50 font-medium">{formatValue(row.monthlyMean, row.kind)}</td>
                 {row.months.map((value, monthIndex) => (
-                  <td key={monthIndex} className={`px-3 py-2.5 text-center ${monthIndex >= 9 ? 'bg-cyan-50' : ''} ${row.kind === 'rate' && value !== null && value < 70 ? 'text-red-600' : ''}`}>
+                  <td key={monthIndex} className={`px-3 py-3 text-center ${monthIndex >= 9 ? 'bg-blue-50/50' : ''}`}>
                     {formatValue(value, row.kind)}
                   </td>
                 ))}
-                <td className="px-3 py-2.5 flex justify-center"><Trend trend={row.trend} /></td>
+                <td className="px-3 py-3"><div className="flex justify-center"><Trend trend={row.trend} /></div></td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <div className="p-3 border-t border-gray-200 text-xs text-gray-500">显示 {rows.length} 条数据 · 当前维度：{dimension}</div>
     </div>
   );
 }
