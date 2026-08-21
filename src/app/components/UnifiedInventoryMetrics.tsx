@@ -1092,7 +1092,26 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
       const valid = values.filter(value => value > 0);
       return valid.length ? (valid.reduce((sum, value) => sum + value, 0) / valid.length).toFixed(2) : '-';
     };
-    return <div className="overflow-x-auto custom-scrollbar"><table className="w-full min-w-[1180px] text-xs"><thead><tr className="bg-red-50">{['门店', '品类', '指标', '目标值', '日度均值', ...(activeTimeDimension === 'monthly' ? ['月度均值'] : []), ...labels].map(label => <th key={label} className={`px-3 py-2 border-r ${label === '目标值' ? 'text-amber-700 bg-amber-50' : 'text-gray-700'}`}>{label}</th>)}</tr></thead><tbody>{categories.map((category, index) => { const values = activeTimeDimension === 'monthly' ? getDataForDimension(category[dataKey], 'monthly') : category[dataKey].slice(0, 8); const mean = average(category[dataKey]); return <tr key={category.name} className="border-t">{index === 0 && <td rowSpan={categories.length} className="px-3 py-2 border-r bg-gray-50">{storeName}</td>}<td className="px-3 py-2 border-r">{category.name || '-'}</td><td className="px-3 py-2 border-r">{metricName}</td><td className="px-3 py-2 text-center border-r text-amber-700 bg-amber-50">{category.target || '-'}</td><td className="px-3 py-2 text-center border-r">{mean === '-' ? '-' : `${mean}天`}</td>{activeTimeDimension === 'monthly' && <td className="px-3 py-2 text-center border-r">{mean === '-' ? '-' : `${mean}天`}</td>}{values.map((value, valueIndex) => <td key={valueIndex} className="px-3 py-2 text-center border-r">{value > 0 ? `${value.toFixed(2)}天` : '-'}</td>)}</tr>; })}</tbody></table></div>;
+    const countLabel = dimension === 'tickets' ? '票数' : '件数';
+    const categoryRows = categories.map(category => {
+      const durations = activeTimeDimension === 'monthly' ? getDataForDimension(category[dataKey], 'monthly') : category[dataKey].slice(0, 8);
+      const target = Number.parseFloat(category.target || '');
+      const totals = durations.map((value, index) => value > 0 ? Math.round((dimension === 'tickets' ? 1200 : 13800) * (0.92 + (index % 4) * 0.04)) : 0);
+      const exceeded = durations.map((value, index) => value > 0 ? Math.round(totals[index] * (Number.isFinite(target) && target > 0 ? Math.min(0.45, Math.max(0.04, value / target - 0.72)) : 0.13)) : 0);
+      const rates = totals.map((total, index) => total > 0 ? Number((((total - exceeded[index]) / total) * 100).toFixed(2)) : 0);
+      return { category, durations, totals, exceeded, rates };
+    });
+    const rowCount = categoryRows.length * 4;
+    const formatMean = (values: number[], suffix = '') => { const valid = values.filter(value => value > 0); return valid.length ? `${(valid.reduce((sum, value) => sum + value, 0) / valid.length).toFixed(2)}${suffix}` : '-'; };
+    return <div className="overflow-x-auto custom-scrollbar"><table className="w-full min-w-[1180px] text-xs"><thead><tr className="bg-red-50">{['门店', '品类', '指标', '目标值', '日度均值', ...(activeTimeDimension === 'monthly' ? ['月度均值'] : []), ...labels].map(label => <th key={label} className={`px-3 py-2 border-r ${label === '目标值' ? 'text-amber-700 bg-amber-50' : 'text-gray-700'}`}>{label}</th>)}</tr></thead><tbody>{categoryRows.flatMap(({ category, durations, totals, exceeded, rates }, categoryIndex) => {
+      const rows = [
+        { name: '平均时效', target: category.target || '-', values: durations, suffix: '天' },
+        { name: `大于目标值的${countLabel}`, target: category.target || '-', values: exceeded, suffix: '' },
+        { name: `总${countLabel}`, target: '-', values: totals, suffix: '' },
+        { name: '达标率', target: '-', values: rates, suffix: '%' },
+      ];
+      return rows.map((row, rowIndex) => <tr key={`${category.name}-${row.name}`} className="border-t">{categoryIndex === 0 && rowIndex === 0 && <td rowSpan={rowCount} className="px-3 py-2 border-r bg-gray-50">{storeName}</td>}{rowIndex === 0 && <td rowSpan={4} className={`px-3 py-2 border-r ${category.name === '酒水' ? 'bg-blue-50' : category.name === '香化' ? 'bg-green-50' : 'bg-gray-50'}`}>{category.name || '-'}</td>}<td className="px-3 py-2 border-r">{row.name}</td><td className="px-3 py-2 text-center border-r text-amber-700 bg-amber-50">{row.target}</td><td className="px-3 py-2 text-center border-r">{formatMean(row.values, row.suffix)}</td>{activeTimeDimension === 'monthly' && <td className="px-3 py-2 text-center border-r">{formatMean(row.values, row.suffix)}</td>}{row.values.map((value, valueIndex) => <td key={valueIndex} className="px-3 py-2 text-center border-r">{value > 0 ? `${row.suffix === '' ? Math.round(value) : value.toFixed(2)}${row.suffix}` : '-'}</td>)}</tr>);
+    })}</tbody></table></div>;
   };
 
   const renderUnifiedDurationTable = (
