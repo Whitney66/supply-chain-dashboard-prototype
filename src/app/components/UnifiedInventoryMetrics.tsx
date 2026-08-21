@@ -1073,14 +1073,26 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
   };
 
   const renderDimensionToggle = (metricName: string) => (
-    <div className="flex items-center justify-between gap-3 px-3 py-2.5 border-b border-gray-200 bg-gray-50">
-      <span className="text-sm font-medium text-gray-700">{metricName}</span>
-      <div className="flex bg-gray-100 rounded-lg p-1" role="group" aria-label={`${metricName}维度`}>
+    <div className="flex bg-gray-100 rounded-lg p-1" role="group" aria-label={`${metricName}维度`}>
         <button type="button" className={`px-3 py-1 text-sm rounded-md flex items-center gap-1.5 ${dimension === 'tickets' ? 'bg-white text-blue-600 shadow-sm font-medium' : 'text-gray-600'}`} onClick={() => setDimension('tickets')}><FileText className="w-4 h-4" />票数</button>
         <button type="button" className={`px-3 py-1 text-sm rounded-md flex items-center gap-1.5 ${dimension === 'pieces' ? 'bg-white text-blue-600 shadow-sm font-medium' : 'text-gray-600'}`} onClick={() => setDimension('pieces')}><Package className="w-4 h-4" />件数</button>
-      </div>
     </div>
   );
+
+  const renderUnifiedStoreDurationTable = (
+    metricName: string,
+    storeName: string,
+    categories: Array<{ name: string; tickets: number[]; pieces: number[]; target?: string }>,
+    activeTimeDimension: TimeDimension,
+  ) => {
+    const labels = activeTimeDimension === 'monthly' ? getTimeLabels() : ['第1周', '第2周', '第3周', '第4周', '第5周', '第6周', '第7周', '第8周'];
+    const dataKey = dimension === 'tickets' ? 'tickets' : 'pieces';
+    const average = (values: number[]) => {
+      const valid = values.filter(value => value > 0);
+      return valid.length ? (valid.reduce((sum, value) => sum + value, 0) / valid.length).toFixed(2) : '-';
+    };
+    return <div className="overflow-x-auto custom-scrollbar"><table className="w-full min-w-[1180px] text-xs"><thead><tr className="bg-red-50">{['门店', '品类', '指标', '目标值', '日度均值', ...(activeTimeDimension === 'monthly' ? ['月度均值'] : []), ...labels].map(label => <th key={label} className={`px-3 py-2 border-r ${label === '目标值' ? 'text-amber-700 bg-amber-50' : 'text-gray-700'}`}>{label}</th>)}</tr></thead><tbody>{categories.map((category, index) => { const values = activeTimeDimension === 'monthly' ? getDataForDimension(category[dataKey], 'monthly') : category[dataKey].slice(0, 8); const mean = average(category[dataKey]); return <tr key={category.name} className="border-t">{index === 0 && <td rowSpan={categories.length} className="px-3 py-2 border-r bg-gray-50">{storeName}</td>}<td className="px-3 py-2 border-r">{category.name || '-'}</td><td className="px-3 py-2 border-r">{metricName}</td><td className="px-3 py-2 text-center border-r text-amber-700 bg-amber-50">{category.target || '-'}</td><td className="px-3 py-2 text-center border-r">{mean === '-' ? '-' : `${mean}天`}</td>{activeTimeDimension === 'monthly' && <td className="px-3 py-2 text-center border-r">{mean === '-' ? '-' : `${mean}天`}</td>}{values.map((value, valueIndex) => <td key={valueIndex} className="px-3 py-2 text-center border-r">{value > 0 ? `${value.toFixed(2)}天` : '-'}</td>)}</tr>; })}</tbody></table></div>;
+  };
 
   const renderUnifiedDurationTable = (
     metricName: string,
@@ -1099,7 +1111,6 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
 
     return (
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-4">
-        {renderDimensionToggle(metricName)}
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full min-w-[1180px] text-xs">
             <thead>
@@ -1110,20 +1121,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
               </tr>
             </thead>
             <tbody>
-              {tableStores.flatMap(store => {
-                const showDetails = store.id === 'overall' || !isMultiStoreView || expandedStoreIds.includes(store.id);
-                if (!showDetails) {
-                  return [(
-                    <tr key={store.id} className="border-t border-gray-200 hover:bg-blue-50/40">
-                      <td className="px-3 py-2 border-r border-gray-200" colSpan={2}>
-                        <button type="button" onClick={() => toggleStoreExpanded(store.id)} className="flex items-center gap-2 text-left font-medium text-gray-700">
-                          <ChevronRight className="w-4 h-4 text-gray-400" />{store.name}
-                        </button>
-                      </td>
-                      <td className="px-3 py-2 text-gray-500" colSpan={4 + labels.length}>点击查看该门店指标明细</td>
-                    </tr>
-                  )];
-                }
+              {tableStores.filter(store => store.id === 'overall' || !isMultiStoreView).flatMap(store => {
                 return visibleCategories.map((category, categoryIndex) => {
                   const storeData = scaleStoreValues(category[selectedDataKey], store.factor);
                   const values = activeTimeDimension === 'monthly' ? getDataForDimension(storeData, 'monthly') : storeData.slice(0, 8);
@@ -1149,6 +1147,16 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
           </table>
         </div>
         <div className="px-3 py-2.5 border-t border-blue-100 bg-blue-50 text-[11px] text-blue-800">日度均值 = 每个月的时效指标汇总值 / 每个月天数的汇总值；月度均值 = 各月日度均值的平均值。目标值与指标总览一致，未配置时展示“-”。</div>
+        {isMultiStoreView && (
+          <div className="border-t border-gray-200 p-3">
+            <div className="text-xs font-medium text-gray-600 mb-2">门店下钻</div>
+            <div className="flex flex-wrap gap-2">{activeStores.map(store => <button key={store.id} type="button" onClick={() => toggleStoreExpanded(store.id)} className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded border ${expandedStoreIds.includes(store.id) ? 'border-blue-300 bg-blue-50 text-blue-700' : 'border-gray-300 bg-white text-gray-700'}`}><ChevronRight className={`w-3.5 h-3.5 ${expandedStoreIds.includes(store.id) ? 'rotate-90' : ''}`} />{store.name}</button>)}</div>
+          </div>
+        )}
+        {activeStores.filter(store => expandedStoreIds.includes(store.id)).map(store => {
+          const storeCategories = visibleCategories.map(category => ({ ...category, tickets: scaleStoreValues(category.tickets, storeFactor(store.id)), pieces: scaleStoreValues(category.pieces, storeFactor(store.id)) }));
+          return <div key={store.id} className="mt-4 border-t-4 border-blue-200"><div className="px-3 py-2 bg-blue-50 font-medium text-sm text-blue-900">{store.name} - 指标明细</div>{renderUnifiedStoreDurationTable(metricName, store.name, storeCategories, activeTimeDimension)}</div>;
+        })}
       </div>
     );
   };
@@ -1187,10 +1195,9 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
       rate14Days: { monthlyData: scaleStoreValues(category.rate14Days.monthlyData, factor, true), weeklyData: scaleStoreValues(category.rate14Days.weeklyData, factor, true) },
     });
     if (!options?.storeContext) {
-      const visibleStores = tableStores.filter(store => store.id === 'overall' || !isMultiStoreView || expandedStoreIds.includes(store.id));
+      const visibleStores = tableStores.filter(store => store.id === 'overall' || !isMultiStoreView);
       return (
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-4">
-          {renderDimensionToggle(metricName)}
           <div className="overflow-x-auto custom-scrollbar">
             <table className="w-full min-w-[1180px] text-xs">
               <thead><tr className="bg-red-50"><th className="px-2 py-2 text-left border-r">门店</th><th className="px-2 py-2 text-left border-r">品类</th><th className="px-2 py-2 text-left border-r">指标</th><th className="px-2 py-2 text-center border-r text-amber-700 bg-amber-50">目标值</th><th className="px-2 py-2 text-center border-r">日度均值</th>{timeDimension === 'monthly' && <th className="px-2 py-2 text-center border-r">月度均值</th>}{getTimeLabels().map(label => <th key={label} className="px-2 py-2 text-center border-r">{label}</th>)}</tr></thead>
@@ -1199,13 +1206,12 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   alcohol: scaleCategory(categoryData.alcohol, store.factor),
                   cosmetics: scaleCategory(categoryData.cosmetics, store.factor),
                 }, { ...options, storeContext: store }))}
-                {isMultiStoreView && tableStores.filter(store => store.id !== 'overall' && !expandedStoreIds.includes(store.id)).map(store => (
-                  <tr key={store.id} className="border-t hover:bg-blue-50/40"><td className="px-3 py-2" colSpan={2}><button type="button" onClick={() => toggleStoreExpanded(store.id)} className="flex items-center gap-2 font-medium"><ChevronRight className="w-4 h-4" />{store.name}</button></td><td className="px-3 py-2 text-gray-500" colSpan={4 + getTimeLabels().length}>点击展开该门店指标明细</td></tr>
-                ))}
               </tbody>
             </table>
           </div>
           <div className="px-3 py-2.5 border-t border-blue-100 bg-blue-50 text-[11px] text-blue-800">日度均值 = 每个月的时效指标汇总值 / 每个月天数的汇总值；月度均值 = 各月日度均值的平均值。目标值与指标总览一致，未配置时展示“-”。</div>
+          {isMultiStoreView && <div className="border-t p-3"><div className="text-xs font-medium text-gray-600 mb-2">门店下钻</div><div className="flex flex-wrap gap-2">{activeStores.map(store => <button key={store.id} type="button" onClick={() => toggleStoreExpanded(store.id)} className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded border ${expandedStoreIds.includes(store.id) ? 'border-blue-300 bg-blue-50 text-blue-700' : 'border-gray-300'}`}><ChevronRight className={`w-3.5 h-3.5 ${expandedStoreIds.includes(store.id) ? 'rotate-90' : ''}`} />{store.name}</button>)}</div></div>}
+          {activeStores.filter(store => expandedStoreIds.includes(store.id)).map(store => <div key={store.id} className="mt-4 border-t-4 border-blue-200"><div className="px-3 py-2 bg-blue-50 font-medium text-sm text-blue-900">{store.name} - 指标明细</div><div className="overflow-x-auto"><table className="w-full min-w-[1180px] text-xs"><thead><tr className="bg-red-50"><th className="px-2 py-2 border-r">门店</th><th className="px-2 py-2 border-r">品类</th><th className="px-2 py-2 border-r">指标</th><th className="px-2 py-2 border-r text-amber-700 bg-amber-50">目标值</th><th className="px-2 py-2 border-r">日度均值</th>{timeDimension === 'monthly' && <th className="px-2 py-2 border-r">月度均值</th>}{getTimeLabels().map(label => <th key={label} className="px-2 py-2 border-r">{label}</th>)}</tr></thead><tbody>{renderMetricTableWithCategory(metricName, { alcohol: scaleCategory(categoryData.alcohol, storeFactor(store.id)), cosmetics: scaleCategory(categoryData.cosmetics, storeFactor(store.id)) }, { ...options, storeContext: { ...store, factor: storeFactor(store.id) } })}</tbody></table></div></div>)}
         </div>
       );
     }
@@ -1666,7 +1672,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
           
             {/* 趋势图 - 带目标值虚线 */}
             {/* 双轴坐标系趋势图 - 酒水vs香化（票数+件数） */}
-            <div className="bg-gradient-to-br from-blue-50 to-white rounded-lg border border-blue-100 p-4 mb-4 ml-3 max-w-full overflow-hidden">
+            <div className="relative bg-gradient-to-br from-blue-50 to-white rounded-lg border border-blue-100 p-4 mb-4 ml-3 max-w-full overflow-hidden">
+              <div className="absolute top-3 right-3 z-10">{renderDimensionToggle('指标')}</div>
               <div className="text-xs text-gray-600 mb-2">酒水 vs 香化（双轴：票数 | 件数）</div>
               <ResponsiveContainer width="100%" height={280} minHeight={280}>
                 <LineChart 
@@ -2072,7 +2079,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
             </h4>
           
             {/* 双轴坐标系趋势图 - 酒水vs香化（票数+件数） */}
-            <div className="bg-gradient-to-br from-blue-50 to-white rounded-lg border border-blue-100 p-4 mb-4 ml-3 max-w-full overflow-hidden">
+            <div className="relative bg-gradient-to-br from-blue-50 to-white rounded-lg border border-blue-100 p-4 mb-4 ml-3 max-w-full overflow-hidden">
+              <div className="absolute top-3 right-3 z-10">{renderDimensionToggle('指标')}</div>
               <div className="text-xs text-gray-600 mb-2">酒水 vs 香化（双轴：票数 | 件数）</div>
             <ResponsiveContainer width="100%" height={240} minHeight={240}>
               <LineChart data={(() => {
@@ -2267,7 +2275,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
             </h4>
             
             {/* 趋势图 - 票数 vs 件数对比 */}
-            <div className="bg-gradient-to-br from-blue-50 to-white rounded-lg border border-blue-100 p-4 mb-4 ml-3 max-w-full overflow-hidden">
+            <div className="relative bg-gradient-to-br from-blue-50 to-white rounded-lg border border-blue-100 p-4 mb-4 ml-3 max-w-full overflow-hidden">
+              <div className="absolute top-3 right-3 z-10">{renderDimensionToggle('指标')}</div>
               <div className="text-xs text-gray-600 mb-2">一线通关平均时效对比（票数|件数）</div>
               <ResponsiveContainer width="100%" height={240} minHeight={240}>
                 <LineChart data={(() => {
@@ -2373,8 +2382,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
 
             <div className="ml-3">
               {renderUnifiedDurationTable('一线通关平均时效', [
-                { name: '酒水', tickets: customsClearanceData.tickets.firstLine.monthlyData, pieces: customsClearanceData.pieces.firstLine.monthlyData, target: '3D' },
-                { name: '香化', tickets: customsClearanceData.tickets.firstLine.monthlyData, pieces: customsClearanceData.pieces.firstLine.monthlyData, target: '3D' },
+                { name: '-', tickets: customsClearanceData.tickets.firstLine.monthlyData, pieces: customsClearanceData.pieces.firstLine.monthlyData, target: '-' },
               ], firstLineTimeDimension)}
             </div>
           </div>
@@ -2387,7 +2395,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
             </h4>
             
             {/* 趋势图 - 香化&酒水双轴对比 */}
-            <div className="bg-gradient-to-br from-blue-50 to-white rounded-lg border border-blue-100 p-4 mb-4 ml-3 max-w-full overflow-hidden">
+            <div className="relative bg-gradient-to-br from-blue-50 to-white rounded-lg border border-blue-100 p-4 mb-4 ml-3 max-w-full overflow-hidden">
+              <div className="absolute top-3 right-3 z-10">{renderDimensionToggle('指标')}</div>
               <div className="text-xs text-gray-600 mb-2">提货至海综保平均时效对比（香化|酒水 - 票数|件数）</div>
               <ResponsiveContainer width="100%" height={280} minHeight={280}>
                 <LineChart data={(() => {
@@ -2661,7 +2670,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
 
               return (
                 <>
-                  <div className="bg-gradient-to-br from-blue-50 to-white rounded-lg border border-blue-100 p-4 mb-4 ml-3 max-w-full overflow-hidden">
+                  <div className="relative bg-gradient-to-br from-blue-50 to-white rounded-lg border border-blue-100 p-4 mb-4 ml-3 max-w-full overflow-hidden">
+              <div className="absolute top-3 right-3 z-10">{renderDimensionToggle('指标')}</div>
                     <div className="text-xs text-gray-600 mb-2">酒水 vs 香化（双轴：票数 | 件数）</div>
                     <ResponsiveContainer width="100%" height={280} minHeight={280}>
                       <LineChart data={chartData} margin={{ top: 10, right: 40, left: 10, bottom: 10 }}>
@@ -2685,8 +2695,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
                   </div>
                   <div className="ml-3">
                     {renderUnifiedDurationTable('全链路入库平均时效（直发）', [
-                      { name: '酒水', tickets: alcohol, pieces: alcohol.map(value => value + 0.3), target: '-' },
-                      { name: '香化', tickets: cosmetics, pieces: cosmetics.map(value => value + 0.3), target: '3.88D' },
+                      { name: '-', tickets: alcohol, pieces: alcohol.map(value => value + 0.3), target: '-' },
                     ])}
                   </div>
                 </>
@@ -2712,7 +2721,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
             </h4>
             
             {/* 双轴坐标系趋势图 - 酒水vs香化（票数+件数） */}
-            <div className="bg-gradient-to-br from-green-50 to-white rounded-lg border border-green-100 p-4 mb-4 ml-3 max-w-full overflow-hidden">
+            <div className="relative bg-gradient-to-br from-green-50 to-white rounded-lg border border-green-100 p-4 mb-4 ml-3 max-w-full overflow-hidden">
+              <div className="absolute top-3 right-3 z-10">{renderDimensionToggle('指标')}</div>
               <div className="text-xs text-gray-600 mb-2">酒水 vs 香化（双轴：票数 | 件数）</div>
             <ResponsiveContainer width="100%" height={240} minHeight={240}>
               <LineChart data={(() => {
@@ -2901,7 +2911,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
             </h4>
             
             {/* 双轴坐标系趋势图 - 酒水vs香化（票数+件数） */}
-            <div className="bg-gradient-to-br from-green-50 to-white rounded-lg border border-green-100 p-4 mb-4 ml-3 max-w-full overflow-hidden">
+            <div className="relative bg-gradient-to-br from-green-50 to-white rounded-lg border border-green-100 p-4 mb-4 ml-3 max-w-full overflow-hidden">
+              <div className="absolute top-3 right-3 z-10">{renderDimensionToggle('指标')}</div>
               <div className="text-xs text-gray-600 mb-2">酒水 vs 香化（双轴：票数 | 件数）</div>
             <ResponsiveContainer width="100%" height={240} minHeight={240}>
               <LineChart data={(() => {
@@ -3090,7 +3101,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
             </h4>
             
             {/* 趋势图 - 票数 vs 件数对比 */}
-            <div className="bg-gradient-to-br from-green-50 to-white rounded-lg border border-green-100 p-4 mb-4 ml-3 max-w-full overflow-hidden">
+            <div className="relative bg-gradient-to-br from-green-50 to-white rounded-lg border border-green-100 p-4 mb-4 ml-3 max-w-full overflow-hidden">
+              <div className="absolute top-3 right-3 z-10">{renderDimensionToggle('指标')}</div>
               <div className="text-xs text-gray-600 mb-2">二线通关平均时效对比（票数 | 件数）</div>
               <ResponsiveContainer width="100%" height={240} minHeight={240}>
                 <LineChart data={(() => {
@@ -3194,8 +3206,7 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
               </div>
               
               {renderUnifiedDurationTable('二线通关平均时效', [
-                { name: '酒水', tickets: customsClearanceData.tickets.secondLine.monthlyData, pieces: customsClearanceData.pieces.secondLine.monthlyData },
-                { name: '香化', tickets: customsClearanceData.tickets.secondLine.monthlyData, pieces: customsClearanceData.pieces.secondLine.monthlyData },
+                { name: '-', tickets: customsClearanceData.tickets.secondLine.monthlyData, pieces: customsClearanceData.pieces.secondLine.monthlyData },
               ])}
             </div>
           </div>
@@ -3208,7 +3219,8 @@ export function UnifiedInventoryMetrics({ dimension, timeDimension, setDimension
             </h4>
             
             {/* 趋势图 - 票数 vs 件数对比 */}
-            <div className="bg-gradient-to-br from-green-50 to-white rounded-lg border border-green-100 p-4 mb-4 ml-3 max-w-full overflow-hidden">
+            <div className="relative bg-gradient-to-br from-green-50 to-white rounded-lg border border-green-100 p-4 mb-4 ml-3 max-w-full overflow-hidden">
+              <div className="absolute top-3 right-3 z-10">{renderDimensionToggle('指标')}</div>
               <div className="text-xs text-gray-600 mb-2">门店提货至上架平均时效对比（票数 | 件数）</div>
               <ResponsiveContainer width="100%" height={240} minHeight={240}>
                 <LineChart data={(() => {
